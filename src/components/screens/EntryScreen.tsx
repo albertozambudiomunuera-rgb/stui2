@@ -1,4 +1,5 @@
-import { Home, Building2, BookOpen, MessageSquareHeart } from 'lucide-react';
+import { Home, Building2, MessageSquareHeart } from 'lucide-react';
+import { RecommendationsSection } from '../ui/RecommendationsSection';
 
 interface EntryScreenProps {
   onChoose: (mode: 'home' | 'express') => void;
@@ -101,15 +102,7 @@ export function EntryScreen({ onChoose, notes, onNotesChange }: EntryScreenProps
       {/* Recomendaciones + Mis Notas */}
       <div className="w-full max-w-md space-y-3 mb-6">
         {/* Recomendaciones */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen size={16} className="text-teal-200 flex-shrink-0" />
-            <span className="text-xs font-black text-white uppercase tracking-wider">Recomendaciones</span>
-          </div>
-          <p className="text-xs text-teal-100 leading-relaxed">
-            Próximamente encontrarás aquí consejos educativos sobre tus síntomas urinarios, hábitos saludables y cómo prepararte mejor para tu consulta.
-          </p>
-        </div>
+        <RecommendationsSection />
 
         {/* Mis notas para el médico */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
