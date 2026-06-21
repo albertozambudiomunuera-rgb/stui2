@@ -9,7 +9,7 @@ interface EntryScreenProps {
 
 export function EntryScreen({ onChoose, notes, onNotesChange, onOpenRecommendations }: EntryScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-700 via-teal-800 to-teal-900 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-b from-teal-700 via-teal-800 to-teal-900 flex flex-col items-center p-6 pt-12">
       {/* Logo + Welcome */}
       <div className="text-center mb-12 animate-fade-in">
         <img

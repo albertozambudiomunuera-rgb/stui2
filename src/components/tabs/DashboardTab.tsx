@@ -113,6 +113,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((s2) => `<li>${s2}</li>`).join('')}</ul></div>` : ''}
+${data.notes?.trim() ? `<h2>💬 Notas del Paciente para el Médico</h2><div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:14px;font-size:13px;color:#4c1d95;white-space:pre-wrap;line-height:1.7">${data.notes}</div>` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
 <div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>
@@ -198,6 +199,16 @@ ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados
           ))}
         </div>
       </div>
+
+      {/* Patient notes */}
+      {data.notes?.trim() && (
+        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-2xl p-5">
+          <h3 className="font-black text-purple-800 dark:text-purple-300 text-sm mb-2 flex items-center gap-2">
+            💬 Notas del paciente para el médico
+          </h3>
+          <p className="text-sm text-purple-900 dark:text-purple-200 leading-relaxed whitespace-pre-wrap">{data.notes}</p>
+        </div>
+      )}
 
       {/* Clinical note */}
       <div>

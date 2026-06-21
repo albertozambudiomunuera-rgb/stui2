@@ -183,11 +183,11 @@ function ExpressScreening({ data, actions, onNext }: { data: AppData; actions: R
         />
       )}
 
-      {canContinue && (
-        <button onClick={onNext} className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg" style={{ backgroundColor: RED }}>
-          Continuar → IPSS
-        </button>
-      )}
+      <button onClick={onNext} disabled={!canContinue}
+        className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+        style={{ backgroundColor: RED }}>
+        {canContinue ? 'Continuar → IPSS' : !sex ? 'Selecciona el sexo para empezar' : s.oab === null ? 'Responde las preguntas de cribado' : sex === 'M' && s.iief === null ? 'Responde también la pregunta de erección' : 'Completa el cribado'}
+      </button>
     </div>
   );
 }
@@ -249,7 +249,11 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
           </div>
         )}
       </div>
-      {comp && <button onClick={onNext} className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg" style={{ backgroundColor: RED }}>Siguiente →</button>}
+      <button onClick={onNext} disabled={!comp}
+        className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+        style={{ backgroundColor: RED }}>
+        {comp ? 'Siguiente →' : `Responde todas las preguntas (${data.ipss.q.filter((v) => v !== null).length + (data.ipss.qol !== null ? 1 : 0)}/8)`}
+      </button>
     </div>
   );
 }
@@ -288,7 +292,11 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
           </div>
         )}
       </div>
-      {comp && <button onClick={onNext} className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg" style={{ backgroundColor: RED }}>Siguiente →</button>}
+      <button onClick={onNext} disabled={!comp}
+        className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+        style={{ backgroundColor: RED }}>
+        {comp ? 'Siguiente →' : `Responde todas las preguntas (${data.iief.q.filter((v) => v !== null).length}/5)`}
+      </button>
     </div>
   );
 }
@@ -378,7 +386,11 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
           </div>
         )}
       </div>
-      {comp && <button onClick={onNext} className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg" style={{ backgroundColor: RED }}>Ver Resultado →</button>}
+      <button onClick={onNext} disabled={!comp}
+        className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+        style={{ backgroundColor: RED }}>
+        {comp ? 'Ver Resultado →' : `Responde las preguntas 1 y 2 para continuar`}
+      </button>
     </div>
   );
 }
@@ -480,6 +492,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((sg) => `<li>${sg}</li>`).join('')}</ul></div>` : ''}
+${data.notes?.trim() ? `<h2>💬 Notas del Paciente para el Médico</h2><div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:14px;font-size:13px;color:#4c1d95;white-space:pre-wrap;line-height:1.7">${data.notes}</div>` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
 <div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>
