@@ -98,7 +98,7 @@ export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenReco
                     className="flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all text-white/80 hover:bg-white/10 hover:text-white"
                   >
                     <span className="text-sm">📚</span>
-                    <span>Escuela</span>
+                    <span>Recomendaciones</span>
                   </button>
                   <button
                     key={tab.id}
