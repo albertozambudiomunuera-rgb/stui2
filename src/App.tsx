@@ -191,7 +191,7 @@ export default function App() {
 
       <footer className="text-center py-6 px-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 mt-4">
         <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed">
-          © 2026 Dr. Alberto Zambudio. Todos los derechos reservados.
+          © 2026 Dr. Alberto Zambudio · Oficina de Salud Digital AEU · Todos los derechos reservados.
         </p>
       </footer>
     </div>

@@ -176,7 +176,7 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
 
       <footer className="w-full max-w-md mt-8 text-center">
         <p className="text-xs text-teal-300/60">
-          © 2026 Dr. Alberto Zambudio. Todos los derechos reservados.
+          © 2026 Dr. Alberto Zambudio · Oficina de Salud Digital AEU · Todos los derechos reservados.
         </p>
       </footer>
     </div>
