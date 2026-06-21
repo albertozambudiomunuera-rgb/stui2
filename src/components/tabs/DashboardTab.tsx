@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Printer, Copy, CheckCircle } from 'lucide-react';
+import { Printer, Copy, CheckCircle, Trash2, PlusCircle } from 'lucide-react';
 import type { AppData } from '../../types';
 import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
@@ -10,10 +10,23 @@ import {
 
 interface DashboardTabProps {
   data: AppData;
+  onAddNote?: (text: string) => void;
+  onDeleteNote?: (id: string) => void;
 }
 
-export function DashboardTab({ data }: DashboardTabProps) {
+export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProps) {
   const [copied, setCopied] = useState(false);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [noteSaved, setNoteSaved] = useState(false);
+
+  const handleAddNote = () => {
+    const text = noteDraft.trim();
+    if (!text || !onAddNote) return;
+    onAddNote(text);
+    setNoteDraft('');
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 2000);
+  };
 
   const hasDiary = data.days.some((d) => d.entries.length > 0);
   const hasIPSS = ipssComplete(data.ipss);
@@ -113,7 +126,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((s2) => `<li>${s2}</li>`).join('')}</ul></div>` : ''}
-${data.notes?.trim() ? `<h2>💬 Notas del Paciente para el Médico</h2><div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:14px;font-size:13px;color:#4c1d95;white-space:pre-wrap;line-height:1.7">${data.notes}</div>` : ''}
+${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
 <div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>
@@ -201,14 +214,62 @@ ${data.notes?.trim() ? `<h2>💬 Notas del Paciente para el Médico</h2><div sty
       </div>
 
       {/* Patient notes */}
-      {data.notes?.trim() && (
-        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-2xl p-5">
-          <h3 className="font-black text-purple-800 dark:text-purple-300 text-sm mb-2 flex items-center gap-2">
-            💬 Notas del paciente para el médico
-          </h3>
-          <p className="text-sm text-purple-900 dark:text-purple-200 leading-relaxed whitespace-pre-wrap">{data.notes}</p>
-        </div>
-      )}
+      <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-2xl p-5 space-y-3">
+        <h3 className="font-black text-purple-800 dark:text-purple-300 text-sm flex items-center gap-2">
+          💬 Mis notas para el médico
+          {data.notes.length > 0 && (
+            <span className="text-[10px] bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded-full">
+              {data.notes.length}
+            </span>
+          )}
+        </h3>
+
+        {data.notes.length === 0 && (
+          <p className="text-xs text-purple-500 dark:text-purple-400 italic">Aún no hay notas guardadas. Añade una desde aquí o desde la pantalla de inicio.</p>
+        )}
+
+        {data.notes.map((note) => (
+          <div key={note.id} className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-purple-100 dark:border-purple-800 flex gap-2 items-start">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-purple-400 font-semibold mb-1">
+                {new Date(note.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{note.text}</p>
+            </div>
+            {onDeleteNote && (
+              <button
+                onClick={() => onDeleteNote(note.id)}
+                className="flex-shrink-0 p-1.5 text-purple-300 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                title="Eliminar nota"
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* Add new note */}
+        {onAddNote && (
+          <div className="pt-1 border-t border-purple-100 dark:border-purple-800">
+            <textarea
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              placeholder="Añadir nueva nota…"
+              rows={2}
+              className="w-full text-xs rounded-xl p-3 border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 placeholder-purple-300 resize-none focus:outline-none focus:ring-2 focus:ring-purple-300 leading-relaxed mb-2"
+            />
+            <button
+              onClick={handleAddNote}
+              disabled={!noteDraft.trim()}
+              className="flex items-center gap-1.5 text-xs font-black px-3 py-2 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ backgroundColor: noteSaved ? '#059669' : '#7c3aed', color: 'white' }}
+            >
+              <PlusCircle size={13} />
+              {noteSaved ? '✅ Guardada' : 'Añadir nota'}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Clinical note */}
       <div>

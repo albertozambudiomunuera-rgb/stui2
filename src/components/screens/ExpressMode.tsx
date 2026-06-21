@@ -492,7 +492,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((sg) => `<li>${sg}</li>`).join('')}</ul></div>` : ''}
-${data.notes?.trim() ? `<h2>💬 Notas del Paciente para el Médico</h2><div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:14px;font-size:13px;color:#4c1d95;white-space:pre-wrap;line-height:1.7">${data.notes}</div>` : ''}
+${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
 <div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>

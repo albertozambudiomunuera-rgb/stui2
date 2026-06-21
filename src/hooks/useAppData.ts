@@ -180,9 +180,18 @@ export function useAppData(initialData: AppData) {
     });
   }, [save]);
 
-  const updateNotes = useCallback((val: string) => {
+  const addNote = useCallback((text: string) => {
     setData((prev) => {
-      const next = { ...prev, notes: val };
+      const note = { id: uid(), text, date: new Date().toISOString() };
+      const next = { ...prev, notes: [note, ...prev.notes] };
+      save(next);
+      return next;
+    });
+  }, [save]);
+
+  const deleteNote = useCallback((id: string) => {
+    setData((prev) => {
+      const next = { ...prev, notes: prev.notes.filter((n) => n.id !== id) };
       save(next);
       return next;
     });
@@ -218,7 +227,8 @@ export function useAppData(initialData: AppData) {
     updateICIQ,
     updateICIQVas,
     toggleICIQWhen,
-    updateNotes,
+    addNote,
+    deleteNote,
     resetData,
     restoreData,
     update,

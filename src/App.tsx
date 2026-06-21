@@ -89,8 +89,8 @@ export default function App() {
       <>
         <EntryScreen
           onChoose={handleChooseMode}
-          notes={actions.data.notes}
-          onNotesChange={actions.updateNotes}
+          notesCount={actions.data.notes.length}
+          onAddNote={actions.addNote}
           onOpenRecommendations={() => setShowRecommendations(true)}
         />
         {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
@@ -185,7 +185,7 @@ export default function App() {
           />
         )}
         {activeTab === 'dashboard' && (
-          <DashboardTab data={d} />
+          <DashboardTab data={d} onAddNote={actions.addNote} onDeleteNote={actions.deleteNote} />
         )}
       </main>
 

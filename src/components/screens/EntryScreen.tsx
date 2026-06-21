@@ -1,13 +1,25 @@
-import { Home, Building2, MessageSquareHeart, BookOpen, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { Home, Building2, MessageSquareHeart, BookOpen, ChevronRight, Save } from 'lucide-react';
 
 interface EntryScreenProps {
   onChoose: (mode: 'home' | 'express') => void;
-  notes: string;
-  onNotesChange: (val: string) => void;
+  notesCount: number;
+  onAddNote: (text: string) => void;
   onOpenRecommendations: () => void;
 }
 
-export function EntryScreen({ onChoose, notes, onNotesChange, onOpenRecommendations }: EntryScreenProps) {
+export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendations }: EntryScreenProps) {
+  const [draft, setDraft] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    const text = draft.trim();
+    if (!text) return;
+    onAddNote(text);
+    setDraft('');
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-700 via-teal-800 to-teal-900 flex flex-col items-center p-6 pt-12">
       {/* Logo + Welcome */}
@@ -120,20 +132,36 @@ export function EntryScreen({ onChoose, notes, onNotesChange, onOpenRecommendati
 
         {/* Mis notas para el médico */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-          <div className="flex items-center gap-2 mb-2">
-            <MessageSquareHeart size={16} className="text-teal-200 flex-shrink-0" />
-            <span className="text-xs font-black text-white uppercase tracking-wider">Mis notas para el médico</span>
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              <MessageSquareHeart size={16} className="text-teal-200 flex-shrink-0" />
+              <span className="text-xs font-black text-white uppercase tracking-wider">Mis notas para el médico</span>
+            </div>
+            {notesCount > 0 && (
+              <span className="text-[10px] bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">
+                {notesCount} guardada{notesCount > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
           <p className="text-xs text-teal-200 mb-2 leading-relaxed">
-            Escribe aquí tus dudas, miedos o lo que no quieres olvidar contarle al médico.
+            Escribe tus dudas, miedos o lo que no quieres olvidar contarle al médico. Puedes guardar varias notas en distintos días.
           </p>
           <textarea
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Ej: Me preocupa levantarme tantas veces por la noche, quiero preguntar si es normal…"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Ej: Me preocupa levantarme tantas veces por la noche, ¿es normal?…"
             rows={3}
-            className="w-full bg-white/10 text-white placeholder-teal-300/60 text-xs rounded-xl p-3 border border-white/20 resize-none focus:outline-none focus:ring-2 focus:ring-white/30 leading-relaxed"
+            className="w-full bg-white/10 text-white placeholder-teal-300/60 text-xs rounded-xl p-3 border border-white/20 resize-none focus:outline-none focus:ring-2 focus:ring-white/30 leading-relaxed mb-2"
           />
+          <button
+            onClick={handleSave}
+            disabled={!draft.trim()}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ backgroundColor: saved ? '#059669' : 'rgba(255,255,255,0.2)', color: 'white' }}
+          >
+            <Save size={13} />
+            {saved ? '✅ ¡Nota guardada! Aparecerá en tu Informe' : 'Guardar nota'}
+          </button>
         </div>
       </div>
 

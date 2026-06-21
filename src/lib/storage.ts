@@ -85,7 +85,7 @@ export function emptyData(): AppData {
     iief: { q: [null, null, null, null, null] },
     oab: { q: [null, null, null, null, null], qol: [null, null, null, null, null], impact: [] },
     iciq: { q: [null, null, null], vas: 5, when: [] },
-    notes: '',
+    notes: [],
   };
 }
 
@@ -109,6 +109,8 @@ export async function loadDataAsync(): Promise<AppData> {
   if (raw) {
     try {
       const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      // Migrate old string notes to array
+      if (typeof parsed.notes === 'string') parsed.notes = [];
       return deepMerge(emptyData(), parsed);
     } catch { /* ignore */ }
   }

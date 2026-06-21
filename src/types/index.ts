@@ -67,6 +67,12 @@ export interface ICIQData {
   when: number[];
 }
 
+export interface PatientNote {
+  id: string;
+  text: string;
+  date: string; // ISO string
+}
+
 export interface AppData {
   patient: Patient;
   screening: Screening;
@@ -75,7 +81,7 @@ export interface AppData {
   iief: IIEFData;
   oab: OABData;
   iciq: ICIQData;
-  notes: string;
+  notes: PatientNote[];
 }
 
 export interface DiaryStats {
