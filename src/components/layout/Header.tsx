@@ -1,9 +1,12 @@
+import { ChevronLeft } from 'lucide-react';
 import type { TabId, AppData } from '../../types';
 
 interface HeaderProps {
   data: AppData;
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  onBackToEntry?: () => void;
+  onOpenRecommendations?: () => void;
 }
 
 const TABS: { id: TabId; label: string; show: (data: AppData) => boolean }[] = [
@@ -30,9 +33,10 @@ const TAB_ICONS: Record<TabId, string> = {
   oab: '🔵',
   iciq: '💧',
   dashboard: '🏥',
+  notes: '📝',
 };
 
-export function Header({ data, activeTab, onTabChange }: HeaderProps) {
+export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenRecommendations }: HeaderProps) {
   const p = data.patient;
   const visibleTabs = TABS.filter((t) => t.show(data));
 
@@ -43,6 +47,15 @@ export function Header({ data, activeTab, onTabChange }: HeaderProps) {
       <div className="px-4 pt-safe pt-3 pb-0">
         {/* Top row */}
         <div className="flex items-center gap-3 mb-3">
+          {onBackToEntry && (
+            <button
+              onClick={onBackToEntry}
+              className="flex items-center gap-1 bg-white/20 hover:bg-white/30 rounded-xl px-2.5 py-1.5 flex-shrink-0 transition-colors"
+            >
+              <ChevronLeft size={14} className="text-white" />
+              <span className="text-xs font-bold text-white">Inicio</span>
+            </button>
+          )}
           <img
             src="/Logo-AEU-Corporativo.png"
             alt="AEU"
@@ -75,6 +88,34 @@ export function Header({ data, activeTab, onTabChange }: HeaderProps) {
           {visibleTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             const badge = tab.id.startsWith('day-') ? getDayBadge(parseInt(tab.id.slice(-1))) : 0;
+
+            if (tab.id === 'dashboard' && onOpenRecommendations) {
+              return (
+                <>
+                  <button
+                    key="escuela"
+                    onClick={onOpenRecommendations}
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all text-white/80 hover:bg-white/10 hover:text-white"
+                  >
+                    <span className="text-sm">📚</span>
+                    <span>Escuela</span>
+                  </button>
+                  <button
+                    key={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all ${
+                      isActive
+                        ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-400 shadow-sm'
+                        : 'text-white/80 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-sm">{TAB_ICONS[tab.id]}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                </>
+              );
+            }
+
             return (
               <button
                 key={tab.id}

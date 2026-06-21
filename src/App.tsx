@@ -6,6 +6,7 @@ import { Toast, useToast } from './components/ui/Toast';
 import { Disclaimer } from './components/ui/Disclaimer';
 import { Header } from './components/layout/Header';
 import { EntryScreen } from './components/screens/EntryScreen';
+import { RecommendationsScreen } from './components/screens/RecommendationsScreen';
 import { ExpressMode } from './components/screens/ExpressMode';
 import { PatientTab } from './components/tabs/PatientTab';
 import { ScreeningTab } from './components/tabs/ScreeningTab';
@@ -22,6 +23,7 @@ export default function App() {
   const [mode, setMode] = useState<AppMode>('loading');
   const [activeTab, setActiveTab] = useState<TabId>('patient');
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const [idbActive, setIdbActive] = useState(true);
   const { toastMessage, toastVisible, showToast } = useToast();
   const actions = useAppData(emptyData());
@@ -84,11 +86,15 @@ export default function App() {
 
   if (mode === 'entry') {
     return (
-      <EntryScreen
-        onChoose={handleChooseMode}
-        notes={actions.data.notes}
-        onNotesChange={actions.updateNotes}
-      />
+      <>
+        <EntryScreen
+          onChoose={handleChooseMode}
+          notes={actions.data.notes}
+          onNotesChange={actions.updateNotes}
+          onOpenRecommendations={() => setShowRecommendations(true)}
+        />
+        {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
+      </>
     );
   }
 
@@ -110,7 +116,14 @@ export default function App() {
       <Disclaimer visible={showDisclaimer} onAccept={() => setShowDisclaimer(false)} />
       <Toast message={toastMessage} visible={toastVisible} />
 
-      <Header data={d} activeTab={activeTab} onTabChange={nav} />
+      {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
+      <Header
+        data={d}
+        activeTab={activeTab}
+        onTabChange={nav}
+        onBackToEntry={() => setMode('entry')}
+        onOpenRecommendations={() => setShowRecommendations(true)}
+      />
 
       <main className="px-4 py-5 max-w-4xl mx-auto">
         {activeTab === 'patient' && (

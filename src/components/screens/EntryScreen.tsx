@@ -1,13 +1,13 @@
-import { Home, Building2, MessageSquareHeart } from 'lucide-react';
-import { RecommendationsSection } from '../ui/RecommendationsSection';
+import { Home, Building2, MessageSquareHeart, BookOpen, ChevronRight } from 'lucide-react';
 
 interface EntryScreenProps {
   onChoose: (mode: 'home' | 'express') => void;
   notes: string;
   onNotesChange: (val: string) => void;
+  onOpenRecommendations: () => void;
 }
 
-export function EntryScreen({ onChoose, notes, onNotesChange }: EntryScreenProps) {
+export function EntryScreen({ onChoose, notes, onNotesChange, onOpenRecommendations }: EntryScreenProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-700 via-teal-800 to-teal-900 flex flex-col items-center justify-center p-6">
       {/* Logo + Welcome */}
@@ -101,8 +101,22 @@ export function EntryScreen({ onChoose, notes, onNotesChange }: EntryScreenProps
 
       {/* Recomendaciones + Mis Notas */}
       <div className="w-full max-w-md space-y-3 mb-6">
-        {/* Recomendaciones */}
-        <RecommendationsSection />
+        {/* Recomendaciones — abre pantalla completa */}
+        <button
+          onClick={onOpenRecommendations}
+          className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-left hover:bg-white/15 active:scale-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-teal-600/50 flex items-center justify-center flex-shrink-0">
+              <BookOpen size={16} className="text-teal-100" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-black text-white uppercase tracking-wider">Escuela de Salud Vesical</p>
+              <p className="text-[10px] text-teal-300 mt-0.5">6 bloques educativos · Guías AEU 2026</p>
+            </div>
+            <ChevronRight size={16} className="text-teal-300 flex-shrink-0" />
+          </div>
+        </button>
 
         {/* Mis notas para el médico */}
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
