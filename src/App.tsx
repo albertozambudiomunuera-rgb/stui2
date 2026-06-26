@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { TabId } from './types';
-import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, emptyData } from './lib/storage';
+import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, emptyData, idbClear } from './lib/storage';
+import { clearPINSetup, clearStoredMode } from './lib/keyManager';
 import { useAppData } from './hooks/useAppData';
+import { useSecureInit } from './hooks/useSecureInit';
+import { SecurityChoice } from './components/ui/SecurityChoice';
+import { PINSetup } from './components/ui/PINSetup';
 import { Toast, useToast } from './components/ui/Toast';
 import { Disclaimer } from './components/ui/Disclaimer';
 import { Header } from './components/layout/Header';
@@ -27,8 +31,11 @@ export default function App() {
   const [idbActive, setIdbActive] = useState(true);
   const { toastMessage, toastVisible, showToast } = useToast();
   const actions = useAppData(emptyData());
+  const secure = useSecureInit();
 
+  // Cargar datos clínicos solo cuando el sistema de cifrado esté listo
   useEffect(() => {
+    if (secure.status !== 'ready') return;
     (async () => {
       const [data, , idbOk] = await Promise.all([
         loadDataAsync(),
@@ -37,11 +44,16 @@ export default function App() {
       ]);
       actions.restoreData(data);
       setIdbActive(idbOk);
-
-      // Always show entry screen first - user chooses their mode
       setMode('entry');
     })();
-  }, []);
+  }, [secure.status]);
+
+  const handleForgotPIN = async () => {
+    await idbClear();
+    clearPINSetup();
+    clearStoredMode(); // vuelve a mostrar la pantalla de elección al reiniciar
+    window.location.reload();
+  };
 
   const handleChooseMode = (m: 'home' | 'express') => {
     if (m === 'home') {
@@ -74,6 +86,43 @@ export default function App() {
   };
 
   if (mode === 'loading') {
+    // Primer arranque: el usuario elige su nivel de seguridad
+    if (secure.status === 'choose-mode') {
+      return <SecurityChoice onChoose={secure.chooseMode} />;
+    }
+    // Modo PIN, primera vez: configurar PIN
+    if (secure.status === 'setup-pin') {
+      return (
+        <PINSetup
+          mode="setup"
+          onSetup={secure.submitSetupPIN}
+          onUnlock={secure.submitUnlockPIN}
+        />
+      );
+    }
+    // Modo PIN, retorno: desbloquear
+    if (secure.status === 'unlock-pin') {
+      return (
+        <PINSetup
+          mode="unlock"
+          onSetup={secure.submitSetupPIN}
+          onUnlock={secure.submitUnlockPIN}
+          onForgotPIN={handleForgotPIN}
+        />
+      );
+    }
+    if (secure.status === 'error') {
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-teal-700 to-teal-900 flex items-center justify-center p-6">
+          <div className="text-center text-white max-w-sm">
+            <div className="text-5xl mb-4">⚠️</div>
+            <p className="font-bold mb-2">Error al inicializar el almacenamiento seguro</p>
+            <p className="text-sm opacity-70">{secure.error}</p>
+          </div>
+        </div>
+      );
+    }
+    // 'initializing' o modo auto cargando: spinner estándar
     return (
       <div className="min-h-screen bg-gradient-to-b from-teal-700 to-teal-900 flex items-center justify-center">
         <div className="text-center text-white">

@@ -3,18 +3,15 @@ import type { AppData, DiaryEntry, PadEntry } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
 import { uid } from '../lib/clinical';
 
-const LS_KEY = 'stuiv1';
-
 export function useAppData(initialData: AppData) {
   const [data, setData] = useState<AppData>(initialData);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // idbSave escribe en IndexedDB y en localStorage (cifrado) en un único punto
   const save = useCallback((newData: AppData) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      const str = JSON.stringify(newData);
-      idbSave(str);
-      try { localStorage.setItem(LS_KEY, str); } catch { /* ignore */ }
+      idbSave(JSON.stringify(newData));
     }, 300);
   }, []);
 
@@ -198,8 +195,7 @@ export function useAppData(initialData: AppData) {
   }, [save]);
 
   const resetData = useCallback(async (emptyDataFn: () => AppData) => {
-    await idbClear();
-    try { localStorage.removeItem(LS_KEY); } catch { /* ignore */ }
+    await idbClear(); // idbClear ya borra también la clave de localStorage
     const fresh = emptyDataFn();
     setData(fresh);
   }, []);

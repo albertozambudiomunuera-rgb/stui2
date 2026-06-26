@@ -1,40 +1,58 @@
-import type { AppData } from '../types';
+/**
+ * storage.ts — Capa de persistencia con cifrado transparente.
+ *
+ * Todas las escrituras pasan por encrypt() y todas las lecturas por decrypt()
+ * si hay una clave activa en keyManager. Si no hay clave (modo 'none' o app
+ * aún no inicializada) los datos se guardan/leen en claro para compatibilidad.
+ *
+ * Migración: los datos JSON legacy (sin prefijo "enc:v1:") se leen en claro y
+ * se re-cifran automáticamente en la siguiente escritura.
+ */
 
-const DB_NAME = 'stuiDB';
-const DB_VER = 1;
-const STORE = 'appData';
-const DATA_KEY = 'main';
+import type { AppData } from '../types';
+import { openDB, DATA_STORE, DATA_KEY } from './idb';
+import { getActiveKey } from './keyManager';
+import { encrypt, decrypt, isEncryptedPayload } from './crypto';
+
 const LS_KEY = 'stuiv1';
 const DISCLAIMER_KEY = 'stuiv1_d';
 
-let _db: IDBDatabase | null = null;
+// ── Helpers de cifrado para el storage ────────────────────────────────────────
 
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((res, rej) => {
-    if (_db) return res(_db);
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = (e) => {
-      const db = (e.target as IDBOpenDBRequest).result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE);
-      }
-    };
-    req.onsuccess = (e) => { _db = (e.target as IDBOpenDBRequest).result; res(_db); };
-    req.onerror = (e) => rej((e.target as IDBOpenDBRequest).error);
-  });
+async function encryptForStorage(plain: string): Promise<string> {
+  const key = getActiveKey();
+  return key ? encrypt(key, plain) : plain;
 }
 
+async function decryptFromStorage(raw: string): Promise<string> {
+  const key = getActiveKey();
+  if (!key) return raw;
+  if (isEncryptedPayload(raw)) {
+    return decrypt(key, raw);
+  }
+  // Dato legacy en texto plano — se devuelve tal cual; se cifrará en la siguiente escritura
+  return raw;
+}
+
+// ── API de IndexedDB ───────────────────────────────────────────────────────────
+
+export { openDB };
+
 export async function idbSave(val: string): Promise<boolean> {
+  const payload = await encryptForStorage(val);
   try {
     const db = await openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put(val, DATA_KEY);
-      tx.oncomplete = () => res(true);
+    await new Promise<void>((res, rej) => {
+      const tx = db.transaction(DATA_STORE, 'readwrite');
+      tx.objectStore(DATA_STORE).put(payload, DATA_KEY);
+      tx.oncomplete = () => res();
       tx.onerror = (e) => rej((e.target as IDBRequest).error);
     });
+    // Mantiene localStorage sincronizado (cifrado) como respaldo redundante
+    try { localStorage.setItem(LS_KEY, payload); } catch { /* ignore */ }
+    return true;
   } catch {
-    try { localStorage.setItem(LS_KEY, val); } catch { /* ignore */ }
+    try { localStorage.setItem(LS_KEY, payload); } catch { /* ignore */ }
     return false;
   }
 }
@@ -42,26 +60,36 @@ export async function idbSave(val: string): Promise<boolean> {
 export async function idbLoad(): Promise<string | null> {
   try {
     const db = await openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(STORE, 'readonly');
-      const req = tx.objectStore(STORE).get(DATA_KEY);
+    const raw: string | null = await new Promise((res, rej) => {
+      const tx = db.transaction(DATA_STORE, 'readonly');
+      const req = tx.objectStore(DATA_STORE).get(DATA_KEY);
       req.onsuccess = (e) => res((e.target as IDBRequest).result ?? null);
       req.onerror = (e) => rej((e.target as IDBRequest).error);
     });
+    if (!raw) return null;
+    return decryptFromStorage(raw);
   } catch {
-    try { return localStorage.getItem(LS_KEY); } catch { return null; }
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return null;
+      return decryptFromStorage(raw);
+    } catch {
+      return null;
+    }
   }
 }
 
 export async function idbClear(): Promise<boolean> {
   try {
     const db = await openDB();
-    return new Promise((res, rej) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).delete(DATA_KEY);
-      tx.oncomplete = () => res(true);
+    await new Promise<void>((res, rej) => {
+      const tx = db.transaction(DATA_STORE, 'readwrite');
+      tx.objectStore(DATA_STORE).delete(DATA_KEY);
+      tx.oncomplete = () => res();
       tx.onerror = () => rej(false);
     });
+    try { localStorage.removeItem(LS_KEY); } catch { /* ignore */ }
+    return true;
   } catch {
     try { localStorage.removeItem(LS_KEY); } catch { /* ignore */ }
     return false;
@@ -71,6 +99,8 @@ export async function idbClear(): Promise<boolean> {
 export async function checkIDBAvailable(): Promise<boolean> {
   try { await openDB(); return true; } catch { return false; }
 }
+
+// ── Datos de la aplicación ────────────────────────────────────────────────────
 
 export function emptyData(): AppData {
   return {
@@ -94,7 +124,10 @@ function deepMerge<T extends object>(target: T, source: Partial<T>): T {
   for (const key of Object.keys(source) as (keyof T)[]) {
     const sv = source[key];
     const tv = target[key];
-    if (sv !== null && typeof sv === 'object' && !Array.isArray(sv) && key in target && typeof tv === 'object' && !Array.isArray(tv) && tv !== null) {
+    if (
+      sv !== null && typeof sv === 'object' && !Array.isArray(sv) &&
+      key in target && typeof tv === 'object' && !Array.isArray(tv) && tv !== null
+    ) {
       out[key] = deepMerge(tv as object, sv as object) as T[keyof T];
     } else if (sv !== undefined) {
       out[key] = sv as T[keyof T];
@@ -104,12 +137,10 @@ function deepMerge<T extends object>(target: T, source: Partial<T>): T {
 }
 
 export async function loadDataAsync(): Promise<AppData> {
-  let raw = await idbLoad();
-  if (!raw) { try { raw = localStorage.getItem(LS_KEY); } catch { /* ignore */ } }
+  const raw = await idbLoad(); // ya viene descifrado
   if (raw) {
     try {
       const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      // Migrate old string notes to array
       if (typeof parsed.notes === 'string') parsed.notes = [];
       return deepMerge(emptyData(), parsed);
     } catch { /* ignore */ }
@@ -118,10 +149,20 @@ export async function loadDataAsync(): Promise<AppData> {
 }
 
 export async function hasExistingData(): Promise<boolean> {
-  const raw = await idbLoad();
-  if (raw) return true;
+  try {
+    const db = await openDB();
+    const raw: unknown = await new Promise((res, rej) => {
+      const tx = db.transaction(DATA_STORE, 'readonly');
+      const req = tx.objectStore(DATA_STORE).get(DATA_KEY);
+      req.onsuccess = (e) => res((e.target as IDBRequest).result ?? null);
+      req.onerror = (e) => rej((e.target as IDBRequest).error);
+    });
+    if (raw) return true;
+  } catch { /* ignore */ }
   try { return !!localStorage.getItem(LS_KEY); } catch { return false; }
 }
+
+// ── Disclaimer ────────────────────────────────────────────────────────────────
 
 export function isDisclaimerAccepted(): boolean {
   try { return !!localStorage.getItem(DISCLAIMER_KEY); } catch { return false; }
@@ -131,7 +172,10 @@ export function acceptDisclaimer(): void {
   try { localStorage.setItem(DISCLAIMER_KEY, '1'); } catch { /* ignore */ }
 }
 
+// ── Backup / Importación ──────────────────────────────────────────────────────
+
 export function exportBackup(data: AppData): void {
+  // Exporta los datos en claro (ya descifrados en memoria) para portabilidad
   const backup = {
     version: 2,
     app: 'STUI_App',
@@ -156,5 +200,6 @@ export async function importBackup(file: File): Promise<AppData> {
   const text = await file.text();
   const backup = JSON.parse(text);
   if (!backup.data && !backup.patient) throw new Error('Archivo no válido');
+  // Los datos importados se re-cifrarán al guardarse mediante idbSave
   return deepMerge(emptyData(), backup.data ?? backup);
 }
