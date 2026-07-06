@@ -26,6 +26,7 @@ type AppMode = 'loading' | 'entry' | 'app' | 'express';
 export default function App() {
   const [mode, setMode] = useState<AppMode>('loading');
   const [activeTab, setActiveTab] = useState<TabId>('patient');
+  const [tabHistory, setTabHistory] = useState<TabId[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [idbActive, setIdbActive] = useState(true);
@@ -81,7 +82,17 @@ export default function App() {
   };
 
   const nav = (tab: TabId) => {
+    setTabHistory((h) => [...h, activeTab]);
     setActiveTab(tab);
+    window.scrollTo(0, 0);
+  };
+
+  const goBack = () => {
+    setTabHistory((h) => {
+      if (h.length === 0) return h;
+      setActiveTab(h[h.length - 1]);
+      return h.slice(0, -1);
+    });
     window.scrollTo(0, 0);
   };
 
@@ -153,7 +164,7 @@ export default function App() {
         data={actions.data}
         actions={actions}
         onExit={() => setMode('entry')}
-        onSwitchHome={() => { setMode('app'); nav('patient'); }}
+        onSwitchHome={() => { setMode('app'); setTabHistory([]); setActiveTab('patient'); }}
       />
     );
   }
@@ -170,7 +181,9 @@ export default function App() {
         data={d}
         activeTab={activeTab}
         onTabChange={nav}
-        onBackToEntry={() => setMode('entry')}
+        canGoBack={tabHistory.length > 0}
+        onBack={goBack}
+        onBackToEntry={() => { setMode('entry'); setTabHistory([]); }}
         onOpenRecommendations={() => setShowRecommendations(true)}
       />
 
@@ -182,7 +195,7 @@ export default function App() {
             idbActive={idbActive}
             onToast={showToast}
             onNext={() => nav('screening')}
-            onBackToEntry={() => setMode('entry')}
+            onBackToEntry={() => { setMode('entry'); setTabHistory([]); }}
           />
         )}
         {activeTab === 'screening' && (

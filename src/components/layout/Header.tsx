@@ -5,6 +5,8 @@ interface HeaderProps {
   data: AppData;
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  canGoBack?: boolean;
+  onBack?: () => void;
   onBackToEntry?: () => void;
   onOpenRecommendations?: () => void;
 }
@@ -36,7 +38,7 @@ const TAB_ICONS: Record<TabId, string> = {
   notes: '📝',
 };
 
-export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenRecommendations }: HeaderProps) {
+export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBackToEntry, onOpenRecommendations }: HeaderProps) {
   const p = data.patient;
   const visibleTabs = TABS.filter((t) => t.show(data));
 
@@ -47,6 +49,15 @@ export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenReco
       <div className="px-4 pt-safe pt-3 pb-0">
         {/* Top row */}
         <div className="flex items-center gap-3 mb-3">
+          {canGoBack && onBack && (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1 bg-white/20 hover:bg-white/30 rounded-xl px-2.5 py-1.5 flex-shrink-0 transition-colors"
+            >
+              <ChevronLeft size={14} className="text-white" />
+              <span className="text-xs font-bold text-white">Atrás</span>
+            </button>
+          )}
           {onBackToEntry && (
             <button
               onClick={onBackToEntry}
@@ -91,7 +102,7 @@ export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenReco
 
             if (tab.id === 'dashboard' && onOpenRecommendations) {
               return (
-                <>
+                <div key={tab.id} className="flex gap-1 flex-shrink-0">
                   <button
                     key="escuela"
                     onClick={onOpenRecommendations}
@@ -112,7 +123,7 @@ export function Header({ data, activeTab, onTabChange, onBackToEntry, onOpenReco
                     <span className="text-sm">{TAB_ICONS[tab.id]}</span>
                     <span>{tab.label}</span>
                   </button>
-                </>
+                </div>
               );
             }
 
