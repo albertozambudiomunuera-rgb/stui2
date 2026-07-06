@@ -46,7 +46,7 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
 
   return (
     <header className="bg-gradient-to-br from-teal-700 to-teal-900 sticky top-0 z-50 shadow-lg">
-      <div className="px-4 pt-safe pt-3 pb-0">
+      <div className="px-4 safe-top pb-0">
         {/* Top row */}
         <div className="flex items-center gap-3 mb-3">
           {canGoBack && onBack && (

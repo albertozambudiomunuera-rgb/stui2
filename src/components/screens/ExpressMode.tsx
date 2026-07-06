@@ -62,7 +62,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
   return (
     <div className="fixed inset-0 z-[400] bg-white dark:bg-slate-950 overflow-y-auto">
       <div className="sticky top-0 z-10 shadow-lg" style={{ backgroundColor: RED }}>
-        <div className="px-4 pt-3 pb-0">
+        <div className="px-4 safe-top pb-0">
           <div className="flex items-center gap-3 mb-3">
             <img
               src="/Logo-AEU-Corporativo.png"

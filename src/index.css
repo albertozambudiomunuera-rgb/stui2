@@ -21,6 +21,7 @@ body {
 .safe-bottom { padding-bottom: max(24px, env(safe-area-inset-bottom, 24px)); }
 .safe-left { padding-left: max(16px, env(safe-area-inset-left, 16px)); }
 .safe-right { padding-right: max(16px, env(safe-area-inset-right, 16px)); }
+.safe-top-fixed { top: max(16px, env(safe-area-inset-top, 16px)); }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }

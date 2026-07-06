@@ -286,7 +286,7 @@ export function RecommendationsScreen({ onClose }: Props) {
     <div className="fixed inset-0 z-[500] bg-white flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-br from-teal-700 to-teal-900 flex-shrink-0">
-        <div className="px-4 pt-4 pb-0">
+        <div className="px-4 safe-top pb-0">
           <div className="flex items-center gap-3 mb-3">
             <img src="/Logo-AEU-Corporativo.png" alt="AEU" className="h-8 flex-shrink-0 object-contain" />
             <div className="flex-1 min-w-0">

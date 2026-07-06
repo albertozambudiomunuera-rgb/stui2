@@ -9,7 +9,7 @@ interface ToastProps {
 export function Toast({ message, visible }: ToastProps) {
   if (!visible) return null;
   return (
-    <div className="fixed top-safe top-4 left-1/2 -translate-x-1/2 z-[200] pointer-events-none animate-slide-down">
+    <div className="fixed safe-top-fixed left-1/2 -translate-x-1/2 z-[200] pointer-events-none animate-slide-down">
       <div className="flex items-center gap-2 bg-teal-800 dark:bg-teal-700 text-white rounded-2xl px-5 py-3 text-sm font-bold shadow-2xl whitespace-nowrap">
         <CheckCircle size={16} />
         {message}

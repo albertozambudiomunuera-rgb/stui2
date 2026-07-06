@@ -37,7 +37,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
             <X size={18} />
           </button>
         </div>
-        <div className="p-5 pb-safe">
+        <div className="p-5 safe-bottom">
           {children}
         </div>
       </div>
