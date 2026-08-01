@@ -1,5 +1,5 @@
 /**
- * InstallPrompt.tsx — Aviso de instalación previo al diario miccional.
+ * InstallPrompt.tsx — Aviso de instalación en la pantalla de bienvenida.
  *
  * MOTIVO CLÍNICO
  * Los navegadores móviles pueden desalojar IndexedDB cuando el sitio se usa
@@ -13,11 +13,10 @@
  *   · Safari macOS, pestaña             → persist() DENEGADO
  *   · Safari macOS, añadida al Dock     → persist() CONCEDIDO
  *
- * Como el diario miccional dura 3 días y la consulta suele ser semanas después,
- * rellenarlo en una pestaña expone al paciente a perder todos los datos antes
- * de la visita. Por eso se solicita instalar ANTES de empezar el diario.
- *
- * El modo exprés no necesita este aviso: se rellena y se exporta en el momento.
+ * Se muestra al abrir la app, antes de elegir modo (Diario o Exprés), porque
+ * el diario dura 3 días y la consulta suele ser semanas después: rellenarlo
+ * en una pestaña expone al paciente a perder todos los datos antes de la
+ * visita.
  */
 
 import { useEffect, useState } from 'react';
@@ -113,7 +112,7 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
             <span className="text-3xl leading-none" aria-hidden="true">⚠️</span>
             <div>
               <h2 className="text-xl font-bold text-slate-900 leading-snug">
-                Antes de empezar el diario
+                Antes de empezar
               </h2>
               <p className="text-sm text-slate-500 mt-1">
                 Un paso importante para no perder tus datos
@@ -123,9 +122,11 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
             <p className="text-[15px] text-amber-900 leading-relaxed">
-              El diario dura <strong>3 días</strong>, y hasta que vuelvas a la consulta
-              pueden pasar semanas. Si usas STUI como una pestaña normal del navegador,
-              el móvil <strong>puede borrar tus datos</strong> durante ese tiempo.
+              Tus datos se guardan solo en este dispositivo. Si usas STUI como una
+              pestaña normal del navegador, el móvil <strong>puede borrarlos</strong>{' '}
+              con el tiempo, sobre todo si tardas días o semanas en volver a la app
+              (por ejemplo, si estás rellenando el diario miccional de 3 días antes
+              de tu consulta).
             </p>
             <p className="text-[15px] text-amber-900 leading-relaxed mt-2">
               Si la instalas, tus datos quedan protegidos.

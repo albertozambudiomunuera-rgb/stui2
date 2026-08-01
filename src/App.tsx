@@ -48,6 +48,10 @@ export default function App() {
       actions.restoreData(data);
       setIdbActive(idbOk);
       setMode('entry');
+      // El diario dura 3 días y la consulta es semanas después: si la app no
+      // está instalada, el navegador puede desalojar IndexedDB entre medias.
+      // Se avisa ya en la bienvenida, antes de elegir modo.
+      if (!isInstalled()) setShowInstallPrompt(true);
     })();
   }, [secure.status]);
 
@@ -63,10 +67,6 @@ export default function App() {
       setMode('app');
       // Show disclaimer on first-time entry to app
       if (!isDisclaimerAccepted()) setShowDisclaimer(true);
-      // El diario dura 3 días y la consulta es semanas después: si la app no
-      // está instalada, el navegador puede desalojar IndexedDB entre medias.
-      // El modo exprés no lo necesita (se rellena y exporta en el momento).
-      if (!isInstalled()) setShowInstallPrompt(true);
     } else {
       // Reset data for Express mode (fresh start for waiting room)
       actions.restoreData(emptyData());
@@ -159,6 +159,9 @@ export default function App() {
           onAddNote={actions.addNote}
           onOpenRecommendations={() => setShowRecommendations(true)}
         />
+        {showInstallPrompt && (
+          <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
+        )}
         {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
       </>
     );
@@ -180,9 +183,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Disclaimer visible={showDisclaimer} onAccept={() => setShowDisclaimer(false)} />
-      {showInstallPrompt && !showDisclaimer && (
-        <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
-      )}
       <Toast message={toastMessage} visible={toastVisible} />
 
       {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
