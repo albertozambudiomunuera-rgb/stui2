@@ -67,7 +67,7 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
     { label: 'Diario miccional (3 días)', done: true },
     { label: 'IPSS', done: true },
     ...(sex === 'M' ? [{ label: s.iief ? 'IIEF-5 activado' : 'IIEF-5 — No aplica', done: s.iief === true, na: s.iief === false }] : []),
-    { label: s.oab ? 'OAB-q activado' : 'OAB-q — No aplica', done: s.oab === true, na: s.oab === false },
+    { label: s.oab ? 'OAB (AUA) activado' : 'OAB (AUA) — No aplica', done: s.oab === true, na: s.oab === false },
     ...(sex === 'F' ? [{ label: s.iciq ? 'ICIQ-SF activado' : 'ICIQ-SF — No aplica', done: s.iciq === true, na: s.iciq === false }] : []),
   ] as { label: string; done: boolean; na?: boolean }[];
 
@@ -92,7 +92,7 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
       )}
 
       <ScrCard
-        badge={<Badge active={s.oab === true} label={s.oab === true ? 'OAB-q activado' : 'OAB-q bloqueado'} />}
+        badge={<Badge active={s.oab === true} label={s.oab === true ? 'OAB (AUA) activado' : 'OAB (AUA) bloqueado'} />}
         question="¿Su síntoma principal es el miedo repentino a no llegar al baño a tiempo (urgencia miccional)?"
         value={s.oab}
         onYes={() => actions.updateScreening('oab', true)}

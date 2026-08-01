@@ -19,7 +19,7 @@ const TABS: { id: TabId; label: string; show: (data: AppData) => boolean }[] = [
   { id: 'day-2', label: 'Día 3', show: () => true },
   { id: 'ipss', label: 'IPSS', show: () => true },
   { id: 'iief', label: 'IIEF-5', show: (d) => d.screening.iief === true },
-  { id: 'oab', label: 'OAB-q', show: (d) => d.screening.oab === true },
+  { id: 'oab', label: 'OAB (AUA)', show: (d) => d.screening.oab === true },
   { id: 'iciq', label: 'ICIQ-SF', show: (d) => d.screening.iciq === true },
   { id: 'dashboard', label: 'Informe', show: () => true },
 ];

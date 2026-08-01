@@ -22,7 +22,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
         <h2 className="font-black text-slate-800 dark:text-slate-100 text-base mb-1 flex items-center gap-2">
-          <span>🔵</span> OAB-q — Vejiga Hiperactiva
+          <span>🔵</span> AUA OAB Assessment — Vejiga Hiperactiva
         </h2>
         <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-5 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-l-2 border-slate-300 dark:border-slate-600">
           Las preguntas 1–5 dan una puntuación de síntomas (0–25). Las preguntas b evalúan el impacto en calidad de vida.
@@ -57,7 +57,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
         {comp && (
           <div className="mt-6 text-center p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="font-mono text-5xl font-black text-slate-700 dark:text-slate-300">{sc}<span className="text-lg text-slate-400 font-normal">/25</span></div>
-            <div className="text-sm text-slate-500 mt-1">Total síntomas OAB-q</div>
+            <div className="text-sm text-slate-500 mt-1">Total síntomas OAB (AUA)</div>
             <div className={`text-lg font-black mt-1 ${severity.colorClass}`}>{severity.text}</div>
           </div>
         )}

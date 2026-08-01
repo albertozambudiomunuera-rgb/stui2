@@ -263,7 +263,7 @@ export function generateClinicalNote(data: AppData): string {
 
   if (data.screening.oab && data.oab.q.every((v) => v !== null)) {
     const sc = oabScore(data);
-    t += `OAB-q síntomas: ${sc}/25${sc === 0 ? '' : sc <= 10 ? ' (Leve)' : sc <= 18 ? ' (Moderado)' : ' (Grave)'}\n\n`;
+    t += `AUA OAB Assessment: ${sc}/25${sc === 0 ? '' : sc <= 10 ? ' (Leve)' : sc <= 18 ? ' (Moderado)' : ' (Grave)'}\n\n`;
   }
 
   if (data.screening.iciq && data.iciq.q[0] !== null) {

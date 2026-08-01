@@ -1,0 +1,27 @@
+{
+  "name": "STUI App — Evaluación de síntomas del tracto urinario inferior",
+  "short_name": "STUI App",
+  "description": "Diario miccional e instrumentos validados de evaluación de STUI. Los datos se guardan cifrados en tu dispositivo.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "lang": "es",
+  "categories": ["medical", "health"],
+  "icons": [
+    {
+      "src": "/Logo-AEU-Corporativo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Logo-AEU-Corporativo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

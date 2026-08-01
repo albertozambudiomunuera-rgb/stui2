@@ -8,6 +8,7 @@ import { SecurityChoice } from './components/ui/SecurityChoice';
 import { PINSetup } from './components/ui/PINSetup';
 import { Toast, useToast } from './components/ui/Toast';
 import { Disclaimer } from './components/ui/Disclaimer';
+import { InstallPrompt, isInstalled } from './components/ui/InstallPrompt';
 import { Header } from './components/layout/Header';
 import { EntryScreen } from './components/screens/EntryScreen';
 import { RecommendationsScreen } from './components/screens/RecommendationsScreen';
@@ -28,6 +29,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('patient');
   const [tabHistory, setTabHistory] = useState<TabId[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [idbActive, setIdbActive] = useState(true);
   const { toastMessage, toastVisible, showToast } = useToast();
@@ -61,6 +63,10 @@ export default function App() {
       setMode('app');
       // Show disclaimer on first-time entry to app
       if (!isDisclaimerAccepted()) setShowDisclaimer(true);
+      // El diario dura 3 días y la consulta es semanas después: si la app no
+      // está instalada, el navegador puede desalojar IndexedDB entre medias.
+      // El modo exprés no lo necesita (se rellena y exporta en el momento).
+      if (!isInstalled()) setShowInstallPrompt(true);
     } else {
       // Reset data for Express mode (fresh start for waiting room)
       actions.restoreData(emptyData());
@@ -174,6 +180,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Disclaimer visible={showDisclaimer} onAccept={() => setShowDisclaimer(false)} />
+      {showInstallPrompt && !showDisclaimer && (
+        <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
+      )}
       <Toast message={toastMessage} visible={toastVisible} />
 
       {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}

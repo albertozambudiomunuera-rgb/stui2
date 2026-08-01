@@ -154,7 +154,7 @@ function ExpressScreening({ data, actions, onNext }: { data: AppData; actions: R
       {sex && (
         <ScrCard
           question="¿Su síntoma principal es el miedo repentino a no llegar al baño a tiempo (urgencia miccional)?"
-          label="OAB-q"
+          label="OAB (AUA)"
           value={s.oab}
           onYes={() => actions.updateScreening('oab', true)}
           onNo={() => actions.updateScreening('oab', false)}
@@ -432,10 +432,10 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
     else suggestions.push(`Función eréctil conservada (IIEF-5 ${iiefVal}/25).`);
   }
   if (hasOAB) {
-    if (data.oab.q[0] === 0) suggestions.push('Sin urgencia miccional (OAB-q pregunta 1 = 0).');
-    else if (oabVal > 18) suggestions.push(`Síntomas de vejiga hiperactiva graves (OAB-q ${oabVal}/25).`);
-    else if (oabVal > 10) suggestions.push(`Síntomas de vejiga hiperactiva moderados (OAB-q ${oabVal}/25).`);
-    else suggestions.push(`Síntomas de vejiga hiperactiva leves (OAB-q ${oabVal}/25).`);
+    if (data.oab.q[0] === 0) suggestions.push('Sin urgencia miccional (AUA OAB Assessment, pregunta 1 = 0).');
+    else if (oabVal > 18) suggestions.push(`Síntomas de vejiga hiperactiva graves (AUA OAB Assessment ${oabVal}/25).`);
+    else if (oabVal > 10) suggestions.push(`Síntomas de vejiga hiperactiva moderados (AUA OAB Assessment ${oabVal}/25).`);
+    else suggestions.push(`Síntomas de vejiga hiperactiva leves (AUA OAB Assessment ${oabVal}/25).`);
   }
   if (hasICIQ) {
     if (iciqVal === 0) suggestions.push('Sin incontinencia urinaria (ICIQ-SF 0/21).');
@@ -449,7 +449,7 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
     hasIPSS && { title: 'IPSS', val: ipssVal, max: '/35', sev: ipssSev, accent: 'teal', extra: `${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' · QoL: ' + IPSS_QOL[data.ipss.qol] : ''}` },
     s && { title: 'Diario', val: s.avgD, max: '/día', sev: { text: `CVF: ${s.maxV}ml`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'sky', extra: `Nocturia: ${s.avgN}/noche${s.npI !== null ? ` · IPN: ${s.npI}%` : ''}` },
     hasIIEF && { title: 'IIEF-5', val: iiefVal, max: '/25', sev: iiefSev, accent: 'sky', extra: null },
-    hasOAB && { title: 'OAB-q', val: oabVal, max: '/25', sev: oabVal === 0 ? { text: 'Sin síntomas', colorClass: 'text-emerald-500' } : oabVal <= 10 ? { text: 'Leve', colorClass: 'text-sky-500' } : oabVal <= 18 ? { text: 'Moderado', colorClass: 'text-amber-500' } : { text: 'Grave', colorClass: 'text-red-500' }, accent: 'slate', extra: null },
+    hasOAB && { title: 'OAB (AUA)', val: oabVal, max: '/25', sev: oabVal === 0 ? { text: 'Sin síntomas', colorClass: 'text-emerald-500' } : oabVal <= 10 ? { text: 'Leve', colorClass: 'text-sky-500' } : oabVal <= 18 ? { text: 'Moderado', colorClass: 'text-amber-500' } : { text: 'Grave', colorClass: 'text-red-500' }, accent: 'slate', extra: null },
     allPads.length > 0 && { title: 'Pad Test', val: `${padTotal}g`, max: '', sev: padSev, accent: 'slate', extra: `${allPads.length} absorbente(s)` },
     hasICIQ && { title: 'ICIQ-SF', val: iciqVal, max: '/21', sev: iciqSev, accent: 'teal', extra: null },
   ].filter(Boolean) as Array<{ title: string; val: number | string; max: string; sev: { text: string; colorClass: string }; accent: string; extra: string | null }>;
@@ -466,7 +466,7 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
       hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : '',
       s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} días</td><td>CVF ${s.maxV}ml · IPN ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>Nocturia ${s.avgN}/noche · IUU ${s.ul} ep.</td></tr>` : '',
       hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : '',
-      hasOAB ? `<tr><td><b>OAB-q</b></td><td>${oabVal}/25</td><td>${oabVal === 0 ? 'Sin síntomas' : oabVal <= 10 ? 'Leve' : oabVal <= 18 ? 'Moderado' : 'Grave'}</td><td></td></tr>` : '',
+      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabVal === 0 ? 'Sin síntomas' : oabVal <= 10 ? 'Leve' : oabVal <= 18 ? 'Moderado' : 'Grave'}</td><td></td></tr>` : '',
       allPads.length > 0 ? `<tr><td><b>Pad Test</b></td><td>${padTotal}g</td><td>${padSev.text}</td><td>${allPads.length} absorbente(s)</td></tr>` : '',
       hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : '',
     ].filter(Boolean).join('');
