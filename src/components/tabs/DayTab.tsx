@@ -65,7 +65,7 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
             { label: '🌙 Acostarse', type: 'time', val: day.sleep, key: 'sleep' as const },
           ].map(({ label, type, val, key }) => (
             <div key={key}>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">{label}</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">{label}</label>
               <input
                 type={type}
                 value={val}
@@ -86,11 +86,11 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
           { label: 'Urgencias ≥3', val: sevUrg, sub: '', danger: sevUrg > 0 },
         ].map(({ label, val, unit, sub, danger }) => (
           <div key={label} className="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-3">
-            <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">{label}</div>
+            <div className="text-sm font-black uppercase tracking-wider text-slate-600">{label}</div>
             <div className={`font-mono text-xl font-black mt-0.5 ${danger ? 'text-red-500' : 'text-teal-700 dark:text-teal-400'}`}>
-              {val}{unit && <span className="text-xs font-normal text-slate-400"> {unit}</span>}
+              {val}{unit && <span className="text-xs font-normal text-slate-600"> {unit}</span>}
             </div>
-            {sub && <div className="text-[10px] text-slate-400 mt-0.5">{sub}</div>}
+            {sub && <div className="text-sm text-slate-600 mt-0.5">{sub}</div>}
           </div>
         ))}
       </div>
@@ -121,11 +121,11 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
           <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2">
             <span>📋</span> Registros del día {di + 1}
           </h3>
-          <span className="text-xs text-slate-400">{day.entries.length} anotacion{day.entries.length !== 1 ? 'es' : ''}</span>
+          <span className="text-xs text-slate-600">{day.entries.length} anotacion{day.entries.length !== 1 ? 'es' : ''}</span>
         </div>
 
         {sorted.length === 0 ? (
-          <div className="text-center py-10 text-slate-400">
+          <div className="text-center py-10 text-slate-600">
             <div className="text-4xl mb-2">📋</div>
             <p>Sin registros todavía.</p>
             <p className="text-xs mt-1">Usa los botones de arriba.</p>
@@ -141,22 +141,22 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
 
       {/* Pad test section */}
       <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
-        <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-3">
           🩲 Pad Test — Absorbentes del día {di + 1}
         </h3>
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Hora</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Hora</label>
             <input type="time" value={padTime} onChange={(e) => setPadTime(e.target.value)}
               className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 font-mono text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Seco (g)</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Seco (g)</label>
             <input type="text" inputMode="decimal" value={padDry} placeholder="ej. 8" onChange={(e) => setPadDry(e.target.value)}
               className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Mojado (g)</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Mojado (g)</label>
             <input type="text" inputMode="decimal" value={padWet} placeholder="ej. 23" onChange={(e) => setPadWet(e.target.value)}
               className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
           </div>
@@ -171,7 +171,7 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
               <div key={pad.id} className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl px-3 py-2.5 border border-slate-200 dark:border-slate-700">
                 <div>
                   <div className="font-mono font-bold text-teal-700 dark:text-teal-400 text-base">{pad.time}</div>
-                  <div className="text-xs text-slate-500">{pad.dry}g → {pad.wet}g</div>
+                  <div className="text-xs text-slate-600">{pad.dry}g → {pad.wet}g</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-black text-lg text-rose-500">+{pad.leak}g</span>

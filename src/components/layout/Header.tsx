@@ -106,7 +106,7 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
                   <button
                     key="escuela"
                     onClick={onOpenRecommendations}
-                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all text-white/80 hover:bg-white/10 hover:text-white"
+                    className="flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[48px] flex-shrink-0 transition-all text-white/80 hover:bg-white/10 hover:text-white"
                   >
                     <span className="text-sm">📚</span>
                     <span>Recomendaciones</span>
@@ -114,7 +114,7 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
                   <button
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[48px] flex-shrink-0 transition-all ${
                       isActive
                         ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-400 shadow-sm'
                         : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -131,7 +131,7 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
               <button
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[48px] flex-shrink-0 transition-all ${
                   isActive
                     ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-400 shadow-sm'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -140,7 +140,7 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
                 <span className="text-sm">{TAB_ICONS[tab.id]}</span>
                 <span>{tab.label}</span>
                 {badge > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-teal-700 text-white' : 'bg-white/25 text-white'}`}>
+                  <span className={`text-sm font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-teal-700 text-white' : 'bg-white/25 text-white'}`}>
                     {badge}
                   </span>
                 )}

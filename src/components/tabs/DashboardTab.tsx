@@ -118,7 +118,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 .algo h3{color:#92400e;font-size:14px;margin:0 0 10px}
 .algo li{color:#78350f;margin-bottom:6px;line-height:1.5}
 .note{background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;white-space:pre-wrap;line-height:1.8}
-.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}
+.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;line-height:1.45}
 @media print{body{margin:20px auto}}
 </style></head><body>
 <h1>Resumen Clínico STUI</h1>
@@ -129,7 +129,7 @@ ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados
 ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
-<div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>
+<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento. No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
@@ -177,7 +177,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       <div className="flex flex-wrap gap-2">
         {badges.map((b) => (
           <span key={b.label} className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full border ${
-            b.na ? 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+            b.na ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 border-slate-200 dark:border-slate-700'
             : b.done ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800'
             : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-amber-100 dark:border-amber-800'
           }`}>
@@ -191,10 +191,10 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {scoreCards.map((c) => (
             <div key={c.title} className={`bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 border-t-4 ${accentMap[c.accent]}`}>
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">{c.title}</div>
-              <div className="font-mono text-3xl font-black text-slate-800 dark:text-slate-100">{c.val}<span className="text-sm text-slate-400 font-normal">{c.max}</span></div>
+              <div className="text-sm font-black uppercase tracking-wider text-slate-600 mb-2">{c.title}</div>
+              <div className="font-mono text-3xl font-black text-slate-800 dark:text-slate-100">{c.val}<span className="text-sm text-slate-600 font-normal">{c.max}</span></div>
               <div className={`text-xs font-black mt-1 ${c.sev.colorClass}`}>{c.sev.text}</div>
-              {c.extra && <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-tight">{c.extra}</div>}
+              {c.extra && <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-tight">{c.extra}</div>}
             </div>
           ))}
         </div>
@@ -218,7 +218,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
         <h3 className="font-black text-purple-800 dark:text-purple-300 text-sm flex items-center gap-2">
           💬 Mis notas para el médico
           {data.notes.length > 0 && (
-            <span className="text-[10px] bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded-full">
+            <span className="text-sm bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded-full">
               {data.notes.length}
             </span>
           )}
@@ -231,7 +231,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
         {data.notes.map((note) => (
           <div key={note.id} className="bg-white dark:bg-slate-900 rounded-xl p-3 border border-purple-100 dark:border-purple-800 flex gap-2 items-start">
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] text-purple-400 font-semibold mb-1">
+              <p className="text-sm text-purple-400 font-semibold mb-1">
                 {new Date(note.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </p>
               <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{note.text}</p>

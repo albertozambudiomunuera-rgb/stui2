@@ -32,7 +32,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
           <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{title}</h3>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
           >
             <X size={18} />
           </button>

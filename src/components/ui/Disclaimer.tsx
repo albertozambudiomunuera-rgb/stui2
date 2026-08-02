@@ -20,14 +20,14 @@ export function Disclaimer({ visible, onAccept }: DisclaimerProps) {
         <div className="bg-gradient-to-br from-teal-700 to-teal-900 p-6 text-center text-white">
           <div className="text-5xl mb-3">🩺</div>
           <h2 className="text-lg font-black">STUI App — Evaluación Urológica</h2>
-          <p className="text-sm opacity-80 mt-1">Herramienta de apoyo clínico · AEU</p>
+          <p className="text-sm opacity-80 mt-1">Evaluación urológica · AEU</p>
         </div>
         <div className="p-6 space-y-3">
           <div className="flex gap-3 p-3 bg-teal-50 dark:bg-teal-900/30 rounded-xl">
             <ClipboardList size={20} className="text-teal-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-sm text-slate-800 dark:text-slate-200">Para pacientes y profesionales</p>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Esta app recoge información sobre tus síntomas urinarios para compartirla con tu médico urólogo.</p>
+              <p className="font-bold text-sm text-slate-800 dark:text-slate-200">Los mismos cuestionarios, en digital</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Esta app recoge los mismos cuestionarios y el mismo diario miccional que se usan en papel en la consulta, para que puedas rellenarlos con calma y compartirlos con tu urólogo.</p>
             </div>
           </div>
           <div className="flex gap-3 p-3 bg-teal-50 dark:bg-teal-900/30 rounded-xl">
@@ -41,7 +41,7 @@ export function Disclaimer({ visible, onAccept }: DisclaimerProps) {
             <AlertTriangle size={20} className="text-amber-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-bold text-sm text-slate-800 dark:text-slate-200">No sustituye la consulta médica</p>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">Esta aplicación es una herramienta de apoyo. El diagnóstico siempre corresponde a un profesional sanitario.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">La app no realiza mediciones, no emite diagnósticos y no recomienda tratamientos. Calcula las puntuaciones según las reglas publicadas de cada cuestionario y prepara un resumen. La interpretación corresponde siempre a un profesional sanitario.</p>
             </div>
           </div>
           <button

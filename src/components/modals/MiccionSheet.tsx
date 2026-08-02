@@ -58,7 +58,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
       <div className="space-y-5">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Hora</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Hora</label>
             <input
               type="time"
               value={draft.time}
@@ -67,7 +67,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
             />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">ml orinados</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">ml orinados</label>
             <input
               type="text"
               inputMode="decimal"
@@ -81,7 +81,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
 
         {/* Urgency */}
         <div>
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-3">
+          <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-3">
             Urgencia — ¿Cuántas ganas tenías?
           </label>
           <div className="flex gap-2">
@@ -94,14 +94,14 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
                 className={`flex-1 min-h-[52px] rounded-xl text-xl font-black border-2 transition-all ${
                   draft.urgency === g
                     ? 'border-transparent shadow-md'
-                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600'
                 }`}
               >
                 {g}
               </button>
             ))}
           </div>
-          <p className={`text-sm font-semibold mt-2 text-center transition-colors ${draft.urgency !== null ? '' : 'text-slate-400'}`}
+          <p className={`text-sm font-semibold mt-2 text-center transition-colors ${draft.urgency !== null ? '' : 'text-slate-600'}`}
             style={draft.urgency !== null ? { color: URGENCY_COLORS[draft.urgency] } : undefined}>
             {draft.urgency !== null ? `${draft.urgency} — ${URGENCY_LABELS[draft.urgency]}` : 'Toca un número para seleccionar'}
           </p>
@@ -111,7 +111,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
         <button
           type="button"
           onClick={() => setShowMore((v) => !v)}
-          className="w-full border-2 border-dashed border-teal-200 dark:border-teal-800 text-slate-500 dark:text-slate-400 rounded-xl py-3 text-sm font-semibold hover:border-teal-400 transition-colors"
+          className="w-full border-2 border-dashed border-teal-200 dark:border-teal-800 text-slate-600 dark:text-slate-400 rounded-xl py-3 text-sm font-semibold hover:border-teal-400 transition-colors"
         >
           {showMore ? '▲ Ocultar opciones' : '▼ Escape / absorbente / otras opciones'}
         </button>
@@ -120,7 +120,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
           <div className="space-y-4 animate-fade-in">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Escape de orina</label>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Escape de orina</label>
                 <select
                   value={draft.leak}
                   onChange={(e) => setDraft((d) => ({ ...d, leak: e.target.value as MiccionDraft['leak'] }))}
@@ -132,7 +132,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Absorbente</label>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Absorbente</label>
                 <select
                   value={draft.pad}
                   onChange={(e) => setDraft((d) => ({ ...d, pad: e.target.value as MiccionDraft['pad'] }))}

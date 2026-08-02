@@ -56,24 +56,24 @@ export function SecurityChoice({ onChoose }: SecurityChoiceProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-black text-base text-slate-800">Proteger con PIN</span>
-                <span className="text-[10px] font-black bg-teal-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wide">
+                <span className="text-sm font-black bg-teal-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wide">
                   Recomendado
                 </span>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">
+              <p className="text-xs text-slate-600 leading-relaxed mb-3">
                 Crea un código de 4 dígitos. Tus datos se cifran con AES-256
                 usando una clave derivada de ese PIN. Sin él, nadie puede leer la información.
               </p>
               <div className="flex flex-wrap gap-1.5">
-                <span className="text-[10px] bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-sm bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
                   🔐 Cifrado AES-256 con PIN
                 </span>
-                <span className="text-[10px] bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-sm bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
                   ✅ RGPD · máxima seguridad
                 </span>
               </div>
             </div>
-            <ChevronRight size={18} className="text-slate-400 flex-shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight size={18} className="text-slate-600 flex-shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
           </div>
         </button>
 
@@ -97,20 +97,20 @@ export function SecurityChoice({ onChoose }: SecurityChoiceProps) {
               <div className="font-black text-base text-slate-800 mb-1">
                 {loading === 'auto' ? 'Configurando cifrado…' : 'Continuar sin PIN'}
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">
+              <p className="text-xs text-slate-600 leading-relaxed mb-3">
                 El navegador genera automáticamente una clave AES-256 aleatoria.
                 Los datos nunca quedan en texto plano, pero no se requiere PIN para acceder.
               </p>
               <div className="flex flex-wrap gap-1.5">
-                <span className="text-[10px] bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-sm bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
                   ⚡ Acceso inmediato
                 </span>
-                <span className="text-[10px] bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
+                <span className="text-sm bg-amber-50 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
                   🛡️ Cifrado técnico básico
                 </span>
               </div>
             </div>
-            <ChevronRight size={18} className="text-slate-400 flex-shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight size={18} className="text-slate-600 flex-shrink-0 mt-1 group-hover:translate-x-0.5 transition-transform" />
           </div>
         </button>
       </div>

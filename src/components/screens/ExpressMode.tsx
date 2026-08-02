@@ -82,7 +82,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
           <nav className="flex gap-1 overflow-x-auto no-scrollbar">
             {tabs.map((t) => (
               <button key={t} onClick={() => setActiveTab(t)}
-                className={`px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] transition-all ${
+                className={`px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[48px] transition-all ${
                   activeTab === t ? 'bg-white dark:bg-slate-950 text-blue-700' : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }`}>
                 {tabLabel[t]}
@@ -138,12 +138,12 @@ function ExpressScreening({ data, actions, onNext }: { data: AppData; actions: R
         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">¿Cuál es el sexo biológico del paciente?</p>
         <div className="flex gap-3">
           <button onClick={() => handleSexSelect('M')}
-            className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${sex === 'M' ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-blue-300'}`}
+            className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${sex === 'M' ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
             style={sex === 'M' ? { backgroundColor: RED } : {}}>
             ♂ Varón
           </button>
           <button onClick={() => handleSexSelect('F')}
-            className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${sex === 'F' ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-blue-300'}`}
+            className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${sex === 'F' ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
             style={sex === 'F' ? { backgroundColor: RED } : {}}>
             ♀ Mujer
           </button>
@@ -195,13 +195,13 @@ function ExpressScreening({ data, actions, onNext }: { data: AppData; actions: R
 function ScrCard({ question, label, value, onYes, onNo }: { question: string; label: string; value: boolean | null; onYes: () => void; onNo: () => void }) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-      <span className={`inline-block text-xs font-black px-2.5 py-1 rounded-full mb-3 ${value === true ? 'bg-emerald-100 text-emerald-700' : value === false ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-700'}`}>
+      <span className={`inline-block text-xs font-black px-2.5 py-1 rounded-full mb-3 ${value === true ? 'bg-emerald-100 text-emerald-700' : value === false ? 'bg-slate-100 text-slate-600' : 'bg-blue-50 text-blue-700'}`}>
         {value === true ? `✅ ${label} activado` : value === false ? `— ${label} no aplica` : label}
       </span>
       <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
       <div className="flex gap-3">
-        <button onClick={onYes} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === true ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-teal-300'}`}>Sí</button>
-        <button onClick={onNo} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === false ? 'bg-slate-200 dark:bg-slate-700 border-slate-300 text-slate-600' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-slate-300'}`}>No</button>
+        <button onClick={onYes} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === true ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>Sí</button>
+        <button onClick={onNo} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === false ? 'bg-slate-200 dark:bg-slate-700 border-slate-300 text-slate-600' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-slate-300'}`}>No</button>
       </div>
     </div>
   );
@@ -215,7 +215,7 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-1">📊 IPSS — Últimos 30 días</h3>
-        <p className="text-xs text-slate-500 mb-5">Indica con qué frecuencia has tenido cada síntoma.</p>
+        <p className="text-xs text-slate-600 mb-5">Indica con qué frecuencia has tenido cada síntoma.</p>
         <div className="space-y-5">
           {IPSS_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
@@ -223,7 +223,7 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
               <div className="flex flex-wrap gap-2">
                 {q.opts.map((o, oi) => (
                   <button key={oi} onClick={() => actions.updateIPSS(qi, oi)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${data.ipss.q[qi] === oi ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.ipss.q[qi] === oi ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                     {oi} — {o}
                   </button>
                 ))}
@@ -235,7 +235,7 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
             <div className="flex flex-wrap gap-2">
               {IPSS_QOL.map((o, i) => (
                 <button key={i} onClick={() => actions.updateIPSSQoL(i)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${data.ipss.qol === i ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.ipss.qol === i ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {i} — {o}
                 </button>
               ))}
@@ -244,7 +244,7 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
         </div>
         {comp && (
           <div className="mt-5 text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
-            <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-400 font-normal">/35</span></div>
+            <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-600 font-normal">/35</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text} · {ipssPredom(data.ipss)}</div>
           </div>
         )}
@@ -266,7 +266,7 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-1">💊 IIEF-5 — Últimos 6 meses</h3>
-        <p className="text-xs text-slate-500 mb-5">Función eréctil. Solo 5 preguntas.</p>
+        <p className="text-xs text-slate-600 mb-5">Función eréctil. Solo 5 preguntas.</p>
         <div className="space-y-5">
           {IIEF_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
@@ -276,7 +276,7 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
                   const isSel = data.iief.q[qi] !== null && data.iief.q[qi] === oi;
                   return (
                     <button key={oi} onClick={() => actions.updateIIEF(qi, oi)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${isSel ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-sky-300'}`}>
+                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${isSel ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-sky-300'}`}>
                       {oi} — {o}
                     </button>
                   );
@@ -287,7 +287,7 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
         </div>
         {comp && (
           <div className="mt-5 text-center p-4 bg-sky-50 rounded-xl border border-sky-100">
-            <div className="font-mono text-4xl font-black text-sky-600">{sc}<span className="text-base text-slate-400 font-normal">/25</span></div>
+            <div className="font-mono text-4xl font-black text-sky-600">{sc}<span className="text-base text-slate-600 font-normal">/25</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
           </div>
         )}
@@ -307,7 +307,7 @@ function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnT
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-1">🚨 OAB — Vejiga Hiperactiva</h3>
-        <p className="text-xs text-slate-500 mb-5">5 preguntas sobre síntomas del último mes.</p>
+        <p className="text-xs text-slate-600 mb-5">5 preguntas sobre síntomas del último mes.</p>
         <div className="space-y-5">
           {OAB_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
@@ -315,7 +315,7 @@ function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnT
               <div className="flex flex-wrap gap-2">
                 {q.opts.map((o, oi) => (
                   <button key={oi} onClick={() => actions.updateOAB(qi, oi)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${data.oab.q[qi] === oi ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.oab.q[qi] === oi ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
                     style={data.oab.q[qi] === oi ? { backgroundColor: RED } : {}}>
                     {oi} — {o}
                   </button>
@@ -343,14 +343,14 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-1">💧 ICIQ-SF — Incontinencia urinaria</h3>
-        <p className="text-xs text-slate-500 mb-5">3 preguntas sobre pérdidas de orina.</p>
+        <p className="text-xs text-slate-600 mb-5">3 preguntas sobre pérdidas de orina.</p>
         <div className="space-y-5">
           <div className="pb-5 border-b border-slate-100 dark:border-slate-800">
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">1. </span>¿Con qué frecuencia pierde orina?</p>
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q1_OPTS.map(({ v, t }) => (
                 <button key={v} onClick={() => actions.updateICIQ(0, v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${iciq.q[0] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${iciq.q[0] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {v} — {t}
                 </button>
               ))}
@@ -361,14 +361,14 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q2_OPTS.map(({ v, t }) => (
                 <button key={v} onClick={() => actions.updateICIQ(1, v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[40px] ${iciq.q[1] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${iciq.q[1] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {v} — {t}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">3. </span>¿En qué medida afectan estas pérdidas a su vida diaria? <span className="text-slate-400">(0=nada · 10=mucho)</span></p>
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">3. </span>¿En qué medida afectan estas pérdidas a su vida diaria? <span className="text-slate-600">(0=nada · 10=mucho)</span></p>
             <div className="flex flex-wrap gap-2">
               {[0,1,2,3,4,5,6,7,8,9,10].map((v) => (
                 <button key={v} onClick={() => actions.updateICIQVas(v)}
@@ -381,7 +381,7 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
         </div>
         {comp && (
           <div className="mt-5 text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
-            <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-400 font-normal">/21</span></div>
+            <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-600 font-normal">/21</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
           </div>
         )}
@@ -484,7 +484,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 .algo h3{color:#92400e;font-size:14px;margin:0 0 10px}
 .algo li{color:#78350f;margin-bottom:6px;line-height:1.5}
 .note{background:#eef0ff;border:1px solid #a5b4fc;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;white-space:pre-wrap;line-height:1.8}
-.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}
+.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;line-height:1.45}
 @media print{body{margin:20px auto}}
 </style></head><body>
 <h1>Resumen Clínico STUI — Modo Exprés</h1>
@@ -495,7 +495,7 @@ ${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados
 ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
-<div class="footer">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</div>
+<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento. No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
@@ -519,10 +519,10 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {scoreCards.map((c) => (
             <div key={c.title} className={`bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800 border-t-4 ${accentMap[c.accent]}`}>
-              <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">{c.title}</div>
-              <div className="font-mono text-3xl font-black text-slate-800 dark:text-slate-100">{c.val}<span className="text-sm text-slate-400 font-normal">{c.max}</span></div>
+              <div className="text-sm font-black uppercase tracking-wider text-slate-600 mb-2">{c.title}</div>
+              <div className="font-mono text-3xl font-black text-slate-800 dark:text-slate-100">{c.val}<span className="text-sm text-slate-600 font-normal">{c.max}</span></div>
               <div className={`text-xs font-black mt-1 ${c.sev.colorClass}`}>{c.sev.text}</div>
-              {c.extra && <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-tight">{c.extra}</div>}
+              {c.extra && <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-tight">{c.extra}</div>}
             </div>
           ))}
         </div>

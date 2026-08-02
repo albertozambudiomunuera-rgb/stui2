@@ -28,7 +28,7 @@ function KegeiInfographic() {
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           {['Vejiga', 'Uretra', 'Recto', 'Ano', 'Vagina', 'Esfínteres'].map((s) => (
-            <div key={s} className="bg-white rounded-xl px-2 py-1.5 text-[10px] font-semibold text-teal-700 border border-teal-100 text-center">{s}</div>
+            <div key={s} className="bg-white rounded-xl px-2 py-1.5 text-sm font-semibold text-teal-700 border border-teal-100 text-center">{s}</div>
           ))}
         </div>
       </div>
@@ -84,7 +84,7 @@ function KegeiInfographic() {
 
       {/* Exercises */}
       <div>
-        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Ejercicios</p>
+        <p className="text-sm font-black text-slate-600 uppercase tracking-widest mb-3">Ejercicios</p>
         <div className="space-y-2">
           {exercises.map((ex) => (
             <div key={ex.n} className="flex gap-3 items-start bg-teal-50 rounded-2xl p-3 border border-teal-100">
@@ -94,7 +94,7 @@ function KegeiInfographic() {
               <div className="flex gap-2 items-start min-w-0">
                 <span className="text-2xl flex-shrink-0 leading-none mt-0.5">{ex.emoji}</span>
                 <div>
-                  <p className="text-[10px] font-black text-teal-600 uppercase tracking-wider mb-0.5">{ex.pos}</p>
+                  <p className="text-sm font-black text-teal-600 uppercase tracking-wider mb-0.5">{ex.pos}</p>
                   <p className="text-xs text-slate-700 leading-relaxed">{ex.text}</p>
                 </div>
               </div>
@@ -191,7 +191,7 @@ function Block3() {
           <span className="text-xl">🛑</span>
           <p className="font-black text-slate-800 text-xs">Técnicas ante la Urgencia</p>
         </div>
-        <p className="text-xs text-slate-500 mb-3">Cuando sientas unas ganas súbitas, <strong>no corras al baño</strong>. Detente y aplica:</p>
+        <p className="text-xs text-slate-600 mb-3">Cuando sientas unas ganas súbitas, <strong>no corras al baño</strong>. Detente y aplica:</p>
         <div className="space-y-2">
           {[
             { icon: '🧮', text: 'Distracción cognitiva: cuenta hacia atrás de 3 en 3 desde 100, o planifica tu agenda semanal.' },
@@ -291,7 +291,7 @@ export function RecommendationsScreen({ onClose }: Props) {
             <img src="/Logo-AEU-Corporativo.png" alt="AEU" className="h-8 flex-shrink-0 object-contain" />
             <div className="flex-1 min-w-0">
               <div className="font-black text-white text-sm leading-tight">Escuela de Salud Vesical</div>
-              <div className="text-teal-300 text-[10px] mt-0.5">Guías clínicas AEU 2026</div>
+              <div className="text-teal-300 text-sm mt-0.5">Guías clínicas AEU 2026</div>
             </div>
             <button onClick={onClose} className="p-2 bg-white/20 rounded-xl flex-shrink-0">
               <X size={18} className="text-white" />
@@ -304,7 +304,7 @@ export function RecommendationsScreen({ onClose }: Props) {
               <button
                 key={t.id}
                 onClick={() => setActive(i)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[44px] flex-shrink-0 transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2.5 rounded-t-xl text-xs font-bold whitespace-nowrap min-h-[48px] flex-shrink-0 transition-all ${
                   active === i
                     ? 'bg-white text-teal-700'
                     : 'text-white/80 hover:bg-white/10 hover:text-white'
@@ -332,7 +332,7 @@ export function RecommendationsScreen({ onClose }: Props) {
         {/* Alarm footer */}
         <div className="mt-5 bg-red-50 rounded-2xl p-3 border border-red-100 flex gap-2">
           <AlertTriangle size={14} className="text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-[10px] text-red-700 leading-relaxed">
+          <p className="text-sm text-red-700 leading-relaxed">
             <span className="font-black">Síntomas de alarma: </span>
             {ALARM.join(', ')}. Si aparece alguno, solicita consulta urológica prioritaria.
           </p>

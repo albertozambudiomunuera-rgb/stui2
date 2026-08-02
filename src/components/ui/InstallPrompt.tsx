@@ -114,7 +114,7 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
               <h2 className="text-xl font-bold text-slate-900 leading-snug">
                 Antes de empezar
               </h2>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm text-slate-600 mt-1">
                 Un paso importante para no perder tus datos
               </p>
             </div>
@@ -156,12 +156,12 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
 
           <button
             onClick={onContinue}
-            className="w-full py-3 mt-2 text-slate-500 text-[15px] underline"
+            className="w-full py-3 mt-2 text-slate-600 text-[15px] underline"
           >
             Continuar de todas formas
           </button>
 
-          <p className="text-xs text-slate-400 text-center mt-4 leading-relaxed">
+          <p className="text-xs text-slate-600 text-center mt-4 leading-relaxed">
             Si continúas sin instalar, exporta el informe en PDF en cuanto
             termines cada día para no perder la información.
           </p>

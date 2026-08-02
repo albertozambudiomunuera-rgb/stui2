@@ -36,7 +36,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
                   <button
                     key={oi}
                     onClick={() => actions.updateIPSS(qi, oi)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[42px] ${
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
                       data.ipss.q[qi] === oi
                         ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300 dark:hover:border-teal-600'
@@ -52,10 +52,10 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
 
         {showScore && (
           <div className="mt-6 text-center p-5 bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-900/10 rounded-2xl border border-teal-100 dark:border-teal-800">
-            <div className="font-mono text-5xl font-black text-teal-700 dark:text-teal-400">{sc}<span className="text-lg text-slate-400 font-normal">/35</span></div>
-            <div className="text-sm text-slate-500 mt-1">Puntuación IPSS total</div>
+            <div className="font-mono text-5xl font-black text-teal-700 dark:text-teal-400">{sc}<span className="text-lg text-slate-600 font-normal">/35</span></div>
+            <div className="text-sm text-slate-600 mt-1">Puntuación IPSS total</div>
             <div className={`text-lg font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
-            <div className="text-sm text-slate-500 mt-1">Predominio: <strong className="text-slate-700 dark:text-slate-300">{ipssPredom(data.ipss)}</strong></div>
+            <div className="text-sm text-slate-600 mt-1">Predominio: <strong className="text-slate-700 dark:text-slate-300">{ipssPredom(data.ipss)}</strong></div>
           </div>
         )}
       </div>
@@ -73,7 +73,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
               <button
                 key={i}
                 onClick={() => actions.updateIPSSQoL(i)}
-                className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[42px] ${
+                className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
                   data.ipss.qol === i
                     ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'

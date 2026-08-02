@@ -28,7 +28,7 @@ function ScrCard({ badge, question, value, onYes, onNo, accentClass }: ScrCardPr
           className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
             value === true
               ? 'bg-teal-700 border-teal-700 text-white shadow-md shadow-teal-700/20'
-              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-teal-300'
+              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-teal-300'
           }`}
         >
           Sí
@@ -38,7 +38,7 @@ function ScrCard({ badge, question, value, onYes, onNo, accentClass }: ScrCardPr
           className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
             value === false
               ? 'bg-slate-200 dark:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300'
+              : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
           }`}
         >
           No
@@ -50,7 +50,7 @@ function ScrCard({ badge, question, value, onYes, onNo, accentClass }: ScrCardPr
 
 function Badge({ active, label }: { active: boolean; label: string }) {
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full ${active ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-black px-2.5 py-1 rounded-full ${active ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'}`}>
       {active ? <Unlock size={11} /> : <Lock size={11} />}
       {label}
     </span>
@@ -123,7 +123,7 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
                 key={item.label}
                 className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full border ${
                   item.na
-                    ? 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                    ? 'bg-slate-50 dark:bg-slate-800 text-slate-600 border-slate-200 dark:border-slate-700'
                     : item.done
                     ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800'
                     : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-amber-100 dark:border-amber-800'

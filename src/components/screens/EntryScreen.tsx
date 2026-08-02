@@ -124,7 +124,7 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black text-white uppercase tracking-wider">Escuela de Salud Vesical</p>
-              <p className="text-[10px] text-teal-300 mt-0.5">6 bloques educativos · Guías AEU 2026</p>
+              <p className="text-sm text-teal-300 mt-0.5">6 bloques educativos · Guías AEU 2026</p>
             </div>
             <ChevronRight size={16} className="text-teal-300 flex-shrink-0" />
           </div>
@@ -138,7 +138,7 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
               <span className="text-xs font-black text-white uppercase tracking-wider">Mis notas para el médico</span>
             </div>
             {notesCount > 0 && (
-              <span className="text-[10px] bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">
+              <span className="text-sm bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">
                 {notesCount} guardada{notesCount > 1 ? 's' : ''}
               </span>
             )}

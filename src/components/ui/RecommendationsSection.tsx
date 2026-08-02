@@ -48,7 +48,7 @@ function KegeiInfographic() {
       {/* PREPARACIÓN */}
       <div className="rounded-xl overflow-hidden border border-white/20">
         <div className="bg-rose-900/50 px-3 py-1.5 flex items-center gap-1.5">
-          <span className="text-[10px] font-black text-rose-200 uppercase tracking-widest">Preparación</span>
+          <span className="text-sm font-black text-rose-200 uppercase tracking-widest">Preparación</span>
         </div>
         <div className="bg-white/5 px-3 py-2 space-y-1.5 text-teal-100 leading-relaxed">
           <p>Relaja el suelo pélvico <strong className="text-white">3-4 minutos</strong> antes de comenzar, con respiraciones profundas por la nariz y expulsión lenta por la boca.</p>
@@ -66,7 +66,7 @@ function KegeiInfographic() {
       {/* NORMAS */}
       <div className="rounded-xl overflow-hidden border border-white/20">
         <div className="bg-amber-900/40 px-3 py-1.5">
-          <span className="text-[10px] font-black text-amber-200 uppercase tracking-widest">Normas</span>
+          <span className="text-sm font-black text-amber-200 uppercase tracking-widest">Normas</span>
         </div>
         <div className="bg-white/5 px-3 py-2 grid grid-cols-2 gap-x-3 gap-y-2">
           {[
@@ -85,7 +85,7 @@ function KegeiInfographic() {
 
       {/* EXERCISES */}
       <div className="space-y-2">
-        <p className="text-[10px] font-black text-white uppercase tracking-widest">Ejercicios</p>
+        <p className="text-sm font-black text-white uppercase tracking-widest">Ejercicios</p>
         {exercises.map((ex) => (
           <div key={ex.n} className="flex gap-2 items-start bg-white/5 rounded-xl p-2.5 border border-white/10">
             {/* Number circle */}
@@ -103,7 +103,7 @@ function KegeiInfographic() {
 
       {/* Footer note */}
       <div className="bg-teal-800/60 rounded-xl px-3 py-2 text-center">
-        <p className="text-[10px] text-teal-200 leading-relaxed font-semibold">
+        <p className="text-sm text-teal-200 leading-relaxed font-semibold">
           Realiza estos ejercicios de forma continuada. Los cambios son visibles a partir de <strong className="text-white">6-8 semanas</strong>.
           Deben formar parte del tratamiento pautado por tu médico.
         </p>
@@ -209,7 +209,7 @@ export function RecommendationsSection() {
         <BookOpen size={15} className="text-teal-200 flex-shrink-0" />
         <div>
           <span className="text-xs font-black text-white uppercase tracking-wider">Escuela de Salud Vesical</span>
-          <p className="text-[10px] text-teal-300 mt-0.5">Guías AEU 2026 · Toca un bloque para leer</p>
+          <p className="text-sm text-teal-300 mt-0.5">Guías AEU 2026 · Toca un bloque para leer</p>
         </div>
       </div>
 
@@ -291,7 +291,7 @@ export function RecommendationsSection() {
       {/* Alarm disclaimer */}
       <div className="mx-3 mb-3 mt-1 bg-red-900/30 rounded-xl p-3 border border-red-400/30 flex gap-2">
         <AlertTriangle size={13} className="text-red-300 flex-shrink-0 mt-0.5" />
-        <p className="text-[10px] text-red-200 leading-relaxed">
+        <p className="text-sm text-red-200 leading-relaxed">
           <span className="font-bold">Síntomas de alarma: </span>
           {ALARM_SYMPTOMS.join(', ')}. Si aparece alguno, solicita consulta urológica prioritaria.
         </p>

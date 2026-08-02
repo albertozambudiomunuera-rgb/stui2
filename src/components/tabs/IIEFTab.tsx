@@ -34,7 +34,7 @@ export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
                   <button
                     key={oi}
                     onClick={() => actions.updateIIEF(qi, oi)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[42px] ${
+                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
                       data.iief.q[qi] === oi
                         ? 'bg-sky-600 border-sky-600 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-300'
@@ -50,8 +50,8 @@ export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
 
         {comp && (
           <div className="mt-6 text-center p-5 bg-sky-50 dark:bg-sky-900/20 rounded-2xl border border-sky-100 dark:border-sky-800">
-            <div className="font-mono text-5xl font-black text-sky-600">{sc}<span className="text-lg text-slate-400 font-normal">/25</span></div>
-            <div className="text-sm text-slate-500 mt-1">Puntuación IIEF-5</div>
+            <div className="font-mono text-5xl font-black text-sky-600">{sc}<span className="text-lg text-slate-600 font-normal">/25</span></div>
+            <div className="text-sm text-slate-600 mt-1">Puntuación IIEF-5</div>
             <div className={`text-lg font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
           </div>
         )}

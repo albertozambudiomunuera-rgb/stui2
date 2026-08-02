@@ -58,7 +58,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Nombre completo</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Nombre completo</label>
             <input
               type="text"
               value={p.name}
@@ -69,7 +69,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Edad</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Edad</label>
               <input
                 type="text"
                 value={p.age}
@@ -79,7 +79,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
               />
             </div>
             <div>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Sexo biológico</label>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Sexo biológico</label>
               <select
                 value={p.sex}
                 onChange={(e) => actions.updatePatient('sex', e.target.value)}
@@ -92,7 +92,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
             </div>
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Medicación vesical (opcional)</label>
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Medicación vesical (opcional)</label>
             <input
               type="text"
               value={p.med}
@@ -141,7 +141,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
           <Shield size={12} />
           {idbActive ? 'IndexedDB activo — RGPD compliant' : 'localStorage (limitado)'}
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
           Tus datos se guardan automáticamente. Haz una copia antes de cambiar de navegador o dispositivo.
         </p>
         <div className="grid grid-cols-3 gap-2">

@@ -50,7 +50,7 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
     >
       <div className="space-y-5">
         <div>
-          <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">
+          <p className="text-xs font-black uppercase tracking-wider text-slate-600 mb-3">
             ¿Qué has bebido? Toca para seleccionar
           </p>
           <div className="grid grid-cols-2 gap-2.5">
@@ -67,14 +67,14 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
               >
                 <span className="text-2xl">{d.e}</span>
                 <span className={`text-sm font-bold ${draft.drink === d.n ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>{d.n}</span>
-                <span className={`text-xs ${draft.drink === d.n ? 'text-sky-100' : 'text-slate-400'}`}>{d.ml} ml</span>
+                <span className={`text-xs ${draft.drink === d.n ? 'text-sky-100' : 'text-slate-600'}`}>{d.ml} ml</span>
               </button>
             ))}
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">O escribe otro tipo</label>
+          <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">O escribe otro tipo</label>
           <div className="grid grid-cols-[1fr_80px] gap-2">
             <input
               type="text"
@@ -95,7 +95,7 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
         </div>
 
         <div>
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1.5">Hora</label>
+          <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Hora</label>
           <input
             type="time"
             value={draft.time}

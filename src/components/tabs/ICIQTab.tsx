@@ -32,7 +32,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q1_OPTS.map((o) => (
                 <button key={o.v} onClick={() => actions.updateICIQ(0, o.v)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[42px] ${
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
                     data.iciq.q[0] === o.v ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'
                   }`}>{o.v} — {o.t}</button>
               ))}
@@ -47,7 +47,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q2_OPTS.map((o) => (
                 <button key={o.v} onClick={() => actions.updateICIQ(1, o.v)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[42px] ${
+                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
                     data.iciq.q[1] === o.v ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'
                   }`}>{o.v} — {o.t}</button>
               ))}
@@ -69,7 +69,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
               className="w-full"
             />
             <div className="text-center font-mono text-3xl font-black text-teal-700 dark:text-teal-400 mt-2">{data.iciq.vas}</div>
-            <div className="flex justify-between text-xs text-slate-400 mt-1">
+            <div className="flex justify-between text-xs text-slate-600 mt-1">
               <span>0 — Nada</span>
               <span>10 — Mucho</span>
             </div>
@@ -78,8 +78,8 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
 
         {comp && (
           <div className="mt-6 text-center p-5 bg-teal-50 dark:bg-teal-900/20 rounded-2xl border border-teal-100 dark:border-teal-800">
-            <div className="font-mono text-5xl font-black text-teal-700 dark:text-teal-400">{sc}<span className="text-lg text-slate-400 font-normal">/21</span></div>
-            <div className="text-sm text-slate-500 mt-1">Puntuación ICIQ-SF (preg. 1+2+3)</div>
+            <div className="font-mono text-5xl font-black text-teal-700 dark:text-teal-400">{sc}<span className="text-lg text-slate-600 font-normal">/21</span></div>
+            <div className="text-sm text-slate-600 mt-1">Puntuación ICIQ-SF (preg. 1+2+3)</div>
             <div className={`text-lg font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
           </div>
         )}
@@ -88,7 +88,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
       {comp && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
           <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm mb-2">🕐 Pregunta 4 — ¿Cuándo pierde orina?</h3>
-          <p className="text-xs text-slate-500 mb-3">Señale todo lo que le ocurra:</p>
+          <p className="text-xs text-slate-600 mb-3">Señale todo lo que le ocurra:</p>
           <div className="space-y-2">
             {ICIQ_WHEN.map((w, i) => {
               const sel = data.iciq.when.includes(i);
