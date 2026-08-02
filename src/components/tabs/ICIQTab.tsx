@@ -26,13 +26,13 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
         <div className="space-y-6">
           {/* Q1 */}
           <div className="pb-6 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
               <span className="text-teal-600 font-black">1.</span> ¿Con qué frecuencia pierde orina?
             </p>
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q1_OPTS.map((o) => (
                 <button key={o.v} onClick={() => actions.updateICIQ(0, o.v)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                  className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                     data.iciq.q[0] === o.v ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'
                   }`}>{o.v} — {o.t}</button>
               ))}
@@ -41,13 +41,13 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
 
           {/* Q2 */}
           <div className="pb-6 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
               <span className="text-teal-600 font-black">2.</span> ¿Cuánta orina cree que se le escapa habitualmente?
             </p>
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q2_OPTS.map((o) => (
                 <button key={o.v} onClick={() => actions.updateICIQ(1, o.v)}
-                  className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                  className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                     data.iciq.q[1] === o.v ? 'bg-teal-600 border-teal-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'
                   }`}>{o.v} — {o.t}</button>
               ))}
@@ -56,7 +56,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
 
           {/* Q3 VAS */}
           <div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
               <span className="text-teal-600 font-black">3.</span> ¿En qué medida estos escapes han afectado su vida diaria? (0 = nada, 10 = mucho)
             </p>
             <input
@@ -87,7 +87,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
 
       {comp && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
-          <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm mb-2">🕐 Pregunta 4 — ¿Cuándo pierde orina?</h3>
+          <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-2">🕐 Pregunta 4 — ¿Cuándo pierde orina?</h3>
           <p className="text-xs text-slate-600 mb-3">Señale todo lo que le ocurra:</p>
           <div className="space-y-2">
             {ICIQ_WHEN.map((w, i) => {
@@ -98,7 +98,7 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
                     sel ? 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-teal-100'
                   }`}>
                   <input type="checkbox" checked={sel} readOnly className="w-4 h-4 accent-teal-600 flex-shrink-0" />
-                  <span className="text-sm text-slate-600 dark:text-slate-300">{w}</span>
+                  <span className="text-base text-slate-600 dark:text-slate-300">{w}</span>
                 </button>
               );
             })}

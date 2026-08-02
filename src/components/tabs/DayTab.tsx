@@ -58,22 +58,32 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
         <h2 className="font-black text-slate-800 dark:text-slate-100 text-base mb-3 flex items-center gap-2">
           <span>📅</span> Día {di + 1}
         </h2>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Fecha', type: 'date', val: day.date, key: 'date' as const },
-            { label: '🌅 Levantarse', type: 'time', val: day.wake, key: 'wake' as const },
-            { label: '🌙 Acostarse', type: 'time', val: day.sleep, key: 'sleep' as const },
-          ].map(({ label, type, val, key }) => (
-            <div key={key}>
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">{label}</label>
-              <input
-                type={type}
-                value={val}
-                onChange={(e) => actions.updateDayMeta(di, key, e.target.value)}
-                className="w-full border-2 border-slate-100 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
-              />
-            </div>
-          ))}
+        <div className="space-y-2">
+          <div>
+            <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Fecha</label>
+            <input
+              type="date"
+              value={day.date}
+              onChange={(e) => actions.updateDayMeta(di, 'date', e.target.value)}
+              className="w-full border-2 border-slate-100 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-base font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { label: '🌅 Levantarse', val: day.wake, key: 'wake' as const },
+              { label: '🌙 Acostarse', val: day.sleep, key: 'sleep' as const },
+            ].map(({ label, val, key }) => (
+              <div key={key}>
+                <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">{label}</label>
+                <input
+                  type="time"
+                  value={val}
+                  onChange={(e) => actions.updateDayMeta(di, key, e.target.value)}
+                  className="w-full border-2 border-slate-100 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-base font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -146,19 +156,19 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
         </h3>
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Hora</label>
+            <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Hora</label>
             <input type="time" value={padTime} onChange={(e) => setPadTime(e.target.value)}
-              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 font-mono text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none" />
+              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 font-mono text-base font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Seco (g)</label>
+            <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Seco (g)</label>
             <input type="text" inputMode="decimal" value={padDry} placeholder="ej. 8" onChange={(e) => setPadDry(e.target.value)}
-              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
+              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-base font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
           </div>
           <div>
-            <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1">Mojado (g)</label>
+            <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Mojado (g)</label>
             <input type="text" inputMode="decimal" value={padWet} placeholder="ej. 23" onChange={(e) => setPadWet(e.target.value)}
-              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
+              className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-base font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600" />
           </div>
         </div>
         <button onClick={handleAddPad}

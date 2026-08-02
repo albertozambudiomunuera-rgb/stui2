@@ -32,7 +32,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
         <div className="space-y-6">
           {OAB_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-6 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
                 <span className="text-slate-600 dark:text-slate-400 font-black">{qi + 1}.</span> {q.t}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -40,7 +40,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
                   <button
                     key={oi}
                     onClick={() => actions.updateOAB(qi, oi)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                    className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                       data.oab.q[qi] === oi
                         ? 'bg-slate-700 dark:bg-slate-600 border-slate-700 dark:border-slate-600 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400'
@@ -71,7 +71,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
             <div className="space-y-4">
               {OAB_QOL_QUESTIONS.map((q, qi) => (
                 <div key={qi}>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 leading-relaxed">{q}</p>
+                  <p className="text-base font-medium text-slate-700 dark:text-slate-300 mb-2 leading-relaxed">{q}</p>
                   <div className="flex gap-2 flex-wrap">
                     {[0, 1, 2, 3, 4, 5].map((v) => (
                       <button key={v} onClick={() => actions.updateOABQoL(qi, v)}
@@ -90,7 +90,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
             <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm mb-2">🌐 Impacto en la vida (6b)</h3>
-            <p className="text-xs text-slate-600 mb-3">¿Cómo han cambiado estos síntomas su vida? Marque todo lo que corresponda.</p>
+            <p className="text-base text-slate-600 mb-3">¿Cómo han cambiado estos síntomas su vida? Marque todo lo que corresponda.</p>
             <div className="space-y-2">
               {OAB_IMPACT_ITEMS.map((item, i) => {
                 const sel = data.oab.impact.includes(i);
@@ -100,7 +100,7 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
                       sel ? 'bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-slate-200'
                     }`}>
                     <input type="checkbox" checked={sel} readOnly className="w-4 h-4 accent-slate-600 flex-shrink-0" />
-                    <span className="text-sm text-slate-600 dark:text-slate-300">{item}</span>
+                    <span className="text-base text-slate-600 dark:text-slate-300">{item}</span>
                   </button>
                 );
               })}

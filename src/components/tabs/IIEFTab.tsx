@@ -26,7 +26,7 @@ export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
         <div className="space-y-6">
           {IIEF_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-6 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
                 <span className="text-sky-600 font-black">{qi + 1}.</span> {q.t}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -34,7 +34,7 @@ export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
                   <button
                     key={oi}
                     onClick={() => actions.updateIIEF(qi, oi)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                    className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                       data.iief.q[qi] === oi
                         ? 'bg-sky-600 border-sky-600 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-300'

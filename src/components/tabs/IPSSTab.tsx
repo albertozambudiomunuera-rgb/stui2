@@ -28,7 +28,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
         <div className="space-y-6">
           {IPSS_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-6 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed">
                 <span className="text-teal-600 dark:text-teal-400 font-black">{qi + 1}.</span> {q.t}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -36,7 +36,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
                   <button
                     key={oi}
                     onClick={() => actions.updateIPSS(qi, oi)}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                    className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                       data.ipss.q[qi] === oi
                         ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300 dark:hover:border-teal-600'
@@ -65,7 +65,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
           <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm mb-3 flex items-center gap-2">
             <span>😊</span> Calidad de Vida
           </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+          <p className="text-base text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
             ¿Cómo se sentiría si tuviera que pasar el resto de su vida con los síntomas prostáticos tal y como los siente ahora?
           </p>
           <div className="flex flex-wrap gap-2">
@@ -73,7 +73,7 @@ export function IPSSTab({ data, actions, onNext }: IPSSTabProps) {
               <button
                 key={i}
                 onClick={() => actions.updateIPSSQoL(i)}
-                className={`px-3 py-2.5 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${
+                className={`px-3 py-2.5 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${
                   data.ipss.qol === i
                     ? 'bg-teal-700 border-teal-700 text-white shadow-sm'
                     : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-300'

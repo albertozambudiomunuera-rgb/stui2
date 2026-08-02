@@ -124,7 +124,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
                 <select
                   value={draft.leak}
                   onChange={(e) => setDraft((d) => ({ ...d, leak: e.target.value as MiccionDraft['leak'] }))}
-                  className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
+                  className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-base text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
                 >
                   <option value="">— No —</option>
                   <option value="urgency">Urgencia</option>
@@ -136,7 +136,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
                 <select
                   value={draft.pad}
                   onChange={(e) => setDraft((d) => ({ ...d, pad: e.target.value as MiccionDraft['pad'] }))}
-                  className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
+                  className="w-full border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-base text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
                 >
                   <option value="">— No —</option>
                   <option value="ropa interior">Ropa interior</option>

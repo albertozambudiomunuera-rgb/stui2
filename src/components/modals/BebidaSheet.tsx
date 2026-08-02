@@ -81,7 +81,7 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
               value={draft.drink}
               placeholder="tipo de bebida..."
               onChange={(e) => setDraft((d) => ({ ...d, drink: e.target.value }))}
-              className="border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-sky-400 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
+              className="border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-base text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-sky-400 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
             />
             <input
               type="text"
@@ -89,7 +89,7 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
               value={draft.drinkAmt}
               placeholder="ml"
               onChange={(e) => setDraft((d) => ({ ...d, drinkAmt: e.target.value }))}
-              className="border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-sky-400 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
+              className="border-2 border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-base font-bold text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-sky-400 focus:outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600"
             />
           </div>
         </div>

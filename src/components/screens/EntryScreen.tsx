@@ -179,6 +179,14 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
           © 2026 Dr. Alberto Zambudio · Oficina de Salud Digital AEU · Todos los derechos reservados.
         </p>
       </footer>
+
+      {/* TEMPORAL: herramienta de investigación. Retirar al terminar la recogida de datos. */}
+      <a
+        href="/persistence-probe.html"
+        className="block text-center text-sm text-teal-200 underline mt-8 mb-4"
+      >
+        Sonda de persistencia (uso interno)
+      </a>
     </div>
   );
 }

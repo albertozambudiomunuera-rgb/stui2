@@ -21,7 +21,7 @@ function ScrCard({ badge, question, value, onYes, onNo, accentClass }: ScrCardPr
   return (
     <div className={`bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border-l-4 border border-slate-100 dark:border-slate-800 ${accentClass}`}>
       <div className="mb-3">{badge}</div>
-      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
+      <p className="text-base font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
       <div className="flex gap-3">
         <button
           onClick={onYes}

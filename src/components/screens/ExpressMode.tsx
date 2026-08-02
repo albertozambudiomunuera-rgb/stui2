@@ -34,10 +34,6 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
     return () => clearInterval(timer);
   }, []);
 
-  const min = Math.floor(elapsed / 60);
-  const sec = elapsed % 60;
-  const timeStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-
   const sex = data.patient.sex;
 
   const tabs: ExpressTab[] = sex === 'M'
@@ -71,8 +67,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
             />
             <span className="text-white font-black text-base">Modo Sala de Espera</span>
             <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-lg">EXPRÉS</span>
-            <span className="ml-auto font-mono text-sm font-bold text-white/90">{timeStr}</span>
-            <button onClick={onExit} className="p-1.5 bg-white/20 rounded-lg">
+            <button onClick={onExit} className="ml-auto p-1.5 bg-white/20 rounded-lg">
               <X size={16} className="text-white" />
             </button>
           </div>
@@ -135,7 +130,7 @@ function ExpressScreening({ data, actions, onNext }: { data: AppData; actions: R
         <span className={`inline-block text-xs font-black px-2.5 py-1 rounded-full mb-3 ${sex ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
           {sex ? `✅ Sexo: ${sex === 'M' ? 'Varón' : 'Mujer'}` : 'Sexo biológico'}
         </span>
-        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">¿Cuál es el sexo biológico del paciente?</p>
+        <p className="text-base font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">¿Cuál es el sexo biológico del paciente?</p>
         <div className="flex gap-3">
           <button onClick={() => handleSexSelect('M')}
             className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${sex === 'M' ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
@@ -198,7 +193,7 @@ function ScrCard({ question, label, value, onYes, onNo }: { question: string; la
       <span className={`inline-block text-xs font-black px-2.5 py-1 rounded-full mb-3 ${value === true ? 'bg-emerald-100 text-emerald-700' : value === false ? 'bg-slate-100 text-slate-600' : 'bg-blue-50 text-blue-700'}`}>
         {value === true ? `✅ ${label} activado` : value === false ? `— ${label} no aplica` : label}
       </span>
-      <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
+      <p className="text-base font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
       <div className="flex gap-3">
         <button onClick={onYes} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === true ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>Sí</button>
         <button onClick={onNo} className={`flex-1 min-h-[48px] rounded-xl font-black text-base border-2 transition-all ${value === false ? 'bg-slate-200 dark:bg-slate-700 border-slate-300 text-slate-600' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-slate-300'}`}>No</button>
@@ -219,11 +214,11 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
         <div className="space-y-5">
           {IPSS_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="text-teal-600 font-black">{qi + 1}. </span>{q.t}</p>
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="text-teal-600 font-black">{qi + 1}. </span>{q.t}</p>
               <div className="flex flex-wrap gap-2">
                 {q.opts.map((o, oi) => (
                   <button key={oi} onClick={() => actions.updateIPSS(qi, oi)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.ipss.q[qi] === oi ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                    className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${data.ipss.q[qi] === oi ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                     {oi} — {o}
                   </button>
                 ))}
@@ -231,11 +226,11 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
             </div>
           ))}
           <div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">8. </span>¿Cómo se sentiría si tuviera que vivir con estos síntomas el resto de su vida?</p>
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">8. </span>¿Cómo se sentiría si tuviera que vivir con estos síntomas el resto de su vida?</p>
             <div className="flex flex-wrap gap-2">
               {IPSS_QOL.map((o, i) => (
                 <button key={i} onClick={() => actions.updateIPSSQoL(i)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.ipss.qol === i ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${data.ipss.qol === i ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {i} — {o}
                 </button>
               ))}
@@ -270,13 +265,13 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
         <div className="space-y-5">
           {IIEF_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="text-sky-600 font-black">{qi + 1}. </span>{q.t}</p>
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="text-sky-600 font-black">{qi + 1}. </span>{q.t}</p>
               <div className="flex flex-wrap gap-2">
                 {q.opts.map((o, oi) => {
                   const isSel = data.iief.q[qi] !== null && data.iief.q[qi] === oi;
                   return (
                     <button key={oi} onClick={() => actions.updateIIEF(qi, oi)}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${isSel ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-sky-300'}`}>
+                      className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${isSel ? 'bg-sky-600 border-sky-600 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-sky-300'}`}>
                       {oi} — {o}
                     </button>
                   );
@@ -311,11 +306,11 @@ function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnT
         <div className="space-y-5">
           {OAB_QUESTIONS.map((q, qi) => (
             <div key={qi} className="pb-5 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="font-black" style={{ color: RED }}>{qi + 1}. </span>{q.t}</p>
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3 leading-relaxed"><span className="font-black" style={{ color: RED }}>{qi + 1}. </span>{q.t}</p>
               <div className="flex flex-wrap gap-2">
                 {q.opts.map((o, oi) => (
                   <button key={oi} onClick={() => actions.updateOAB(qi, oi)}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${data.oab.q[qi] === oi ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
+                    className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${data.oab.q[qi] === oi ? 'text-white border-transparent' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-blue-300'}`}
                     style={data.oab.q[qi] === oi ? { backgroundColor: RED } : {}}>
                     {oi} — {o}
                   </button>
@@ -346,29 +341,29 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
         <p className="text-xs text-slate-600 mb-5">3 preguntas sobre pérdidas de orina.</p>
         <div className="space-y-5">
           <div className="pb-5 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">1. </span>¿Con qué frecuencia pierde orina?</p>
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">1. </span>¿Con qué frecuencia pierde orina?</p>
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q1_OPTS.map(({ v, t }) => (
                 <button key={v} onClick={() => actions.updateICIQ(0, v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${iciq.q[0] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${iciq.q[0] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {v} — {t}
                 </button>
               ))}
             </div>
           </div>
           <div className="pb-5 border-b border-slate-100 dark:border-slate-800">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">2. </span>¿Qué cantidad de orina pierde habitualmente?</p>
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">2. </span>¿Qué cantidad de orina pierde habitualmente?</p>
             <div className="flex flex-wrap gap-2">
               {ICIQ_Q2_OPTS.map(({ v, t }) => (
                 <button key={v} onClick={() => actions.updateICIQ(1, v)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all min-h-[48px] ${iciq.q[1] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
+                  className={`px-3 py-2 rounded-xl text-base font-bold border-2 transition-all min-h-[48px] ${iciq.q[1] === v ? 'bg-teal-700 border-teal-700 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:border-teal-300'}`}>
                   {v} — {t}
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">3. </span>¿En qué medida afectan estas pérdidas a su vida diaria? <span className="text-slate-600">(0=nada · 10=mucho)</span></p>
+            <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-3"><span className="text-teal-600 font-black">3. </span>¿En qué medida afectan estas pérdidas a su vida diaria? <span className="text-slate-600">(0=nada · 10=mucho)</span></p>
             <div className="flex flex-wrap gap-2">
               {[0,1,2,3,4,5,6,7,8,9,10].map((v) => (
                 <button key={v} onClick={() => actions.updateICIQVas(v)}
@@ -510,7 +505,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       <div className="rounded-2xl p-5 text-white" style={{ background: `linear-gradient(135deg, ${RED}, #2030a0)` }}>
         <div className="text-lg font-black">{p.name || 'Paciente'}</div>
         <div className="text-sm text-white/80 mt-1">
-          {[p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : null, `${min}:${sec < 10 ? '0' : ''}${sec} min`].filter(Boolean).join(' · ')}
+          {p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : ''}
         </div>
       </div>
 
