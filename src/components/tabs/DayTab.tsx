@@ -4,7 +4,7 @@ import type { AppData, DiaryEntry } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
 import { MiccionSheet } from '../modals/MiccionSheet';
 import { BebidaSheet } from '../modals/BebidaSheet';
-import { isNight, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS, nowTime, padSeverity } from '../../lib/clinical';
+import { isNight, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS, nowTime, parseDecimal } from '../../lib/clinical';
 
 interface DayTabProps {
   data: AppData;
@@ -26,8 +26,8 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
   const avgV = svoids.length ? Math.round(tvoid / svoids.length) : 0;
   const tdrink = day.entries.filter((e) => e.drinkAmt).reduce((s, e) => s + (e.drinkAmt ?? 0), 0);
   const sevUrg = day.entries.filter((e) => (e.urgency ?? 0) >= 3).length;
-  const diurnal = day.wake && day.sleep ? svoids.filter((e) => !isNight(e.time, day.wake, day.sleep)).length : svoids.length;
-  const nocturnal = day.wake && day.sleep ? svoids.filter((e) => isNight(e.time, day.wake, day.sleep)).length : 0;
+  const diurnal = day.wake && day.sleep ? svoids.filter((e) => isNight(e.time, day.wake, day.sleep) === false).length : svoids.length;
+  const nocturnal = day.wake && day.sleep ? svoids.filter((e) => isNight(e.time, day.wake, day.sleep) === true).length : 0;
   const sorted = [...day.entries].sort((a, b) => a.time.localeCompare(b.time));
 
   const handleSaveEntry = (di2: number, entry: Omit<DiaryEntry, 'id'>) => {
@@ -37,10 +37,10 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
   };
 
   const handleAddPad = () => {
-    const dry = parseFloat(padDry);
-    const wet = parseFloat(padWet);
-    if (isNaN(dry) || dry < 0) { alert('Indica el peso seco'); return; }
-    if (isNaN(wet) || wet < dry) { alert('El peso mojado debe ser mayor que el seco'); return; }
+    const dry = parseDecimal(padDry);
+    const wet = parseDecimal(padWet);
+    if (dry === null || dry < 0) { alert('Indica el peso seco (usa , o . para los decimales)'); return; }
+    if (wet === null || wet < dry) { alert('El peso mojado debe ser un número válido mayor que el seco (usa , o . para los decimales)'); return; }
     actions.addPad(di, { time: padTime || nowTime(), dry, wet, leak: +(wet - dry).toFixed(1) });
     setPadDry('');
     setPadWet('');
@@ -49,7 +49,6 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
 
   const pads = day.pads ?? [];
   const padTotal = +(pads.reduce((s, e) => s + e.leak, 0)).toFixed(1);
-  const padSev = padSeverity(padTotal);
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
@@ -84,6 +83,26 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
               </div>
             ))}
           </div>
+          <div>
+            <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">😴 ¿A qué hora calcula que se quedó dormido? (opcional)</label>
+            <input
+              type="time"
+              value={day.sleepOnset}
+              onChange={(e) => actions.updateDayMeta(di, 'sleepOnset', e.target.value)}
+              className="w-full border-2 border-slate-100 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-base font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none"
+            />
+            <p className="text-xs text-slate-500 mt-1">Se usa para contar la nocturia (ICS): las micciones antes de conciliar el sueño no cuentan como nocturia.</p>
+          </div>
+          <label className="flex items-center gap-3 p-3 bg-teal-50 dark:bg-teal-900/20 rounded-xl cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={day.dayComplete}
+              onChange={(e) => actions.updateDayComplete(di, e.target.checked)}
+              className="w-5 h-5 accent-teal-600 rounded flex-shrink-0"
+            />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">He terminado de registrar este día</span>
+          </label>
+          <p className="text-xs text-slate-500 -mt-1">Solo los días marcados como terminados (con horario informado) cuentan en las medias del diario.</p>
         </div>
       </div>
 
@@ -154,6 +173,18 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
         <h3 className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-3">
           🩲 Pad Test — Absorbentes del día {di + 1}
         </h3>
+        <label className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl cursor-pointer select-none mb-3 border border-slate-200 dark:border-slate-700">
+          <input
+            type="checkbox"
+            checked={day.padTestStatus === 'registrado'}
+            onChange={(e) => actions.updateDayPadStatus(di, e.target.checked ? 'registrado' : 'sin-registrar')}
+            className="w-5 h-5 accent-slate-600 rounded flex-shrink-0"
+          />
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">He completado el registro de absorbentes de este día</span>
+        </label>
+        {day.padTestStatus === 'registrado' && pads.length === 0 && (
+          <p className="text-xs text-slate-500 -mt-2 mb-3">Día seco: se contará como 0 g en la media, no se excluirá.</p>
+        )}
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div>
             <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Hora</label>
@@ -192,8 +223,8 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
                 </div>
               </div>
             ))}
-            <div className={`text-right text-sm font-black mt-1 ${padSev.colorClass}`}>
-              Total: {padTotal}g — {padSev.text}
+            <div className="text-right text-sm font-black mt-1 text-slate-600 dark:text-slate-400">
+              Total del día: {padTotal}g
             </div>
           </div>
         )}

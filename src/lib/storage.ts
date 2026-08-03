@@ -13,6 +13,7 @@ import type { AppData } from '../types';
 import { openDB, DATA_STORE, DATA_KEY } from './idb';
 import { getActiveKey } from './keyManager';
 import { encrypt, decrypt, isEncryptedPayload } from './crypto';
+import { ensureEntryClientKeys } from './clinical';
 
 const LS_KEY = 'stuiv1';
 const DISCLAIMER_KEY = 'stuiv1_d';
@@ -104,17 +105,20 @@ export async function checkIDBAvailable(): Promise<boolean> {
 
 export function emptyData(): AppData {
   return {
-    patient: { name: '', age: '', sex: '', med: '' },
+    patient: { name: '', age: '', sex: '', med: '', weight: '' },
     screening: { iief: null, oab: null, iciq: null },
     days: [
-      { date: '', wake: '', sleep: '', entries: [], pads: [] },
-      { date: '', wake: '', sleep: '', entries: [], pads: [] },
-      { date: '', wake: '', sleep: '', entries: [], pads: [] },
+      { date: '', wake: '', sleep: '', sleepOnset: '', padTestStatus: 'sin-registrar', dayComplete: false, entries: [], pads: [] },
+      { date: '', wake: '', sleep: '', sleepOnset: '', padTestStatus: 'sin-registrar', dayComplete: false, entries: [], pads: [] },
+      { date: '', wake: '', sleep: '', sleepOnset: '', padTestStatus: 'sin-registrar', dayComplete: false, entries: [], pads: [] },
     ],
     ipss: { q: [null, null, null, null, null, null, null], qol: null },
     iief: { q: [null, null, null, null, null] },
     oab: { q: [null, null, null, null, null], qol: [null, null, null, null, null], impact: [] },
-    iciq: { q: [null, null, null], vas: 5, when: [] },
+    // q tiene 2 ítems: frecuencia (Q1) y cantidad (Q2). vas empieza en null
+    // (no respondido), no en un valor intermedio: un valor por defecto no
+    // nulo en el slider de afectación se contaría como respuesta real.
+    iciq: { q: [null, null], vas: null, when: [] },
     notes: [],
   };
 }
@@ -142,7 +146,10 @@ export async function loadDataAsync(): Promise<AppData> {
     try {
       const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (typeof parsed.notes === 'string') parsed.notes = [];
-      return deepMerge(emptyData(), parsed);
+      // Cambio 7 (ronda 3 · punto 3.7): las entradas guardadas antes de este
+      // cambio no tienen clientKey — se les asigna una al cargar, sin perder
+      // ningún dato existente.
+      return ensureEntryClientKeys(deepMerge(emptyData(), parsed));
     } catch { /* ignore */ }
   }
   return emptyData();
@@ -201,5 +208,5 @@ export async function importBackup(file: File): Promise<AppData> {
   const backup = JSON.parse(text);
   if (!backup.data && !backup.patient) throw new Error('Archivo no válido');
   // Los datos importados se re-cifrarán al guardarse mediante idbSave
-  return deepMerge(emptyData(), backup.data ?? backup);
+  return ensureEntryClientKeys(deepMerge(emptyData(), backup.data ?? backup));
 }

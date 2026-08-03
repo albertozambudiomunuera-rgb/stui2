@@ -67,7 +67,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
               className="w-full border-2 border-teal-100 dark:border-slate-700 rounded-xl px-4 py-3 text-base text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none transition-colors placeholder:text-slate-300 dark:placeholder:text-slate-600"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Edad</label>
               <input
@@ -90,7 +90,19 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
                 <option value="F">Mujer</option>
               </select>
             </div>
+            <div>
+              <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Peso (kg, opcional)</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={p.weight}
+                placeholder="70"
+                onChange={(e) => actions.updatePatient('weight', e.target.value)}
+                className="w-full border-2 border-teal-100 dark:border-slate-700 rounded-xl px-4 py-3 text-base text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-800 focus:border-teal-500 focus:outline-none transition-colors placeholder:text-slate-300 dark:placeholder:text-slate-600"
+              />
+            </div>
           </div>
+          <p className="text-xs text-slate-500 -mt-2">El peso se usa para expresar el volumen del día registrado en ml/kg (referencia: 40 ml/kg). Sin peso, ese cálculo no es posible.</p>
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-1.5">Medicación vesical (opcional)</label>
             <input

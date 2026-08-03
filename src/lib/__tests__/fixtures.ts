@@ -13,7 +13,7 @@ import type {
 } from '../../types';
 
 export function emptyDay(over: Partial<DayData> = {}): DayData {
-  return { date: '', wake: '', sleep: '', entries: [], pads: [], ...over };
+  return { date: '', wake: '', sleep: '', sleepOnset: '', padTestStatus: 'sin-registrar', dayComplete: false, entries: [], pads: [], ...over };
 }
 
 let _n = 0;
@@ -21,6 +21,7 @@ export function entry(over: Partial<DiaryEntry> = {}): DiaryEntry {
   _n += 1;
   return {
     id: `e${_n}`,
+    clientKey: `ck${_n}`,
     time: '12:00',
     void: null,
     urgency: null,
@@ -52,13 +53,13 @@ export function oab(q: (number | null)[]): OABData {
   return { q, qol: [null, null, null, null, null], impact: [] };
 }
 
-export function iciq(q: (number | null)[], vas = 0, when: number[] = []): ICIQData {
+export function iciq(q: (number | null)[], vas: number | null = null, when: number[] = []): ICIQData {
   return { q, vas, when };
 }
 
 export function appData(over: Partial<AppData> = {}): AppData {
   return {
-    patient: { name: '', age: '', sex: '', med: '' },
+    patient: { name: '', age: '', sex: '', med: '', weight: '' },
     screening: { iief: null, oab: null, iciq: null },
     days: [],
     ipss: ipss([null, null, null, null, null, null, null]),

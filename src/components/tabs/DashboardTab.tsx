@@ -1,18 +1,31 @@
 import { useState } from 'react';
 import { Printer, Copy, CheckCircle, Trash2, PlusCircle } from 'lucide-react';
-import type { AppData } from '../../types';
+import type { AppData, DiaryStats } from '../../types';
 import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
-  iiefScore, iiefSeverity,
-  oabScore, iciqScore, iciqSeverity,
-  computeStats, generateClinicalNote, padSeverity,
+  iiefScore, iiefComplete, iiefSeverity,
+  oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER, iciqScore, iciqComplete, iciqSeverity,
+  computeStats, generateClinicalNote, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
+  CLINICAL_RULES,
 } from '../../lib/clinical';
+
+// Cambio 2: "Nocturia" es una ventana horaria, no un dato único. Si hay hora
+// de conciliación del sueño (sleepOnset) se usa el recuento ICS; si no,
+// se muestra la cuenta sobre la ventana declarada (acostarse→despertar),
+// etiquetada como tal para no hacerla pasar por nocturia ICS.
+function nocturiaLabel(s: DiaryStats): string {
+  if (s.nocturiaCount !== null) return `Nocturia (ICS): ${s.nocturiaCount}/noche`;
+  if (s.avgN !== null) return `Micciones en la ventana nocturna declarada: ${s.avgN}/noche`;
+  return 'Nocturia: sin datos';
+}
 
 interface DashboardTabProps {
   data: AppData;
   onAddNote?: (text: string) => void;
   onDeleteNote?: (id: string) => void;
 }
+
+const naText = 'sin datos';
 
 export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProps) {
   const [copied, setCopied] = useState(false);
@@ -40,49 +53,46 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   const oabVal = oabScore(data);
   const iciqVal = iciqScore(data);
   const iciqSev = iciqSeverity(iciqVal);
-  const allPads = data.days.flatMap((d) => d.pads ?? []);
-  const padTotal = +(allPads.reduce((s2, e) => s2 + e.leak, 0)).toFixed(1);
-  const padSev = padSeverity(padTotal);
+  const padStats = padDayStats(data);
 
   const daysCount = data.days.filter((d) => d.entries.length > 0).length;
-  const hasIIEF = data.screening.iief && data.iief.q.every((v) => v !== null);
-  const hasOAB = data.screening.oab && data.oab.q.every((v) => v !== null);
-  const hasICIQ = data.screening.iciq && data.iciq.q[0] !== null;
+  const hasIIEF = !!data.screening.iief && iiefComplete(data.iief);
+  const hasOAB = !!data.screening.oab && oabComplete(data);
+  const hasICIQ = !!data.screening.iciq && iciqComplete(data);
 
-  const suggestions: string[] = [];
+  const findings: string[] = [];
   if (hasIPSS) {
-    if (ipssVal >= 20) suggestions.push(`IPSS grave (${ipssVal}/35): sintomatología obstructiva-irritativa grave. Predominio ${ipssPredom(data.ipss)}.`);
-    else if (ipssVal >= 8) suggestions.push(`IPSS moderado (${ipssVal}/35): sintomatología de impacto clínico significativo. Predominio ${ipssPredom(data.ipss)}.`);
-    else suggestions.push(`IPSS leve (${ipssVal}/35): sintomatología leve. Predominio ${ipssPredom(data.ipss)}.`);
-    if (data.ipss.qol !== null && data.ipss.qol >= 4) suggestions.push(`Calidad de vida afectada (QoL ${data.ipss.qol}/6: ${IPSS_QOL[data.ipss.qol]}).`);
+    if (ipssVal >= 20) findings.push(`IPSS grave (${ipssVal}/35): sintomatología obstructiva-irritativa grave. Predominio: ${ipssPredom(data.ipss)}.`);
+    else if (ipssVal >= 8) findings.push(`IPSS moderado (${ipssVal}/35): sintomatología de impacto clínico significativo. Predominio: ${ipssPredom(data.ipss)}.`);
+    else findings.push(`IPSS leve (${ipssVal}/35): sintomatología leve. Predominio: ${ipssPredom(data.ipss)}.`);
+    findings.push('El predominio de síntomas es una regla interna de esta herramienta: no equivale a diagnóstico de obstrucción.');
+    if (data.ipss.qol !== null && data.ipss.qol >= 4) findings.push(`Calidad de vida afectada (QoL ${data.ipss.qol}/6: ${IPSS_QOL[data.ipss.qol]}).`);
   }
   if (s) {
-    if (s.npI !== null && s.npI > 33) suggestions.push(`Poliuria nocturna confirmada (IPN ${s.npI}% > 33%).`);
-    if (s.avgN >= 2) suggestions.push(`Nocturia significativa según criterios ICS (${s.avgN} episodios/noche ≥ 2).`);
-    if (s.maxV > 0 && s.maxV < 150) suggestions.push(`Capacidad vesical funcional muy reducida (CVF ${s.maxV} ml).`);
-    else if (s.maxV >= 150 && s.maxV < 200) suggestions.push(`Capacidad vesical funcional reducida (CVF ${s.maxV} ml).`);
-    if (s.ul > 0) suggestions.push(`Incontinencia de urgencia presente (${s.ul} episodios registrados).`);
-    if (s.el > 0) suggestions.push(`Incontinencia de esfuerzo presente (${s.el} episodios registrados).`);
-    if (s.poly) suggestions.push('Posible poliuria (volumen total >2800 ml/24h).');
+    findings.push(nocturiaLabel(s));
+    if (s.npI !== null) findings.push(`Proporción de volumen nocturno: ${s.npI} %.`);
+    if (s.maxV !== null && s.maxV > 0 && s.maxV < 150) findings.push(`Capacidad vesical funcional muy reducida (CVF ${s.maxV} ml).`);
+    else if (s.maxV !== null && s.maxV >= 150 && s.maxV < 200) findings.push(`Capacidad vesical funcional reducida (CVF ${s.maxV} ml).`);
+    if (s.ul > 0) findings.push(`Se registraron ${s.ul} episodio${s.ul > 1 ? 's' : ''} de escape asociados a urgencia.`);
+    if (s.el > 0) findings.push(`Se registraron ${s.el} episodio${s.el > 1 ? 's' : ''} de escape asociados a esfuerzo.`);
+    if (s.avgDV !== null) {
+      findings.push(s.polyMlPerKg !== null
+        ? `Volumen del día registrado: ${s.avgDV} ml = ${s.polyMlPerKg} ml/kg por día registrado.`
+        : `Volumen del día registrado: ${s.avgDV} ml (ml/kg no calculable, falta el peso).`);
+    }
   }
   if (hasIIEF) {
-    if (iiefVal <= 7) suggestions.push(`Disfunción eréctil severa (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 11) suggestions.push(`Disfunción eréctil moderada (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 16) suggestions.push(`Disfunción eréctil leve-moderada (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 21) suggestions.push(`Disfunción eréctil leve (IIEF-5 ${iiefVal}/25).`);
-    else suggestions.push(`Función eréctil conservada (IIEF-5 ${iiefVal}/25).`);
+    findings.push(`IIEF-5 ${iiefVal}/25: ${iiefSev.text}.`);
   }
   if (hasOAB) {
-    if (data.oab.q[0] === 0) suggestions.push('Sin urgencia miccional (AUA OAB Assessment, pregunta 1 = 0).');
-    else if (oabVal > 18) suggestions.push(`Síntomas de vejiga hiperactiva graves (AUA OAB Assessment ${oabVal}/25).`);
-    else if (oabVal > 10) suggestions.push(`Síntomas de vejiga hiperactiva moderados (AUA OAB Assessment ${oabVal}/25).`);
-    else suggestions.push(`Síntomas de vejiga hiperactiva leves (AUA OAB Assessment ${oabVal}/25).`);
+    if (oabNoUrgency(data)) findings.push('Sin urgencia miccional (AUA OAB Assessment, pregunta 1 = 0).');
+    else findings.push(`AUA OAB Assessment: ${oabVal}/25 (puntuación sintomática, sin bandas de gravedad publicadas).`);
   }
   if (hasICIQ) {
-    if (iciqVal === 0) suggestions.push('Sin incontinencia urinaria (ICIQ-SF 0/21).');
-    else suggestions.push(`${iciqSev.text} (ICIQ-SF ${iciqVal}/21).`);
+    if (iciqVal === 0) findings.push('Sin incontinencia urinaria (ICIQ-SF 0/21).');
+    else findings.push(`${iciqSev.text} (ICIQ-SF ${iciqVal}/21).`);
   }
-  if (!suggestions.length) suggestions.push('Completa el IPSS y los cuestionarios para ver la interpretación de los resultados.');
+  if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
   const note = generateClinicalNote(data);
 
@@ -97,12 +107,12 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   const handlePrint = () => {
     const fecha = new Date().toLocaleDateString('es-ES');
     const scoreRows = [
-      hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : '',
-      s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} días</td><td>CVF ${s.maxV}ml · IPN ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>Nocturia ${s.avgN}/noche · IUU ${s.ul} ep.</td></tr>` : '',
-      hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : '',
-      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabVal === 0 ? 'Sin síntomas' : oabVal <= 10 ? 'Leve' : oabVal <= 18 ? 'Moderado' : 'Grave'}</td><td></td></tr>` : '',
-      allPads.length > 0 ? `<tr><td><b>Pad Test</b></td><td>${padTotal}g</td><td>${padSev.text}</td><td>${allPads.length} absorbente(s)</td></tr>` : '',
-      hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : '',
+      hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : `<tr><td><b>IPSS</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>`,
+      s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} de ${s.totalDays} días</td><td>CVF ${s.maxV !== null ? s.maxV + 'ml' : naText} · Vol. nocturno ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>${nocturiaLabel(s)} · IUU ${s.ul} ep.</td></tr>` : '',
+      hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : data.screening.iief ? `<tr><td><b>IIEF-5</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
+      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabNoUrgency(data) ? 'Sin urgencia miccional' : '—'}</td><td>${OAB_DISCLAIMER}</td></tr>` : data.screening.oab ? `<tr><td><b>AUA OAB Assessment</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
+      padStats.avgPerDay !== null ? `<tr><td><b>Pad Test</b></td><td>${padStats.avgPerDay}g por día</td><td>—</td><td>media de ${padStats.n} día(s) registrado(s), ${padStats.dryDays} seco(s) · ${PAD_TEST_DISCLAIMER}</td></tr>` : '',
+      hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : data.screening.iciq ? `<tr><td><b>ICIQ-SF</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
     ].filter(Boolean).join('');
 
     const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
@@ -122,14 +132,14 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 @media print{body{margin:20px auto}}
 </style></head><body>
 <h1>Resumen Clínico STUI</h1>
-<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.med ? ' · Medicación: ' + p.med : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
+<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + p.med : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
-${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((s2) => `<li>${s2}</li>`).join('')}</ul></div>` : ''}
+${findings.length ? `<div class="algo"><h3>📊 Hallazgos registrados</h3><ul>${findings.map((f) => `<li>${f}</li>`).join('')}</ul></div>` : ''}
 ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
-<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento. No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
+<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
@@ -145,15 +155,15 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
     { label: 'IIEF-5', done: !!hasIIEF, na: !data.screening.iief },
     { label: 'OAB (AUA)', done: !!hasOAB, na: !data.screening.oab },
     { label: 'ICIQ-SF', done: !!hasICIQ, na: !data.screening.iciq },
-    { label: 'Pad Test', done: allPads.length > 0, na: false },
+    { label: 'Pad Test', done: padStats.n > 0, na: false },
   ];
 
   const scoreCards = [
     hasIPSS && { title: 'IPSS', val: ipssVal, max: '/35', sev: ipssSev, accent: 'teal', extra: `${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' · QoL: ' + IPSS_QOL[data.ipss.qol] : ''}` },
-    s && { title: 'Diario', val: s.avgD, max: '/día', sev: { text: `CVF: ${s.maxV}ml`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'sky', extra: `Nocturia: ${s.avgN}/noche${s.npI !== null ? ` · IPN: ${s.npI}%` : ''}` },
+    s && { title: 'Diario', val: s.avgD ?? '—', max: '/día', sev: { text: `CVF: ${s.maxV !== null ? s.maxV + 'ml' : naText}`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'sky', extra: `${nocturiaLabel(s)}${s.npI !== null ? ` · Vol. nocturno: ${s.npI}%` : ''} · n=${s.n} de ${s.totalDays} días válidos` },
     hasIIEF && { title: 'IIEF-5', val: iiefVal, max: '/25', sev: iiefSev, accent: 'sky', extra: null },
-    hasOAB && { title: 'OAB (AUA)', val: oabVal, max: '/25', sev: oabVal === 0 ? { text: 'Sin síntomas', colorClass: 'text-emerald-500' } : oabVal <= 10 ? { text: 'Leve', colorClass: 'text-sky-500' } : oabVal <= 18 ? { text: 'Moderado', colorClass: 'text-amber-500' } : { text: 'Grave', colorClass: 'text-red-500' }, accent: 'slate', extra: null },
-    allPads.length > 0 && { title: 'Pad Test', val: `${padTotal}g`, max: '', sev: padSev, accent: 'slate', extra: `${allPads.length} absorbente(s)` },
+    hasOAB && { title: 'OAB (AUA)', val: oabVal, max: '/25', sev: oabNoUrgency(data) ? { text: 'Sin urgencia miccional', colorClass: 'text-emerald-500' } : { text: 'puntuación sintomática', colorClass: 'text-slate-500 dark:text-slate-400' }, accent: 'slate', extra: OAB_DISCLAIMER },
+    padStats.avgPerDay !== null && { title: 'Pad Test', val: `${padStats.avgPerDay}g`, max: '/día', sev: { text: `media de ${padStats.n} día(s) reg., ${padStats.dryDays} seco(s)`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'slate', extra: PAD_TEST_DISCLAIMER },
     hasICIQ && { title: 'ICIQ-SF', val: iciqVal, max: '/21', sev: iciqSev, accent: 'teal', extra: null },
   ].filter(Boolean) as Array<{ title: string; val: number | string; max: string; sev: { text: string; colorClass: string }; accent: string; extra: string | null }>;
 
@@ -169,7 +179,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       {p.name && (
         <div className="bg-gradient-to-br from-teal-700 to-teal-900 rounded-2xl p-5 text-white">
           <div className="text-lg font-black">{p.name}</div>
-          <div className="text-sm text-teal-200 mt-1">{[p.age, p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : null, p.med ? `Medicación: ${p.med}` : null].filter(Boolean).join(' · ')}</div>
+          <div className="text-sm text-teal-200 mt-1">{[p.age, p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : null, p.weight ? `${p.weight} kg` : null, p.med ? `Medicación: ${p.med}` : null].filter(Boolean).join(' · ')}</div>
         </div>
       )}
 
@@ -199,12 +209,13 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
           ))}
         </div>
       )}
+      {s && <p className="text-xs text-slate-500 -mt-2">{PERIOD_DISCLAIMER}</p>}
 
-      {/* Interpretation */}
+      {/* Findings */}
       <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800 rounded-2xl p-5">
-        <h3 className="font-black text-sky-800 dark:text-sky-300 text-sm mb-3 flex items-center gap-2">📊 Interpretación de resultados</h3>
+        <h3 className="font-black text-sky-800 dark:text-sky-300 text-sm mb-3 flex items-center gap-2">📊 Hallazgos registrados</h3>
         <div className="space-y-2">
-          {suggestions.map((sg, i) => (
+          {findings.map((sg, i) => (
             <div key={i} className="flex gap-2 text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 flex-shrink-0" />
               {sg}

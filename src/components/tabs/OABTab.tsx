@@ -1,6 +1,6 @@
 import type { AppData } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
-import { OAB_QUESTIONS, OAB_QOL_QUESTIONS, OAB_IMPACT_ITEMS, oabScore } from '../../lib/clinical';
+import { OAB_QUESTIONS, OAB_QOL_QUESTIONS, OAB_IMPACT_ITEMS, oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER } from '../../lib/clinical';
 
 interface OABTabProps {
   data: AppData;
@@ -9,14 +9,17 @@ interface OABTabProps {
 }
 
 export function OABTab({ data, actions, onNext }: OABTabProps) {
-  const comp = data.oab.q.every((v) => v !== null);
+  const comp = oabComplete(data);
   const sc = oabScore(data);
-  const noOAB = data.oab.q[0] === 0;
+  const noOAB = oabNoUrgency(data);
+  const answered = data.oab.q.filter((v) => v !== null).length;
+  const missing = data.oab.q.length - answered;
 
-  const severity = noOAB ? { text: 'Sin urgencia miccional', colorClass: 'text-emerald-500' }
-    : sc <= 10 ? { text: 'Leve', colorClass: 'text-sky-500' }
-    : sc <= 18 ? { text: 'Moderado', colorClass: 'text-amber-500' }
-    : { text: 'Grave', colorClass: 'text-red-500' };
+  // El AUA OAB Assessment no publica bandas de gravedad (ver OAB_DISCLAIMER):
+  // el único caso especial es la lectura directa de la pregunta 1 (cribado).
+  const severity = noOAB
+    ? { text: 'Sin urgencia miccional', colorClass: 'text-emerald-500' }
+    : { text: 'puntuación sintomática', colorClass: 'text-slate-500 dark:text-slate-400' };
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
@@ -54,11 +57,22 @@ export function OABTab({ data, actions, onNext }: OABTabProps) {
           ))}
         </div>
 
-        {comp && (
+        {comp ? (
           <div className="mt-6 text-center p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
             <div className="font-mono text-5xl font-black text-slate-700 dark:text-slate-300">{sc}<span className="text-lg text-slate-600 font-normal">/25</span></div>
             <div className="text-sm text-slate-600 mt-1">Total síntomas OAB (AUA)</div>
             <div className={`text-lg font-black mt-1 ${severity.colorClass}`}>{severity.text}</div>
+            <div className="text-xs text-slate-500 mt-2">{OAB_DISCLAIMER}</div>
+          </div>
+        ) : (
+          <div className="mt-6 text-center p-5 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800">
+            {answered > 0 && (
+              <>
+                <div className="font-mono text-3xl font-black text-slate-400">{sc}<span className="text-base text-slate-500 font-normal">/25</span></div>
+                <div className="text-xs text-amber-700 dark:text-amber-400 font-bold mt-1">provisional — cuestionario incompleto</div>
+              </>
+            )}
+            <div className="text-sm text-amber-700 dark:text-amber-400 font-semibold mt-2">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>

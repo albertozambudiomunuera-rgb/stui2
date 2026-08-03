@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BottomSheet } from '../ui/BottomSheet';
-import { nowTime, DRINKS } from '../../lib/clinical';
+import { nowTime, DRINKS, parseDecimal, newClientKey } from '../../lib/clinical';
 import type { DiaryEntry } from '../../types';
 
 interface BebidaSheetProps {
@@ -11,13 +11,15 @@ interface BebidaSheetProps {
 }
 
 type BebidaDraft = {
+  clientKey: string;
   time: string;
   drink: string;
   drinkAmt: string;
 };
 
+// Cambio 7: la clave se genera al crear el formulario, no al guardarlo.
 function emptyDraft(): BebidaDraft {
-  return { time: nowTime(), drink: '', drinkAmt: '' };
+  return { clientKey: newClientKey(), time: nowTime(), drink: '', drinkAmt: '' };
 }
 
 export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProps) {
@@ -26,7 +28,13 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
   const handleSave = () => {
     if (!draft.time) { alert('La hora es obligatoria'); return; }
     if (!draft.drink && !draft.drinkAmt) { alert('Selecciona o escribe una bebida'); return; }
+    const amt = parseDecimal(draft.drinkAmt);
+    if (draft.drinkAmt.trim() !== '' && amt === null) {
+      alert('Introduce una cantidad válida en ml (usa , o . para los decimales)');
+      return;
+    }
     onSave(dayIndex, {
+      clientKey: draft.clientKey,
       time: draft.time,
       void: null,
       urgency: null,
@@ -36,7 +44,7 @@ export function BebidaSheet({ open, dayIndex, onClose, onSave }: BebidaSheetProp
       firstMorning: false,
       catheter: false,
       drink: draft.drink,
-      drinkAmt: parseFloat(draft.drinkAmt) || null,
+      drinkAmt: amt,
     } as Omit<DiaryEntry, 'id'>);
     onClose();
     setDraft(emptyDraft());

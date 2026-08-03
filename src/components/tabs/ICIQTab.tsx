@@ -1,6 +1,6 @@
 import type { AppData } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
-import { ICIQ_Q1_OPTS, ICIQ_Q2_OPTS, ICIQ_WHEN, iciqScore, iciqSeverity } from '../../lib/clinical';
+import { ICIQ_Q1_OPTS, ICIQ_Q2_OPTS, ICIQ_WHEN, iciqScore, iciqComplete, iciqSeverity } from '../../lib/clinical';
 
 interface ICIQTabProps {
   data: AppData;
@@ -9,9 +9,11 @@ interface ICIQTabProps {
 }
 
 export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
-  const comp = data.iciq.q[0] !== null && data.iciq.q[1] !== null;
+  const comp = iciqComplete(data);
   const sc = iciqScore(data);
   const sev = iciqSeverity(sc);
+  const answeredCount = (data.iciq.q[0] !== null ? 1 : 0) + (data.iciq.q[1] !== null ? 1 : 0) + (data.iciq.vas !== null ? 1 : 0);
+  const missing = 3 - answeredCount;
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
@@ -63,12 +65,14 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
               type="range"
               min="0"
               max="10"
-              value={data.iciq.vas}
+              value={data.iciq.vas ?? 0}
               onChange={(e) => actions.updateICIQVas(parseInt(e.target.value))}
-              style={{ background: `linear-gradient(to right, #0d9488 ${data.iciq.vas * 10}%, #e2e8f0 ${data.iciq.vas * 10}%)` }}
+              style={{ background: `linear-gradient(to right, #0d9488 ${(data.iciq.vas ?? 0) * 10}%, #e2e8f0 ${(data.iciq.vas ?? 0) * 10}%)` }}
               className="w-full"
             />
-            <div className="text-center font-mono text-3xl font-black text-teal-700 dark:text-teal-400 mt-2">{data.iciq.vas}</div>
+            <div className="text-center font-mono text-3xl font-black text-teal-700 dark:text-teal-400 mt-2">
+              {data.iciq.vas !== null ? data.iciq.vas : <span className="text-lg text-slate-400 font-semibold">Desliza para responder</span>}
+            </div>
             <div className="flex justify-between text-xs text-slate-600 mt-1">
               <span>0 — Nada</span>
               <span>10 — Mucho</span>
@@ -76,11 +80,21 @@ export function ICIQTab({ data, actions, onNext }: ICIQTabProps) {
           </div>
         </div>
 
-        {comp && (
+        {comp ? (
           <div className="mt-6 text-center p-5 bg-teal-50 dark:bg-teal-900/20 rounded-2xl border border-teal-100 dark:border-teal-800">
             <div className="font-mono text-5xl font-black text-teal-700 dark:text-teal-400">{sc}<span className="text-lg text-slate-600 font-normal">/21</span></div>
             <div className="text-sm text-slate-600 mt-1">Puntuación ICIQ-SF (preg. 1+2+3)</div>
             <div className={`text-lg font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
+          </div>
+        ) : (
+          <div className="mt-6 text-center p-5 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800">
+            {answeredCount > 0 && (
+              <>
+                <div className="font-mono text-3xl font-black text-slate-400">{sc}<span className="text-base text-slate-500 font-normal">/21</span></div>
+                <div className="text-xs text-amber-700 dark:text-amber-400 font-bold mt-1">provisional — cuestionario incompleto</div>
+              </>
+            )}
+            <div className="text-sm text-amber-700 dark:text-amber-400 font-semibold mt-2">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>

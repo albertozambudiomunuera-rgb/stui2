@@ -1,6 +1,6 @@
 import type { AppData } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
-import { IIEF_QUESTIONS, iiefScore, iiefSeverity } from '../../lib/clinical';
+import { IIEF_QUESTIONS, iiefScore, iiefComplete, iiefSeverity } from '../../lib/clinical';
 
 interface IIEFTabProps {
   data: AppData;
@@ -9,9 +9,11 @@ interface IIEFTabProps {
 }
 
 export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
-  const comp = data.iief.q.every((v) => v !== null);
+  const comp = iiefComplete(data.iief);
   const sc = iiefScore(data.iief);
   const sev = iiefSeverity(sc);
+  const answered = data.iief.q.filter((v) => v !== null).length;
+  const missing = data.iief.q.length - answered;
 
   return (
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
@@ -48,11 +50,21 @@ export function IIEFTab({ data, actions, onNext }: IIEFTabProps) {
           ))}
         </div>
 
-        {comp && (
+        {comp ? (
           <div className="mt-6 text-center p-5 bg-sky-50 dark:bg-sky-900/20 rounded-2xl border border-sky-100 dark:border-sky-800">
             <div className="font-mono text-5xl font-black text-sky-600">{sc}<span className="text-lg text-slate-600 font-normal">/25</span></div>
             <div className="text-sm text-slate-600 mt-1">Puntuación IIEF-5</div>
             <div className={`text-lg font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
+          </div>
+        ) : (
+          <div className="mt-6 text-center p-5 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-800">
+            {answered > 0 && (
+              <>
+                <div className="font-mono text-3xl font-black text-slate-400">{sc}<span className="text-base text-slate-500 font-normal">/25</span></div>
+                <div className="text-xs text-amber-700 dark:text-amber-400 font-bold mt-1">provisional — cuestionario incompleto</div>
+              </>
+            )}
+            <div className="text-sm text-amber-700 dark:text-amber-400 font-semibold mt-2">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>

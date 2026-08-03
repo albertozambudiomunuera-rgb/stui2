@@ -68,8 +68,26 @@ export default function App() {
       // Show disclaimer on first-time entry to app
       if (!isDisclaimerAccepted()) setShowDisclaimer(true);
     } else {
-      // Reset data for Express mode (fresh start for waiting room)
-      actions.restoreData(emptyData());
+      // El Modo Sala de Espera comparte los mismos datos que el modo Casa.
+      // Antes se borraban aquí sin avisar cada vez que se entraba en Exprés,
+      // lo que hacía perder el trabajo de un paciente que solo había pulsado
+      // la X para salir un momento (p.ej. para enseñarlo en consulta) y
+      // volvía a entrar después. Ahora solo se borra si el paciente/personal
+      // lo confirma explícitamente.
+      const hasData = actions.data.patient.name.trim() !== ''
+        || actions.data.days.some((d) => d.entries.length > 0)
+        || actions.data.ipss.q.some((v) => v !== null)
+        || actions.data.iief.q.some((v) => v !== null)
+        || actions.data.oab.q.some((v) => v !== null)
+        || actions.data.iciq.q.some((v) => v !== null);
+      if (hasData) {
+        const empezarDeNuevo = confirm(
+          'Hay datos guardados de un uso anterior del Modo Sala de Espera.\n\n' +
+          'Aceptar → borrarlos y empezar con un paciente nuevo.\n' +
+          'Cancelar → seguir con esos datos (por ejemplo, si aún no has terminado).'
+        );
+        if (empezarDeNuevo) actions.restoreData(emptyData());
+      }
       setMode('express');
     }
   };

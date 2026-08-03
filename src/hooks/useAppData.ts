@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import type { AppData, DiaryEntry, PadEntry } from '../types';
+import type { AppData, DayData, DiaryEntry, PadEntry } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
-import { uid } from '../lib/clinical';
+import { uid, isDuplicateByClientKey } from '../lib/clinical';
 
 export function useAppData(initialData: AppData) {
   const [data, setData] = useState<AppData>(initialData);
@@ -39,7 +39,7 @@ export function useAppData(initialData: AppData) {
     });
   }, [save]);
 
-  const updateDayMeta = useCallback((di: number, field: 'date' | 'wake' | 'sleep', val: string) => {
+  const updateDayMeta = useCallback((di: number, field: 'date' | 'wake' | 'sleep' | 'sleepOnset', val: string) => {
     setData((prev) => {
       const days = [...prev.days];
       days[di] = { ...days[di], [field]: val };
@@ -49,8 +49,39 @@ export function useAppData(initialData: AppData) {
     });
   }, [save]);
 
+  // Cambio 5 — marcador explícito del paciente de que terminó de registrar
+  // el día: junto con wake/sleep, define si el día es "válido" para
+  // promediar (regla interna, ver CLINICAL_RULES.validDayRule).
+  const updateDayComplete = useCallback((di: number, val: boolean) => {
+    setData((prev) => {
+      const days = [...prev.days];
+      days[di] = { ...days[di], dayComplete: val };
+      const next = { ...prev, days };
+      save(next);
+      return next;
+    });
+  }, [save]);
+
+  // Cambio 3 — marcador explícito de que el registro de absorbentes del día
+  // está completo: un día 'registrado' sin absorbentes es un día seco (0 g),
+  // no un dato ausente.
+  const updateDayPadStatus = useCallback((di: number, status: DayData['padTestStatus']) => {
+    setData((prev) => {
+      const days = [...prev.days];
+      days[di] = { ...days[di], padTestStatus: status };
+      const next = { ...prev, days };
+      save(next);
+      return next;
+    });
+  }, [save]);
+
   const addEntry = useCallback((di: number, entry: Omit<DiaryEntry, 'id'>) => {
     setData((prev) => {
+      // Cambio 7 — idempotencia por clientKey (generada al abrir el
+      // formulario, no al guardar): un doble toque reenvía la misma clave y
+      // se descarta. Dos micciones legítimas con contenido idéntico tienen
+      // claves distintas y se guardan ambas.
+      if (isDuplicateByClientKey(prev.days[di].entries, entry.clientKey)) return prev;
       const days = [...prev.days];
       days[di] = { ...days[di], entries: [...days[di].entries, { ...entry, id: uid() }] };
       const next = { ...prev, days };
@@ -210,6 +241,8 @@ export function useAppData(initialData: AppData) {
     updatePatient,
     updateScreening,
     updateDayMeta,
+    updateDayComplete,
+    updateDayPadStatus,
     addEntry,
     delEntry,
     addPad,

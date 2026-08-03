@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BottomSheet } from '../ui/BottomSheet';
-import { nowTime, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS } from '../../lib/clinical';
+import { nowTime, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS, parseDecimal, newClientKey } from '../../lib/clinical';
 import type { DiaryEntry } from '../../types';
 
 interface MiccionSheetProps {
@@ -11,6 +11,7 @@ interface MiccionSheetProps {
 }
 
 type MiccionDraft = {
+  clientKey: string;
   time: string;
   void: string;
   urgency: number | null;
@@ -23,8 +24,11 @@ type MiccionDraft = {
   drinkAmt: null;
 };
 
+// La clave se genera al crear el formulario (aquí), no al guardarlo: un doble
+// toque en "Guardar" reenvía el mismo draft con la misma clave y se
+// descarta como duplicado (Cambio 7).
 function emptyDraft(): MiccionDraft {
-  return { time: nowTime(), void: '', urgency: null, leak: '', pad: '', incomplete: false, firstMorning: false, catheter: false, drink: '', drinkAmt: null };
+  return { clientKey: newClientKey(), time: nowTime(), void: '', urgency: null, leak: '', pad: '', incomplete: false, firstMorning: false, catheter: false, drink: '', drinkAmt: null };
 }
 
 export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetProps) {
@@ -33,9 +37,15 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
 
   const handleSave = () => {
     if (!draft.time) { alert('La hora es obligatoria'); return; }
+    const voidVal = parseDecimal(draft.void);
+    if (draft.void.trim() !== '' && voidVal === null) {
+      alert('Introduce un volumen válido en ml (usa , o . para los decimales)');
+      return;
+    }
     onSave(dayIndex, {
+      clientKey: draft.clientKey,
       time: draft.time,
-      void: parseFloat(draft.void) || null,
+      void: voidVal,
       urgency: draft.urgency,
       leak: draft.leak,
       pad: draft.pad,
@@ -82,7 +92,7 @@ export function MiccionSheet({ open, dayIndex, onClose, onSave }: MiccionSheetPr
         {/* Urgency */}
         <div>
           <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-3">
-            Urgencia — ¿Cuántas ganas tenías?
+            Grado de urgencia (escala PPIUS, 0-4) — ¿Cuántas ganas tenías?
           </label>
           <div className="flex gap-2">
             {[0, 1, 2, 3, 4].map((g) => (

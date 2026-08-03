@@ -1,16 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Home, Printer } from 'lucide-react';
-import type { AppData } from '../../types';
+import { X, Home, Printer, ArrowLeft, Trash2 } from 'lucide-react';
+import type { AppData, DiaryStats } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
+import { emptyData } from '../../lib/storage';
 import {
   IPSS_QUESTIONS, IPSS_QOL, IIEF_QUESTIONS, OAB_QUESTIONS,
   ICIQ_Q1_OPTS, ICIQ_Q2_OPTS,
   ipssScore, ipssComplete, ipssSeverity, ipssPredom,
-  iiefScore, iiefSeverity,
-  oabScore,
-  iciqScore, iciqSeverity,
-  generateClinicalNote, computeStats, padSeverity,
+  iiefScore, iiefComplete, iiefSeverity,
+  oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER,
+  iciqScore, iciqComplete, iciqSeverity,
+  generateClinicalNote, computeStats, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
+  CLINICAL_RULES,
 } from '../../lib/clinical';
+
+// Cambio 2: ver misma nota en DashboardTab.tsx.
+function nocturiaLabel(s: DiaryStats): string {
+  if (s.nocturiaCount !== null) return `Nocturia (ICS): ${s.nocturiaCount}/noche`;
+  if (s.avgN !== null) return `Micciones en la ventana nocturna declarada: ${s.avgN}/noche`;
+  return 'Nocturia: sin datos';
+}
 
 interface ExpressModeProps {
   data: AppData;
@@ -22,6 +31,7 @@ interface ExpressModeProps {
 type ExpressTab = 'screening' | 'ipss' | 'iief' | 'oab' | 'iciq' | 'result';
 
 const RED = '#4052D6';
+const naText = 'sin datos';
 
 export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps) {
   const data = actions.data;
@@ -52,6 +62,18 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
     if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1]);
   };
 
+  const goBackTab = () => {
+    const idx = tabs.indexOf(activeTab);
+    if (idx > 0) setActiveTab(tabs[idx - 1]);
+  };
+
+  const handleDeleteAll = () => {
+    const ok = confirm('¿Borrar todos los datos introducidos y empezar con un paciente nuevo?\n\nEsta acción no se puede deshacer.');
+    if (!ok) return;
+    actions.resetData(emptyData);
+    setActiveTab('screening');
+  };
+
   const progress = activeTab === 'screening' ? 0 :
     Math.round((data.ipss.q.filter(v => v !== null).length / 8) * 100);
 
@@ -67,9 +89,19 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
             />
             <span className="text-white font-black text-base">Modo Sala de Espera</span>
             <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-lg">EXPRÉS</span>
-            <button onClick={onExit} className="ml-auto p-1.5 bg-white/20 rounded-lg">
-              <X size={16} className="text-white" />
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              {activeTab !== 'screening' && (
+                <button onClick={goBackTab} className="p-1.5 bg-white/20 rounded-lg" title="Volver al paso anterior">
+                  <ArrowLeft size={16} className="text-white" />
+                </button>
+              )}
+              <button onClick={handleDeleteAll} className="p-1.5 bg-white/20 rounded-lg" title="Borrar todo y empezar con un paciente nuevo">
+                <Trash2 size={16} className="text-white" />
+              </button>
+              <button onClick={onExit} className="p-1.5 bg-white/20 rounded-lg" title="Salir — los datos se quedan guardados">
+                <X size={16} className="text-white" />
+              </button>
+            </div>
           </div>
           <div className="h-1 -mx-4 mb-0" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
             <div className="h-full bg-white/80 transition-all duration-300" style={{ width: `${progress}%` }} />
@@ -206,6 +238,8 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
   const sc = ipssScore(data.ipss);
   const comp = ipssComplete(data.ipss);
   const sev = ipssSeverity(sc);
+  const answered = data.ipss.q.filter((v) => v !== null).length;
+  const missing = data.ipss.q.length - answered;
   return (
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
@@ -237,10 +271,16 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
             </div>
           </div>
         </div>
-        {comp && (
+        {comp ? (
           <div className="mt-5 text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
             <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-600 font-normal">/35</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text} · {ipssPredom(data.ipss)}</div>
+            <div className="text-xs text-slate-500 mt-1">(no equivale a diagnóstico de obstrucción)</div>
+          </div>
+        ) : (
+          <div className="mt-5 text-center p-4 bg-amber-50 rounded-xl border border-amber-100">
+            {answered > 0 && <div className="text-xs text-amber-700 font-bold">{sc}/35 — provisional, cuestionario incompleto</div>}
+            <div className="text-sm text-amber-700 font-semibold mt-1">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>
@@ -254,9 +294,11 @@ function ExpressIPSS({ data, actions, onNext }: { data: AppData; actions: Return
 }
 
 function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: ReturnType<typeof useAppData>; onNext: () => void }) {
-  const comp = data.iief.q.length === 5 && data.iief.q.every((v) => v !== null);
-  const sc = comp ? iiefScore(data.iief) : 0;
+  const comp = iiefComplete(data.iief);
+  const sc = iiefScore(data.iief);
   const sev = iiefSeverity(sc);
+  const answered = data.iief.q.filter((v) => v !== null).length;
+  const missing = data.iief.q.length - answered;
   return (
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
@@ -280,10 +322,15 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
             </div>
           ))}
         </div>
-        {comp && (
+        {comp ? (
           <div className="mt-5 text-center p-4 bg-sky-50 rounded-xl border border-sky-100">
             <div className="font-mono text-4xl font-black text-sky-600">{sc}<span className="text-base text-slate-600 font-normal">/25</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
+          </div>
+        ) : (
+          <div className="mt-5 text-center p-4 bg-amber-50 rounded-xl border border-amber-100">
+            {answered > 0 && <div className="text-xs text-amber-700 font-bold">{sc}/25 — provisional, cuestionario incompleto</div>}
+            <div className="text-sm text-amber-700 font-semibold mt-1">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>
@@ -297,7 +344,7 @@ function ExpressIIEF({ data, actions, onNext }: { data: AppData; actions: Return
 }
 
 function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnType<typeof useAppData>; onNext: () => void }) {
-  const isComplete = data.oab.q.filter((v) => v !== null).length === OAB_QUESTIONS.length;
+  const isComplete = oabComplete(data);
   return (
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
@@ -319,6 +366,11 @@ function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnT
             </div>
           ))}
         </div>
+        {!isComplete && (
+          <div className="mt-5 text-center p-4 bg-amber-50 rounded-xl border border-amber-100">
+            <div className="text-sm text-amber-700 font-semibold">Faltan {OAB_QUESTIONS.length - data.oab.q.filter((v) => v !== null).length} pregunta(s) por responder</div>
+          </div>
+        )}
       </div>
       <button onClick={onNext} disabled={!isComplete}
         className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:bg-slate-300 disabled:cursor-not-allowed"
@@ -331,9 +383,11 @@ function ExpressOAB({ data, actions, onNext }: { data: AppData; actions: ReturnT
 
 function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: ReturnType<typeof useAppData>; onNext: () => void }) {
   const iciq = data.iciq;
-  const comp = iciq.q[0] !== null && iciq.q[1] !== null;
-  const sc = comp ? iciqScore(data) : 0;
+  const comp = iciqComplete(data);
+  const sc = iciqScore(data);
   const sev = iciqSeverity(sc);
+  const answeredCount = (iciq.q[0] !== null ? 1 : 0) + (iciq.q[1] !== null ? 1 : 0) + (iciq.vas !== null ? 1 : 0);
+  const missing = 3 - answeredCount;
   return (
     <div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800 mb-4">
@@ -372,19 +426,25 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
                 </button>
               ))}
             </div>
+            {iciq.vas === null && <div className="text-xs text-slate-500 mt-2">Sin responder</div>}
           </div>
         </div>
-        {comp && (
+        {comp ? (
           <div className="mt-5 text-center p-4 bg-teal-50 rounded-xl border border-teal-100">
             <div className="font-mono text-4xl font-black text-teal-700">{sc}<span className="text-base text-slate-600 font-normal">/21</span></div>
             <div className={`text-base font-black mt-1 ${sev.colorClass}`}>{sev.text}</div>
+          </div>
+        ) : (
+          <div className="mt-5 text-center p-4 bg-amber-50 rounded-xl border border-amber-100">
+            {answeredCount > 0 && <div className="text-xs text-amber-700 font-bold">{sc}/21 — provisional, cuestionario incompleto</div>}
+            <div className="text-sm text-amber-700 font-semibold mt-1">Faltan {missing} pregunta{missing === 1 ? '' : 's'} por responder</div>
           </div>
         )}
       </div>
       <button onClick={onNext} disabled={!comp}
         className="w-full text-white font-black py-4 rounded-xl text-base shadow-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         style={{ backgroundColor: RED }}>
-        {comp ? 'Ver Resultado →' : `Responde las preguntas 1 y 2 para continuar`}
+        {comp ? 'Ver Resultado →' : `Responde las preguntas 1, 2 y 3 para continuar`}
       </button>
     </div>
   );
@@ -398,54 +458,56 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
   const hasIPSS = ipssComplete(data.ipss);
   const ipssVal = ipssScore(data.ipss);
   const ipssSev = ipssSeverity(ipssVal);
-  const hasIIEF = data.screening.iief && data.iief.q.every((v) => v !== null);
+  const hasIIEF = !!data.screening.iief && iiefComplete(data.iief);
   const iiefVal = iiefScore(data.iief);
   const iiefSev = iiefSeverity(iiefVal);
-  const hasOAB = data.screening.oab && data.oab.q.every((v) => v !== null);
+  const hasOAB = !!data.screening.oab && oabComplete(data);
   const oabVal = oabScore(data);
-  const hasICIQ = data.screening.iciq && data.iciq.q[0] !== null;
+  const hasICIQ = !!data.screening.iciq && iciqComplete(data);
   const iciqVal = iciqScore(data);
   const iciqSev = iciqSeverity(iciqVal);
-  const allPads = data.days.flatMap((d) => d.pads ?? []);
-  const padTotal = +(allPads.reduce((s2, e) => s2 + e.leak, 0)).toFixed(1);
-  const padSev = padSeverity(padTotal);
+  const padStats = padDayStats(data);
   const hasDiary = data.days.some((d) => d.entries.length > 0);
   const s = hasDiary ? computeStats(data) : null;
 
-  const suggestions: string[] = [];
+  const findings: string[] = [];
   if (hasIPSS) {
-    if (ipssVal >= 20) suggestions.push(`IPSS grave (${ipssVal}/35): sintomatología obstructiva-irritativa grave. Predominio ${ipssPredom(data.ipss)}.`);
-    else if (ipssVal >= 8) suggestions.push(`IPSS moderado (${ipssVal}/35): sintomatología de impacto clínico significativo. Predominio ${ipssPredom(data.ipss)}.`);
-    else suggestions.push(`IPSS leve (${ipssVal}/35): sintomatología leve. Predominio ${ipssPredom(data.ipss)}.`);
-    if (data.ipss.qol !== null && data.ipss.qol >= 4) suggestions.push(`Calidad de vida afectada (QoL ${data.ipss.qol}/6: ${IPSS_QOL[data.ipss.qol]}).`);
+    if (ipssVal >= 20) findings.push(`IPSS grave (${ipssVal}/35): sintomatología obstructiva-irritativa grave. Predominio: ${ipssPredom(data.ipss)}.`);
+    else if (ipssVal >= 8) findings.push(`IPSS moderado (${ipssVal}/35): sintomatología de impacto clínico significativo. Predominio: ${ipssPredom(data.ipss)}.`);
+    else findings.push(`IPSS leve (${ipssVal}/35): sintomatología leve. Predominio: ${ipssPredom(data.ipss)}.`);
+    findings.push('El predominio de síntomas es una regla interna de esta herramienta: no equivale a diagnóstico de obstrucción.');
+    if (data.ipss.qol !== null && data.ipss.qol >= 4) findings.push(`Calidad de vida afectada (QoL ${data.ipss.qol}/6: ${IPSS_QOL[data.ipss.qol]}).`);
+  }
+  if (s) {
+    findings.push(nocturiaLabel(s));
+    if (s.npI !== null) findings.push(`Proporción de volumen nocturno: ${s.npI} %.`);
+    if (s.avgDV !== null) {
+      findings.push(s.polyMlPerKg !== null
+        ? `Volumen del día registrado: ${s.avgDV} ml = ${s.polyMlPerKg} ml/kg por día registrado.`
+        : `Volumen del día registrado: ${s.avgDV} ml (ml/kg no calculable, falta el peso).`);
+    }
   }
   if (hasIIEF) {
-    if (iiefVal <= 7) suggestions.push(`Disfunción eréctil severa (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 11) suggestions.push(`Disfunción eréctil moderada (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 16) suggestions.push(`Disfunción eréctil leve-moderada (IIEF-5 ${iiefVal}/25).`);
-    else if (iiefVal <= 21) suggestions.push(`Disfunción eréctil leve (IIEF-5 ${iiefVal}/25).`);
-    else suggestions.push(`Función eréctil conservada (IIEF-5 ${iiefVal}/25).`);
+    findings.push(`IIEF-5 ${iiefVal}/25: ${iiefSev.text}.`);
   }
   if (hasOAB) {
-    if (data.oab.q[0] === 0) suggestions.push('Sin urgencia miccional (AUA OAB Assessment, pregunta 1 = 0).');
-    else if (oabVal > 18) suggestions.push(`Síntomas de vejiga hiperactiva graves (AUA OAB Assessment ${oabVal}/25).`);
-    else if (oabVal > 10) suggestions.push(`Síntomas de vejiga hiperactiva moderados (AUA OAB Assessment ${oabVal}/25).`);
-    else suggestions.push(`Síntomas de vejiga hiperactiva leves (AUA OAB Assessment ${oabVal}/25).`);
+    if (oabNoUrgency(data)) findings.push('Sin urgencia miccional (AUA OAB Assessment, pregunta 1 = 0).');
+    else findings.push(`AUA OAB Assessment: ${oabVal}/25 (puntuación sintomática, sin bandas de gravedad publicadas).`);
   }
   if (hasICIQ) {
-    if (iciqVal === 0) suggestions.push('Sin incontinencia urinaria (ICIQ-SF 0/21).');
-    else suggestions.push(`${iciqSev.text} (ICIQ-SF ${iciqVal}/21).`);
+    if (iciqVal === 0) findings.push('Sin incontinencia urinaria (ICIQ-SF 0/21).');
+    else findings.push(`${iciqSev.text} (ICIQ-SF ${iciqVal}/21).`);
   }
-  if (!suggestions.length) suggestions.push('Completa el IPSS y los cuestionarios para ver la interpretación de los resultados.');
+  if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
   const note = generateClinicalNote(data);
 
   const scoreCards = [
     hasIPSS && { title: 'IPSS', val: ipssVal, max: '/35', sev: ipssSev, accent: 'teal', extra: `${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' · QoL: ' + IPSS_QOL[data.ipss.qol] : ''}` },
-    s && { title: 'Diario', val: s.avgD, max: '/día', sev: { text: `CVF: ${s.maxV}ml`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'sky', extra: `Nocturia: ${s.avgN}/noche${s.npI !== null ? ` · IPN: ${s.npI}%` : ''}` },
+    s && { title: 'Diario', val: s.avgD ?? '—', max: '/día', sev: { text: `CVF: ${s.maxV !== null ? s.maxV + 'ml' : naText}`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'sky', extra: `${nocturiaLabel(s)}${s.npI !== null ? ` · Vol. nocturno: ${s.npI}%` : ''}` },
     hasIIEF && { title: 'IIEF-5', val: iiefVal, max: '/25', sev: iiefSev, accent: 'sky', extra: null },
-    hasOAB && { title: 'OAB (AUA)', val: oabVal, max: '/25', sev: oabVal === 0 ? { text: 'Sin síntomas', colorClass: 'text-emerald-500' } : oabVal <= 10 ? { text: 'Leve', colorClass: 'text-sky-500' } : oabVal <= 18 ? { text: 'Moderado', colorClass: 'text-amber-500' } : { text: 'Grave', colorClass: 'text-red-500' }, accent: 'slate', extra: null },
-    allPads.length > 0 && { title: 'Pad Test', val: `${padTotal}g`, max: '', sev: padSev, accent: 'slate', extra: `${allPads.length} absorbente(s)` },
+    hasOAB && { title: 'OAB (AUA)', val: oabVal, max: '/25', sev: oabNoUrgency(data) ? { text: 'Sin urgencia miccional', colorClass: 'text-emerald-500' } : { text: 'puntuación sintomática', colorClass: 'text-slate-500 dark:text-slate-400' }, accent: 'slate', extra: OAB_DISCLAIMER },
+    padStats.avgPerDay !== null && { title: 'Pad Test', val: `${padStats.avgPerDay}g`, max: '/día', sev: { text: `media de ${padStats.n} día(s) reg., ${padStats.dryDays} seco(s)`, colorClass: 'text-slate-600 dark:text-slate-400' }, accent: 'slate', extra: PAD_TEST_DISCLAIMER },
     hasICIQ && { title: 'ICIQ-SF', val: iciqVal, max: '/21', sev: iciqSev, accent: 'teal', extra: null },
   ].filter(Boolean) as Array<{ title: string; val: number | string; max: string; sev: { text: string; colorClass: string }; accent: string; extra: string | null }>;
 
@@ -458,12 +520,12 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
   const handlePrint = () => {
     const fecha = new Date().toLocaleDateString('es-ES');
     const scoreRows = [
-      hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : '',
-      s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} días</td><td>CVF ${s.maxV}ml · IPN ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>Nocturia ${s.avgN}/noche · IUU ${s.ul} ep.</td></tr>` : '',
-      hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : '',
-      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabVal === 0 ? 'Sin síntomas' : oabVal <= 10 ? 'Leve' : oabVal <= 18 ? 'Moderado' : 'Grave'}</td><td></td></tr>` : '',
-      allPads.length > 0 ? `<tr><td><b>Pad Test</b></td><td>${padTotal}g</td><td>${padSev.text}</td><td>${allPads.length} absorbente(s)</td></tr>` : '',
-      hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : '',
+      hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : `<tr><td><b>IPSS</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>`,
+      s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} de ${s.totalDays} días</td><td>CVF ${s.maxV !== null ? s.maxV + 'ml' : naText} · Vol. nocturno ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>${nocturiaLabel(s)} · IUU ${s.ul} ep.</td></tr>` : '',
+      hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : data.screening.iief ? `<tr><td><b>IIEF-5</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
+      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabNoUrgency(data) ? 'Sin urgencia miccional' : '—'}</td><td>${OAB_DISCLAIMER}</td></tr>` : data.screening.oab ? `<tr><td><b>AUA OAB Assessment</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
+      padStats.avgPerDay !== null ? `<tr><td><b>Pad Test</b></td><td>${padStats.avgPerDay}g por día</td><td>—</td><td>media de ${padStats.n} día(s) registrado(s), ${padStats.dryDays} seco(s) · ${PAD_TEST_DISCLAIMER}</td></tr>` : '',
+      hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : data.screening.iciq ? `<tr><td><b>ICIQ-SF</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
     ].filter(Boolean).join('');
 
     const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
@@ -483,14 +545,14 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 @media print{body{margin:20px auto}}
 </style></head><body>
 <h1>Resumen Clínico STUI — Modo Exprés</h1>
-<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''} &nbsp;|&nbsp; Duración: ${min}:${sec < 10 ? '0' : ''}${sec} &nbsp;|&nbsp; Fecha: ${fecha}</div>
+<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''} &nbsp;|&nbsp; Duración: ${min}:${sec < 10 ? '0' : ''}${sec} &nbsp;|&nbsp; Fecha: ${fecha}</div>
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
-${suggestions.length ? `<div class="algo"><h3>📊 Interpretación de resultados</h3><ul>${suggestions.map((sg) => `<li>${sg}</li>`).join('')}</ul></div>` : ''}
+${findings.length ? `<div class="algo"><h3>📊 Hallazgos registrados</h3><ul>${findings.map((sg) => `<li>${sg}</li>`).join('')}</ul></div>` : ''}
 ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
 <div class="note">${note}</div>
-<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento. No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
+<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
 <script>window.onload=function(){window.print();}<\/script>
 </body></html>`;
 
@@ -522,12 +584,13 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
           ))}
         </div>
       )}
+      {s && <p className="text-xs text-slate-500 -mt-2">{PERIOD_DISCLAIMER}</p>}
 
-      {/* Interpretation */}
+      {/* Findings */}
       <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-100 dark:border-sky-800 rounded-2xl p-5">
-        <h3 className="font-black text-sky-800 dark:text-sky-300 text-sm mb-3">📊 Interpretación de resultados</h3>
+        <h3 className="font-black text-sky-800 dark:text-sky-300 text-sm mb-3">📊 Hallazgos registrados</h3>
         <div className="space-y-2">
-          {suggestions.map((sg, i) => (
+          {findings.map((sg, i) => (
             <div key={i} className="flex gap-2 text-sm text-sky-800 dark:text-sky-300 leading-relaxed">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 flex-shrink-0" />
               {sg}
