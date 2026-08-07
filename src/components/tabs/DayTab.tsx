@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, HelpCircle } from 'lucide-react';
 import type { AppData, DiaryEntry } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
 import { MiccionSheet } from '../modals/MiccionSheet';
@@ -19,6 +19,10 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
   const [padDry, setPadDry] = useState('');
   const [padWet, setPadWet] = useState('');
   const [padTime, setPadTime] = useState(nowTime());
+  // Accesible en todo momento mientras se rellena el diario, no solo al
+  // activarlo en el Cribado — el paciente puede necesitar recordar cómo o
+  // para qué sirve en cualquiera de los 3 días.
+  const [showHelp, setShowHelp] = useState(false);
 
   const day = data.days[di];
   const svoids = day.entries.filter((e) => e.void !== null && !e.catheter);
@@ -54,9 +58,34 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
     <div className="max-w-2xl mx-auto space-y-4 animate-fade-in">
       {/* Day meta */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-800">
-        <h2 className="font-black text-slate-800 dark:text-slate-100 text-base mb-3 flex items-center gap-2">
-          <span>📅</span> Día {di + 1}
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-black text-slate-800 dark:text-slate-100 text-base flex items-center gap-2">
+            <span>📅</span> Día {di + 1}
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowHelp((v) => !v)}
+            className="flex items-center gap-1.5 text-sm font-bold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20 px-3 py-1.5 rounded-full"
+          >
+            <HelpCircle size={14} />
+            ¿Cómo se rellena?
+          </button>
+        </div>
+
+        {showHelp && (
+          <div className="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-4 mb-4 space-y-2 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <p><strong>¿Para qué sirve?</strong> Registrar cada micción y cada bebida durante 3 días permite a tu médico ver con qué frecuencia orinas, cuánto volumen y si te levantas por la noche.</p>
+            <p><strong>¿Cómo se rellena?</strong></p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Cada vez que orines, pulsa <strong>🚽 Micción</strong> y anota la hora, la cantidad aproximada y si sentiste urgencia.</li>
+              <li>Cada vez que bebas algo, pulsa <strong>🥤 Bebida</strong> y anota el tipo y la cantidad.</li>
+              <li>Indica la hora a la que te levantas y te acuestas cada día.</li>
+              <li>Al terminar el día, marca "He terminado de registrar este día".</li>
+            </ul>
+            <p>No hace falta que sea exacto al mililitro: una estimación a ojo es suficiente.</p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <div>
             <label className="block text-base font-black uppercase tracking-wider text-slate-600 mb-1">Fecha</label>

@@ -254,6 +254,17 @@ export function iciqComplete(data: AppData): boolean {
   return data.iciq.q.every((v) => v !== null) && data.iciq.vas !== null;
 }
 
+/**
+ * El Diario Miccional es opcional (se pregunta en el Cribado). También se
+ * considera desbloqueado si ya tiene contenido registrado — evita que un
+ * paciente con el diario ya empezado antes de este cambio (o que aún no ha
+ * pasado por el Cribado en esta sesión) se quede sin acceso a su propio
+ * registro.
+ */
+export function diaryUnlocked(data: AppData): boolean {
+  return data.screening.diary === true || data.days.some((d) => d.entries.length > 0 || (d.pads?.length ?? 0) > 0);
+}
+
 export function ipssSeverity(score: number): { text: string; colorClass: string } {
   if (score <= 7) return { text: 'Leve', colorClass: 'text-emerald-500' };
   if (score <= 19) return { text: 'Moderado', colorClass: 'text-amber-500' };

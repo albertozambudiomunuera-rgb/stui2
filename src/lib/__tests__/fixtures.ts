@@ -60,7 +60,7 @@ export function iciq(q: (number | null)[], vas: number | null = null, when: numb
 export function appData(over: Partial<AppData> = {}): AppData {
   return {
     patient: { name: '', age: '', sex: '', med: '', weight: '', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
-    screening: { iief: null, oab: null, iciq: null },
+    screening: { iief: null, oab: null, iciq: null, diary: null },
     days: [],
     ipss: ipss([null, null, null, null, null, null, null]),
     iief: iief([null, null, null, null, null]),

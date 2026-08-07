@@ -1,5 +1,6 @@
 import { ChevronLeft } from 'lucide-react';
 import type { TabId, AppData } from '../../types';
+import { diaryUnlocked } from '../../lib/clinical';
 
 interface HeaderProps {
   data: AppData;
@@ -22,9 +23,9 @@ const TABS: { id: TabId; label: string; show: (data: AppData) => boolean }[] = [
   { id: 'iief', label: 'IIEF-5', show: (d) => d.screening.iief === true },
   { id: 'oab', label: 'OAB (AUA)', show: (d) => d.screening.oab === true },
   { id: 'iciq', label: 'ICIQ-SF', show: (d) => d.screening.iciq === true },
-  { id: 'day-0', label: 'Día 1', show: () => true },
-  { id: 'day-1', label: 'Día 2', show: () => true },
-  { id: 'day-2', label: 'Día 3', show: () => true },
+  { id: 'day-0', label: 'Día 1', show: diaryUnlocked },
+  { id: 'day-1', label: 'Día 2', show: diaryUnlocked },
+  { id: 'day-2', label: 'Día 3', show: diaryUnlocked },
   { id: 'dashboard', label: 'Informe', show: () => true },
 ];
 

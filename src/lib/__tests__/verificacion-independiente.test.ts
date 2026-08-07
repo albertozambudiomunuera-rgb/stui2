@@ -24,7 +24,7 @@ const day = (o: Partial<DayData>): DayData => ({
 
 const base = (o: Partial<AppData> = {}): AppData => ({
   patient: { name: '', age: '', sex: '', med: '', weight: '' } as AppData['patient'],
-  screening: { iief: null, oab: null, iciq: null },
+  screening: { iief: null, oab: null, iciq: null, diary: null },
   days: [], notes: [],
   ipss: { q: [null, null, null, null, null, null, null], qol: null },
   iief: { q: [null, null, null, null, null] },

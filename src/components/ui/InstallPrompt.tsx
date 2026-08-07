@@ -53,13 +53,20 @@ function detectAndroidBrowser(): AndroidBrowser {
   return /SamsungBrowser/i.test(navigator.userAgent) ? 'samsung' : 'chrome';
 }
 
+type Choice = 'ios' | 'android';
+
 export function InstallPrompt({ onContinue }: InstallPromptProps) {
-  const [platform, setPlatform] = useState<Platform>('desktop');
   const [androidBrowser, setAndroidBrowser] = useState<AndroidBrowser>('chrome');
   const [persisted, setPersisted] = useState<boolean | null>(null);
+  // Nada preseleccionado por defecto: el paciente pulsa su propio sistema.
+  // Si se detecta iOS/Android se preselecciona para ahorrar un toque, pero
+  // sigue siendo pulsable/cambiable (útil si un familiar mira el móvil
+  // desde su propio ordenador, por ejemplo).
+  const [chosen, setChosen] = useState<Choice | null>(null);
 
   useEffect(() => {
-    setPlatform(detectPlatform());
+    const p = detectPlatform();
+    setChosen(p === 'ios' || p === 'android' ? p : null);
     setAndroidBrowser(detectAndroidBrowser());
     // Pedimos almacenamiento persistente: si el navegador lo concede
     // (habitualmente solo cuando está instalada), el riesgo desaparece.
@@ -84,26 +91,6 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
     return null;
   }
 
-  const instrucciones: Record<'ios' | 'desktop', { titulo: string; pasos: string[] }> = {
-    ios: {
-      titulo: 'Añade STUI a tu pantalla de inicio',
-      pasos: [
-        'Pulsa el botón Compartir, abajo en el centro (el cuadrado con la flecha hacia arriba)',
-        'Baja y elige "Añadir a pantalla de inicio"',
-        'Pulsa "Añadir" arriba a la derecha',
-        'Cierra Safari y abre STUI desde el icono nuevo',
-      ],
-    },
-    desktop: {
-      titulo: 'Instala STUI en tu ordenador',
-      pasos: [
-        'En Safari: menú Archivo → "Añadir al Dock"',
-        'En Chrome o Edge: icono de instalar en la barra de direcciones',
-        'Abre STUI desde el icono nuevo',
-      ],
-    },
-  };
-
   const androidInstrucciones: Record<AndroidBrowser, { titulo: string; pasos: string[] }> = {
     chrome: {
       titulo: 'Instala STUI en tu móvil (Chrome)',
@@ -125,8 +112,17 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
     },
   };
 
-  const { titulo, pasos } =
-    platform === 'android' ? androidInstrucciones[androidBrowser] : instrucciones[platform];
+  const iosInstrucciones = {
+    titulo: 'Añade STUI a tu pantalla de inicio',
+    pasos: [
+      'Pulsa el botón Compartir, abajo en el centro (el cuadrado con la flecha hacia arriba)',
+      'Baja y elige "Añadir a pantalla de inicio"',
+      'Pulsa "Añadir" arriba a la derecha',
+      'Cierra Safari y abre STUI desde el icono nuevo',
+    ],
+  };
+
+  const seleccion = chosen === 'android' ? androidInstrucciones[androidBrowser] : chosen === 'ios' ? iosInstrucciones : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
@@ -158,26 +154,54 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
             </p>
           </div>
 
-          <h3 className="text-lg font-bold text-slate-900 mb-3">{titulo}</h3>
-          <ol className="space-y-3 mb-2">
-            {pasos.map((paso, i) => (
-              <li key={i} className="flex gap-3 text-base text-slate-800 leading-relaxed">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white
-                                 text-base font-bold flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <span className="pt-0.5">{paso}</span>
-              </li>
-            ))}
-          </ol>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">¿Cómo instalarlo?</p>
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <button
+              onClick={() => setChosen('ios')}
+              className={`py-3.5 rounded-xl text-base font-bold border-2 transition-all ${
+                chosen === 'ios'
+                  ? 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-white border-slate-200 text-slate-700'
+              }`}
+            >
+              📱 iPhone
+            </button>
+            <button
+              onClick={() => setChosen('android')}
+              className={`py-3.5 rounded-xl text-base font-bold border-2 transition-all ${
+                chosen === 'android'
+                  ? 'bg-teal-600 border-teal-600 text-white'
+                  : 'bg-white border-slate-200 text-slate-700'
+              }`}
+            >
+              🤖 Android
+            </button>
+          </div>
 
-          {platform === 'android' && (
-            <p className="text-sm text-slate-500 leading-relaxed mb-6">
-              ¿Tu pantalla se ve distinta? Busca "Añadir a pantalla de inicio" o
-              "Instalar aplicación" en el menú de tu navegador.
-            </p>
+          {seleccion && (
+            <>
+              <h3 className="text-lg font-bold text-slate-900 mb-3">{seleccion.titulo}</h3>
+              <ol className="space-y-3 mb-2">
+                {seleccion.pasos.map((paso, i) => (
+                  <li key={i} className="flex gap-3 text-base text-slate-800 leading-relaxed">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white
+                                     text-base font-bold flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    <span className="pt-0.5">{paso}</span>
+                  </li>
+                ))}
+              </ol>
+
+              {chosen === 'android' && (
+                <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                  ¿Tu pantalla se ve distinta? Busca "Añadir a pantalla de inicio" o
+                  "Instalar aplicación" en el menú de tu navegador.
+                </p>
+              )}
+              {chosen === 'ios' && <div className="mb-6" />}
+            </>
           )}
-          {platform !== 'android' && <div className="mb-6" />}
 
           <button
             onClick={onContinue}

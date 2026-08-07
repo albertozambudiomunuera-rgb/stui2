@@ -19,6 +19,7 @@ export interface Screening {
   iief: boolean | null;
   oab: boolean | null;
   iciq: boolean | null;
+  diary: boolean | null; // ¿quiere rellenar el Diario Miccional de 3 días?
 }
 
 export interface DiaryEntry {

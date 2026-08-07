@@ -21,6 +21,7 @@ import { IIEFTab } from './components/tabs/IIEFTab';
 import { OABTab } from './components/tabs/OABTab';
 import { ICIQTab } from './components/tabs/ICIQTab';
 import { DashboardTab } from './components/tabs/DashboardTab';
+import { diaryUnlocked } from './lib/clinical';
 
 type AppMode = 'loading' | 'entry' | 'app' | 'express';
 
@@ -117,7 +118,7 @@ export default function App() {
       ...(s.iief ? ['iief' as TabId] : []),
       ...(s.oab ? ['oab' as TabId] : []),
       ...(s.iciq ? ['iciq' as TabId] : []),
-      'day-0', 'day-1', 'day-2',
+      ...(diaryUnlocked(actions.data) ? ['day-0' as TabId, 'day-1' as TabId, 'day-2' as TabId] : []),
       'dashboard',
     ];
     const idx = seq.indexOf(from);

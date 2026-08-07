@@ -204,26 +204,26 @@ describe('AUA OAB Assessment — sin bandas de gravedad', () => {
   });
 
   it('un total de 18 se reporta como 18/25 en el informe, sin categoría de gravedad', () => {
-    const data = appData({ screening: { iief: null, oab: true, iciq: null }, oab: oab([4, 4, 4, 3, 3]) });
+    const data = appData({ screening: { iief: null, oab: true, iciq: null, diary: null }, oab: oab([4, 4, 4, 3, 3]) });
     const note = generateClinicalNote(data);
     const oabLine = note.split('\n').find((l) => l.startsWith('AUA OAB Assessment'));
     expect(oabLine).toBe('AUA OAB Assessment: 18/25');
   });
 
   it('el informe incluye el descargo de responsabilidad del instrumento (OAB_DISCLAIMER)', () => {
-    const data = appData({ screening: { iief: null, oab: true, iciq: null }, oab: oab([4, 4, 4, 3, 3]) });
+    const data = appData({ screening: { iief: null, oab: true, iciq: null, diary: null }, oab: oab([4, 4, 4, 3, 3]) });
     expect(generateClinicalNote(data)).toContain(OAB_DISCLAIMER);
   });
 
   it('con la pregunta 1 en 0, el informe muestra "Sin urgencia miccional", no una banda', () => {
-    const data = appData({ screening: { iief: null, oab: true, iciq: null }, oab: oab([0, 0, 0, 0, 0]) });
+    const data = appData({ screening: { iief: null, oab: true, iciq: null, diary: null }, oab: oab([0, 0, 0, 0, 0]) });
     const note = generateClinicalNote(data);
     const oabLine = note.split('\n').find((l) => l.startsWith('AUA OAB Assessment'));
     expect(oabLine).toBe('AUA OAB Assessment: 0/25 (Sin urgencia miccional)');
   });
 
   it('ninguna variante de "Leve"/"Moderado"/"Grave" aparece asociada al AUA OAB', () => {
-    const data = appData({ screening: { iief: null, oab: true, iciq: null }, oab: oab([4, 4, 4, 3, 3]) });
+    const data = appData({ screening: { iief: null, oab: true, iciq: null, diary: null }, oab: oab([4, 4, 4, 3, 3]) });
     const note = generateClinicalNote(data);
     const oabLine = note.split('\n').find((l) => l.startsWith('AUA OAB Assessment'));
     expect(oabLine).not.toMatch(/Leve|Moderado|Grave/);

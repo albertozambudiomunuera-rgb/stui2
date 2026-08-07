@@ -61,10 +61,11 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
   const s = data.screening;
   const sex = data.patient.sex;
   const oabAnswered = s.oab !== null;
-  const canContinue = oabAnswered;
+  const diaryAnswered = s.diary !== null;
+  const canContinue = oabAnswered && diaryAnswered;
 
   const summaryItems = [
-    { label: 'Diario miccional (3 días)', done: true },
+    { label: s.diary ? 'Diario miccional (3 días) activado' : 'Diario miccional (3 días) — No', done: s.diary === true, na: s.diary === false },
     { label: 'IPSS', done: true },
     ...(sex === 'M' ? [{ label: s.iief ? 'IIEF-5 activado' : 'IIEF-5 — No aplica', done: s.iief === true, na: s.iief === false }] : []),
     { label: s.oab ? 'OAB (AUA) activado' : 'OAB (AUA) — No aplica', done: s.oab === true, na: s.oab === false },
@@ -74,7 +75,7 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
   return (
     <div className="max-w-xl mx-auto space-y-4 animate-fade-in">
       <div className="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-900/10 rounded-2xl p-5 border border-teal-100 dark:border-teal-800">
-        <h2 className="font-black text-teal-800 dark:text-teal-300 text-base mb-2">🎯 3 preguntas de cribado</h2>
+        <h2 className="font-black text-teal-800 dark:text-teal-300 text-base mb-2">🎯 Preguntas de cribado</h2>
         <p className="text-sm text-teal-700/80 dark:text-teal-400/80 leading-relaxed">
           Responde estas preguntas para activar solo los cuestionarios que te corresponden.
         </p>
@@ -110,6 +111,55 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
           accentClass="border-l-teal-500"
         />
       )}
+
+      {/* Diario Miccional — a diferencia de las anteriores, esta no cribra un
+          síntoma sino que explica en qué consiste el diario y pregunta si el
+          paciente quiere hacerlo. Una vez responde "Sí", queda desbloqueado
+          para las siguientes veces (la respuesta se guarda con el resto de
+          datos, igual que las demás preguntas de cribado). */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-500 border border-slate-100 dark:border-slate-800">
+        <div className="mb-3">
+          <Badge active={s.diary === true} label={s.diary === true ? 'Diario miccional activado' : 'Diario miccional bloqueado'} />
+        </div>
+        <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-2 flex items-center gap-2">
+          <span>🗓️</span> Diario Miccional de 3 días
+        </h3>
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+          Es un registro de cada vez que orinas y cada líquido que bebes, durante 3 días
+          seguidos. Con esa información tu médico ve con qué frecuencia orinas, cuánto
+          volumen y si te levantas por la noche — datos que los cuestionarios por sí
+          solos no dan.
+        </p>
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Lleva un minuto cada vez que vas al baño. Si tu médico no te lo ha pedido
+          expresamente, puedes responder "No" y seguir solo con los cuestionarios.
+        </p>
+        <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-4">
+          ¿Quieres rellenar el Diario Miccional?
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => actions.updateScreening('diary', true)}
+            className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
+              s.diary === true
+                ? 'bg-teal-700 border-teal-700 text-white shadow-md shadow-teal-700/20'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-teal-300'
+            }`}
+          >
+            Sí
+          </button>
+          <button
+            onClick={() => actions.updateScreening('diary', false)}
+            className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
+              s.diary === false
+                ? 'bg-slate-200 dark:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
+            }`}
+          >
+            No
+          </button>
+        </div>
+      </div>
 
       {oabAnswered && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">
