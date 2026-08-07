@@ -11,9 +11,13 @@ interface PatientTabProps {
   onToast: (msg: string) => void;
   onNext: () => void;
   onBackToEntry?: () => void;
+  /** false si la app no está instalada como PWA (riesgo de perder datos). */
+  installed?: boolean;
+  /** Reabre el aviso de instalación a pantalla completa (ya visto una vez, ahora bajo demanda). */
+  onOpenInstallHelp?: () => void;
 }
 
-export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackToEntry }: PatientTabProps) {
+export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackToEntry, installed, onOpenInstallHelp }: PatientTabProps) {
   const p = data.patient;
   const fileRef = useRef<HTMLInputElement>(null);
   // Colapsados por defecto: son secciones informativas/de mantenimiento que
@@ -64,6 +68,21 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
             Cambiar modo
           </button>
         </div>
+      )}
+
+      {/* Recordatorio pequeño y no bloqueante — el aviso a pantalla completa
+          solo sale una vez; a partir de ahí, si sigue sin instalarse, basta
+          con este aviso discreto y reabrible, no una interrupción cada vez. */}
+      {installed === false && onOpenInstallHelp && (
+        <button
+          onClick={onOpenInstallHelp}
+          className="w-full flex items-center gap-2.5 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-left hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+        >
+          <span className="text-lg flex-shrink-0">⚠️</span>
+          <span className="flex-1 text-sm text-amber-800 dark:text-amber-400 leading-snug">
+            App no instalada: tus datos podrían perderse. Toca para ver cómo instalarla.
+          </span>
+        </button>
       )}
 
       {/* Patient data card */}

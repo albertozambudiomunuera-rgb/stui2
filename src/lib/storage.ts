@@ -17,6 +17,8 @@ import { ensureEntryClientKeys } from './clinical';
 
 const LS_KEY = 'stuiv1';
 const DISCLAIMER_KEY = 'stuiv1_d';
+const INSTALL_PROMPT_KEY = 'stuiv1_ip';
+const DIARY_INTRO_KEY = 'stuiv1_di';
 
 // ── Helpers de cifrado para el storage ────────────────────────────────────────
 
@@ -177,6 +179,31 @@ export function isDisclaimerAccepted(): boolean {
 
 export function acceptDisclaimer(): void {
   try { localStorage.setItem(DISCLAIMER_KEY, '1'); } catch { /* ignore */ }
+}
+
+// ── Aviso de instalación ──────────────────────────────────────────────────────
+// El aviso a pantalla completa (InstallPrompt) solo se muestra una vez —
+// después, si sigue sin instalarse, se sustituye por un recordatorio
+// pequeño y no bloqueante (ver PatientTab) para no interrumpir cada vez.
+
+export function isInstallPromptSeen(): boolean {
+  try { return !!localStorage.getItem(INSTALL_PROMPT_KEY); } catch { return false; }
+}
+
+export function markInstallPromptSeen(): void {
+  try { localStorage.setItem(INSTALL_PROMPT_KEY, '1'); } catch { /* ignore */ }
+}
+
+// ── Introducción al Diario Miccional ──────────────────────────────────────────
+// Pantalla explicativa mostrada una sola vez, justo antes de entrar por
+// primera vez al Día 1 (ver App.tsx).
+
+export function isDiaryIntroSeen(): boolean {
+  try { return !!localStorage.getItem(DIARY_INTRO_KEY); } catch { return false; }
+}
+
+export function markDiaryIntroSeen(): void {
+  try { localStorage.setItem(DIARY_INTRO_KEY, '1'); } catch { /* ignore */ }
 }
 
 // ── Backup / Importación ──────────────────────────────────────────────────────

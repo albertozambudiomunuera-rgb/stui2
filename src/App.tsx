@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { TabId } from './types';
-import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, emptyData, idbClear } from './lib/storage';
+import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, isInstallPromptSeen, markInstallPromptSeen, isDiaryIntroSeen, markDiaryIntroSeen, emptyData, idbClear } from './lib/storage';
 import { clearPINSetup, clearStoredMode } from './lib/keyManager';
 import { useAppData } from './hooks/useAppData';
 import { useSecureInit } from './hooks/useSecureInit';
@@ -9,6 +9,7 @@ import { PINSetup } from './components/ui/PINSetup';
 import { Toast, useToast } from './components/ui/Toast';
 import { Disclaimer } from './components/ui/Disclaimer';
 import { InstallPrompt, isInstalled } from './components/ui/InstallPrompt';
+import { DiaryIntro } from './components/ui/DiaryIntro';
 import { Header } from './components/layout/Header';
 import { EntryScreen } from './components/screens/EntryScreen';
 import { RecommendationsScreen } from './components/screens/RecommendationsScreen';
@@ -31,6 +32,7 @@ export default function App() {
   const [tabHistory, setTabHistory] = useState<TabId[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showDiaryIntro, setShowDiaryIntro] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [idbActive, setIdbActive] = useState(true);
   const { toastMessage, toastVisible, showToast } = useToast();
@@ -58,9 +60,28 @@ export default function App() {
     })();
   }, [secure.status]);
 
+  // Pantalla introductoria del Diario Miccional: se dispara la primera vez
+  // que se entra al Día 1, y solo si no hay ya registros (evita mostrarla
+  // retroactivamente a quien ya tuviera el diario empezado antes de este
+  // cambio — ver el mismo criterio en diaryUnlocked()).
+  useEffect(() => {
+    if (mode !== 'app' || activeTab !== 'day-0' || isDiaryIntroSeen()) return;
+    const hasDiaryContent = actions.data.days.some((d) => d.entries.length > 0 || (d.pads?.length ?? 0) > 0);
+    if (!hasDiaryContent) setShowDiaryIntro(true);
+  }, [mode, activeTab]);
+
   const handleDisclaimerAccept = () => {
     setShowDisclaimer(false);
-    if (!isInstalled()) setShowInstallPrompt(true);
+    if (!isInstalled() && !isInstallPromptSeen()) setShowInstallPrompt(true);
+  };
+
+  // El aviso a pantalla completa se marca como visto la primera vez que se
+  // cierra (con cualquiera de los dos botones) y no se vuelve a mostrar
+  // solo; a partir de ahí, si sigue sin instalarse, PatientTab muestra un
+  // recordatorio pequeño que permite reabrirlo manualmente (setShowInstallPrompt(true)).
+  const handleInstallPromptContinue = () => {
+    markInstallPromptSeen();
+    setShowInstallPrompt(false);
   };
 
   const handleForgotPIN = async () => {
@@ -76,7 +97,7 @@ export default function App() {
       // Show disclaimer on first-time entry to app
       if (!isDisclaimerAccepted()) {
         setShowDisclaimer(true);
-      } else if (!isInstalled()) {
+      } else if (!isInstalled() && !isInstallPromptSeen()) {
         // Sin disclaimer pendiente, el aviso de instalación puede mostrarse
         // ya. Si hay disclaimer pendiente, espera a que se acepte
         // (handleDisclaimerAccept) para no apilar dos pantallas completas.
@@ -219,7 +240,10 @@ export default function App() {
     <div className="min-h-screen bg-white dark:bg-slate-950">
       <Disclaimer visible={showDisclaimer} onAccept={handleDisclaimerAccept} />
       {showInstallPrompt && (
-        <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
+        <InstallPrompt onContinue={handleInstallPromptContinue} />
+      )}
+      {showDiaryIntro && (
+        <DiaryIntro onContinue={() => { markDiaryIntroSeen(); setShowDiaryIntro(false); }} />
       )}
       <Toast message={toastMessage} visible={toastVisible} />
 
@@ -243,6 +267,8 @@ export default function App() {
             onToast={showToast}
             onNext={() => nav('screening')}
             onBackToEntry={() => { setMode('entry'); setTabHistory([]); }}
+            installed={isInstalled()}
+            onOpenInstallHelp={() => setShowInstallPrompt(true)}
           />
         )}
         {activeTab === 'screening' && (

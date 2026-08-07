@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Printer, Copy, CheckCircle, Trash2, PlusCircle } from 'lucide-react';
+import { Printer, Copy, CheckCircle, Trash2, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
@@ -31,6 +31,7 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   const [copied, setCopied] = useState(false);
   const [noteDraft, setNoteDraft] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   const handleAddNote = () => {
     const text = noteDraft.trim();
@@ -95,6 +96,14 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
   const note = generateClinicalNote(data);
+  // El bloque "Reglas clínicas aplicadas" es la cola del texto, tras el
+  // separador de guiones — se muestra aparte, desplegable, para no ocupar
+  // pantalla con referencias bibliográficas que el paciente no necesita
+  // leer. El texto para copiar/imprimir (note completo) no cambia.
+  const RULES_SEP = '\n' + '━'.repeat(44) + '\n';
+  const rulesIdx = note.indexOf(RULES_SEP);
+  const noteMain = rulesIdx >= 0 ? note.slice(0, rulesIdx) : note;
+  const noteRules = rulesIdx >= 0 ? note.slice(rulesIdx + RULES_SEP.length) : '';
 
   const handleCopy = async () => {
     try {
@@ -290,8 +299,26 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
           Nota para Historia Clínica
         </h3>
         <pre className="bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 rounded-2xl p-4 text-xs font-mono text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap overflow-x-auto">
-          {note}
+          {noteMain}
         </pre>
+
+        {noteRules && (
+          <div className="mt-2 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowRules((v) => !v)}
+              className="w-full flex items-center justify-between gap-2 px-4 py-2.5 text-left text-slate-500 dark:text-slate-400"
+            >
+              <span className="text-xs font-bold">Reglas clínicas aplicadas</span>
+              {showRules ? <ChevronUp size={14} className="flex-shrink-0" /> : <ChevronDown size={14} className="flex-shrink-0" />}
+            </button>
+            {showRules && (
+              <pre className="bg-slate-50 dark:bg-slate-900/40 border-t border-slate-100 dark:border-slate-800 p-4 text-xs font-mono text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap overflow-x-auto">
+                {noteRules}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
