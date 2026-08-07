@@ -233,7 +233,7 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
       {(svoids.length > 0 || day.entries.length > 0) && (
         <button onClick={onNext}
           className="w-full border-2 border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-400 font-black py-4 rounded-2xl text-base hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors">
-          {di < 2 ? `Continuar con Día ${di + 2} →` : 'Ir al IPSS →'}
+          {di < 2 ? `Continuar con Día ${di + 2} →` : 'Ver mi Informe →'}
         </button>
       )}
 

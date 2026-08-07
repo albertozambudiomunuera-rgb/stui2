@@ -1,5 +1,5 @@
 /**
- * InstallPrompt.tsx — Aviso de instalación en la pantalla de bienvenida.
+ * InstallPrompt.tsx — Aviso de instalación, solo en Modo Casa.
  *
  * MOTIVO CLÍNICO
  * Los navegadores móviles pueden desalojar IndexedDB cuando el sitio se usa
@@ -13,10 +13,12 @@
  *   · Safari macOS, pestaña             → persist() DENEGADO
  *   · Safari macOS, añadida al Dock     → persist() CONCEDIDO
  *
- * Se muestra al abrir la app, antes de elegir modo (Diario o Exprés), porque
+ * Se muestra SOLO al elegir "Voy a preparar mi consulta" (App.tsx), porque
  * el diario dura 3 días y la consulta suele ser semanas después: rellenarlo
  * en una pestaña expone al paciente a perder todos los datos antes de la
- * visita.
+ * visita. El Modo Sala de Espera se rellena de un tirón, con la pestaña
+ * abierta, así que este aviso no aplica ahí y no se muestra: solo añadiría
+ * ruido justo antes de entrar a consulta.
  */
 
 import { useEffect, useState } from 'react';
@@ -26,6 +28,10 @@ interface InstallPromptProps {
 }
 
 type Platform = 'ios' | 'android' | 'desktop';
+// Internet Samsung viene preinstalado y es el navegador por defecto en la
+// mayoría de móviles Samsung (muy extendidos entre pacientes mayores en
+// España), y su menú de instalación no se parece al de Chrome.
+type AndroidBrowser = 'samsung' | 'chrome';
 
 /** True si la app se está ejecutando instalada (no como pestaña del navegador). */
 export function isInstalled(): boolean {
@@ -43,12 +49,18 @@ function detectPlatform(): Platform {
   return 'desktop';
 }
 
+function detectAndroidBrowser(): AndroidBrowser {
+  return /SamsungBrowser/i.test(navigator.userAgent) ? 'samsung' : 'chrome';
+}
+
 export function InstallPrompt({ onContinue }: InstallPromptProps) {
   const [platform, setPlatform] = useState<Platform>('desktop');
+  const [androidBrowser, setAndroidBrowser] = useState<AndroidBrowser>('chrome');
   const [persisted, setPersisted] = useState<boolean | null>(null);
 
   useEffect(() => {
     setPlatform(detectPlatform());
+    setAndroidBrowser(detectAndroidBrowser());
     // Pedimos almacenamiento persistente: si el navegador lo concede
     // (habitualmente solo cuando está instalada), el riesgo desaparece.
     (async () => {
@@ -72,7 +84,7 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
     return null;
   }
 
-  const instrucciones: Record<Platform, { titulo: string; pasos: string[] }> = {
+  const instrucciones: Record<'ios' | 'desktop', { titulo: string; pasos: string[] }> = {
     ios: {
       titulo: 'Añade STUI a tu pantalla de inicio',
       pasos: [
@@ -80,15 +92,6 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
         'Baja y elige "Añadir a pantalla de inicio"',
         'Pulsa "Añadir" arriba a la derecha',
         'Cierra Safari y abre STUI desde el icono nuevo',
-      ],
-    },
-    android: {
-      titulo: 'Instala STUI en tu móvil',
-      pasos: [
-        'Pulsa el menú del navegador (los tres puntos, arriba a la derecha)',
-        'Elige "Instalar aplicación" o "Añadir a pantalla de inicio"',
-        'Confirma',
-        'Abre STUI desde el icono nuevo',
       ],
     },
     desktop: {
@@ -101,7 +104,29 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
     },
   };
 
-  const { titulo, pasos } = instrucciones[platform];
+  const androidInstrucciones: Record<AndroidBrowser, { titulo: string; pasos: string[] }> = {
+    chrome: {
+      titulo: 'Instala STUI en tu móvil (Chrome)',
+      pasos: [
+        'Toca los tres puntos ⋮ arriba a la derecha de la pantalla',
+        'Toca "Instalar aplicación" (si no aparece, toca "Añadir a pantalla de inicio")',
+        'Toca "Instalar" para confirmar',
+        'Cierra el navegador y abre STUI desde el icono nuevo',
+      ],
+    },
+    samsung: {
+      titulo: 'Instala STUI en tu móvil (Internet Samsung)',
+      pasos: [
+        'Toca el icono ≡ abajo a la derecha de la pantalla',
+        'Toca "Añadir página a" y luego "Pantalla de inicio"',
+        'Toca "Añadir" para confirmar',
+        'Cierra el navegador y abre STUI desde el icono nuevo',
+      ],
+    },
+  };
+
+  const { titulo, pasos } =
+    platform === 'android' ? androidInstrucciones[androidBrowser] : instrucciones[platform];
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
@@ -109,59 +134,67 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
         <div className="p-6">
 
           <div className="flex items-start gap-3 mb-4">
-            <span className="text-3xl leading-none" aria-hidden="true">⚠️</span>
+            <span className="text-4xl leading-none" aria-hidden="true">⚠️</span>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 leading-snug">
+              <h2 className="text-2xl font-bold text-slate-900 leading-snug">
                 Antes de empezar
               </h2>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-base text-slate-600 mt-1">
                 Un paso importante para no perder tus datos
               </p>
             </div>
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
-            <p className="text-[15px] text-amber-900 leading-relaxed">
+            <p className="text-base text-amber-900 leading-relaxed">
               Tus datos se guardan solo en este dispositivo. Si usas STUI como una
               pestaña normal del navegador, el móvil <strong>puede borrarlos</strong>{' '}
               con el tiempo, sobre todo si tardas días o semanas en volver a la app
               (por ejemplo, si estás rellenando el diario miccional de 3 días antes
               de tu consulta).
             </p>
-            <p className="text-[15px] text-amber-900 leading-relaxed mt-2">
+            <p className="text-base text-amber-900 leading-relaxed mt-2 font-semibold">
               Si la instalas, tus datos quedan protegidos.
             </p>
           </div>
 
-          <h3 className="font-semibold text-slate-900 mb-3">{titulo}</h3>
-          <ol className="space-y-2.5 mb-6">
+          <h3 className="text-lg font-bold text-slate-900 mb-3">{titulo}</h3>
+          <ol className="space-y-3 mb-2">
             {pasos.map((paso, i) => (
-              <li key={i} className="flex gap-3 text-[15px] text-slate-700 leading-relaxed">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-600 text-white
-                                 text-sm font-bold flex items-center justify-center">
+              <li key={i} className="flex gap-3 text-base text-slate-800 leading-relaxed">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white
+                                 text-base font-bold flex items-center justify-center">
                   {i + 1}
                 </span>
-                <span>{paso}</span>
+                <span className="pt-0.5">{paso}</span>
               </li>
             ))}
           </ol>
 
+          {platform === 'android' && (
+            <p className="text-sm text-slate-500 leading-relaxed mb-6">
+              ¿Tu pantalla se ve distinta? Busca "Añadir a pantalla de inicio" o
+              "Instalar aplicación" en el menú de tu navegador.
+            </p>
+          )}
+          {platform !== 'android' && <div className="mb-6" />}
+
           <button
             onClick={onContinue}
             className="w-full py-4 rounded-xl bg-teal-600 text-white font-semibold
-                       text-[17px] active:bg-teal-700"
+                       text-lg active:bg-teal-700"
           >
             Ya la he instalado, continuar
           </button>
 
           <button
             onClick={onContinue}
-            className="w-full py-3 mt-2 text-slate-600 text-[15px] underline"
+            className="w-full py-3 mt-2 text-slate-600 text-base underline"
           >
             Continuar de todas formas
           </button>
 
-          <p className="text-xs text-slate-600 text-center mt-4 leading-relaxed">
+          <p className="text-sm text-slate-600 text-center mt-4 leading-relaxed">
             Si continúas sin instalar, exporta el informe en PDF en cuanto
             termines cada día para no perder la información.
           </p>

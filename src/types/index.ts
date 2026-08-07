@@ -9,6 +9,10 @@ export interface Patient {
   sex: Sex;
   med: string;
   weight: string;
+  coffeePerDay: string;      // tazas de café al día (anamnesis)
+  colaPerDay: string;        // vasos/latas de cola al día (anamnesis)
+  smoker: 'yes' | 'no' | '';
+  cigarettesPerDay: string;  // solo relevante si smoker === 'yes'
 }
 
 export interface Screening {

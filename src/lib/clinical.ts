@@ -10,7 +10,11 @@ import type { AppData, DayData, DiaryEntry, DiaryStats, IPSSData, IIEFData, PadT
 // un resultado sea trazable a la versión de reglas que lo produjo (ver
 // pie de generateClinicalNote).
 export const CLINICAL_RULES = {
+  // Contador SECUENCIAL de la versión de reglas clínicas: 2026 es el año y
+  // .11 es la undécima revisión de ese año. NO es una fecha (no significa
+  // noviembre de 2026). La revisión anterior fue la 2026.10.
   version: '2026.11',
+  versionScheme: 'Contador secuencial año.revisión (2026.11 = undécima revisión de 2026). No es una fecha.',
   // La app agrupa por DÍAS NATURALES del registro, no por el periodo de 24h
   // encadenado (despertar→siguiente despertar) que define la ICS. Por eso
   // ningún valor se etiqueta "24 h": se etiqueta "del día registrado". Ver
@@ -65,12 +69,12 @@ export const DRINKS = [
 ];
 
 export const IPSS_QUESTIONS = [
-  { t: '¿Con qué frecuencia ha tenido la sensación de no vaciar completamente la vejiga al terminar de orinar?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
-  { t: '¿Con qué frecuencia ha tenido que volver a orinar en las dos horas siguientes?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
-  { t: '¿Con qué frecuencia ha notado que, al orinar, paraba y comenzaba de nuevo varias veces?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
-  { t: '¿Con qué frecuencia ha tenido dificultad para aguantarse las ganas de orinar?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
-  { t: '¿Con qué frecuencia ha observado que el chorro de orina es poco fuerte?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
-  { t: '¿Con qué frecuencia ha tenido que apretar o hacer fuerza para comenzar a orinar?', opts: ['Ninguna', '<1/5 veces', '<Mitad veces', '~Mitad veces', '>Mitad veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha tenido la sensación de no vaciar completamente la vejiga al terminar de orinar?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha tenido que volver a orinar en las dos horas siguientes?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha notado que, al orinar, paraba y comenzaba de nuevo varias veces?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha tenido dificultad para aguantarse las ganas de orinar?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha observado que el chorro de orina es poco fuerte?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
+  { t: '¿Con qué frecuencia ha tenido que apretar o hacer fuerza para comenzar a orinar?', opts: ['Ninguna', 'Menos de 1 de cada 5 veces', 'Menos de la mitad de las veces', 'La mitad de las veces', 'Más de la mitad de las veces', 'Casi siempre'] },
   { t: '¿Cuántas veces suele tener que levantarse para orinar desde que se va a la cama hasta que se levanta?', opts: ['Ninguna', '1 vez', '2 veces', '3 veces', '4 veces', '5 o más'] },
 ];
 
@@ -529,12 +533,23 @@ export function computeStats(data: AppData): DiaryStats {
 
 // ─── Clinical note ────────────────────────────────────────────────────
 
+/** Línea de hábitos (café, cola, tabaco) para el resumen final, solo con los datos que el paciente haya rellenado. */
+export function habitsLine(p: AppData['patient']): string {
+  const parts: string[] = [];
+  if (p.coffeePerDay) parts.push(`Café: ${p.coffeePerDay}/día`);
+  if (p.colaPerDay) parts.push(`Cola: ${p.colaPerDay}/día`);
+  if (p.smoker === 'yes') parts.push(`Fumador: sí${p.cigarettesPerDay ? ' (' + p.cigarettesPerDay + ' cig/día aprox.)' : ''}`);
+  else if (p.smoker === 'no') parts.push('Fumador: no');
+  return parts.join(' | ');
+}
+
 export function generateClinicalNote(data: AppData): string {
   const p = data.patient;
   const s = data.days.some((d) => d.entries.length > 0) ? computeStats(data) : null;
+  const habits = habitsLine(p);
   let t = 'EVALUACIÓN STUI\n';
   t += '━'.repeat(44) + '\n';
-  t += `Paciente: ${p.name || '—'}${p.age ? ' | ' + p.age : ''}${p.sex ? ' | ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' | ' + p.weight + ' kg' : ''}${p.med ? '\nMedicación: ' + p.med : ''}\n\n`;
+  t += `Paciente: ${p.name || '—'}${p.age ? ' | ' + p.age : ''}${p.sex ? ' | ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' | ' + p.weight + ' kg' : ''}${p.med ? '\nMedicación: ' + p.med : ''}${habits ? '\nHábitos: ' + habits : ''}\n\n`;
 
   if (s) {
     const dates = data.days.filter((d) => d.date).map((d) => d.date).join(' / ') || 'sin fecha';

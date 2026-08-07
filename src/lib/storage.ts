@@ -105,7 +105,7 @@ export async function checkIDBAvailable(): Promise<boolean> {
 
 export function emptyData(): AppData {
   return {
-    patient: { name: '', age: '', sex: '', med: '', weight: '' },
+    patient: { name: '', age: '', sex: '', med: '', weight: '', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
     screening: { iief: null, oab: null, iciq: null },
     days: [
       { date: '', wake: '', sleep: '', sleepOnset: '', padTestStatus: 'sin-registrar', dayComplete: false, entries: [], pads: [] },

@@ -141,7 +141,7 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
           onClick={onNext}
           className="w-full bg-teal-700 hover:bg-teal-800 active:scale-[0.98] text-white font-black py-4 rounded-2xl text-base transition-all shadow-lg shadow-teal-700/25"
         >
-          Continuar → Diario Miccional
+          Continuar → IPSS
         </button>
       )}
     </div>

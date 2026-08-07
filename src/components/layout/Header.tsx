@@ -11,16 +11,20 @@ interface HeaderProps {
   onOpenRecommendations?: () => void;
 }
 
+// El diario miccional (day-0/1/2) va al final, después de los cuestionarios:
+// se rellena a lo largo de 3 días mientras que los cuestionarios se
+// completan de un tirón, así que dejarlo para el final evita interrumpir
+// ese flujo continuo con una espera de varios días en medio.
 const TABS: { id: TabId; label: string; show: (data: AppData) => boolean }[] = [
   { id: 'patient', label: 'Perfil', show: () => true },
   { id: 'screening', label: 'Cribado', show: () => true },
-  { id: 'day-0', label: 'Día 1', show: () => true },
-  { id: 'day-1', label: 'Día 2', show: () => true },
-  { id: 'day-2', label: 'Día 3', show: () => true },
   { id: 'ipss', label: 'IPSS', show: () => true },
   { id: 'iief', label: 'IIEF-5', show: (d) => d.screening.iief === true },
   { id: 'oab', label: 'OAB (AUA)', show: (d) => d.screening.oab === true },
   { id: 'iciq', label: 'ICIQ-SF', show: (d) => d.screening.iciq === true },
+  { id: 'day-0', label: 'Día 1', show: () => true },
+  { id: 'day-1', label: 'Día 2', show: () => true },
+  { id: 'day-2', label: 'Día 3', show: () => true },
   { id: 'dashboard', label: 'Informe', show: () => true },
 ];
 

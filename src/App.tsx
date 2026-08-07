@@ -48,12 +48,19 @@ export default function App() {
       actions.restoreData(data);
       setIdbActive(idbOk);
       setMode('entry');
-      // El diario dura 3 días y la consulta es semanas después: si la app no
-      // está instalada, el navegador puede desalojar IndexedDB entre medias.
-      // Se avisa ya en la bienvenida, antes de elegir modo.
-      if (!isInstalled()) setShowInstallPrompt(true);
+      // El aviso de instalación ya NO se muestra aquí: el diario de 3 días
+      // (Modo Casa) es el único flujo que dura días y puede sufrir un
+      // desalojo de IndexedDB entre sesiones. El Modo Sala de Espera se
+      // rellena en una sola sentada con la pestaña abierta, sin ese riesgo
+      // — mostrar el aviso ahí solo genera ruido y confunde a pacientes
+      // mayores. Se dispara en handleChooseMode solo para 'home'.
     })();
   }, [secure.status]);
+
+  const handleDisclaimerAccept = () => {
+    setShowDisclaimer(false);
+    if (!isInstalled()) setShowInstallPrompt(true);
+  };
 
   const handleForgotPIN = async () => {
     await idbClear();
@@ -66,7 +73,14 @@ export default function App() {
     if (m === 'home') {
       setMode('app');
       // Show disclaimer on first-time entry to app
-      if (!isDisclaimerAccepted()) setShowDisclaimer(true);
+      if (!isDisclaimerAccepted()) {
+        setShowDisclaimer(true);
+      } else if (!isInstalled()) {
+        // Sin disclaimer pendiente, el aviso de instalación puede mostrarse
+        // ya. Si hay disclaimer pendiente, espera a que se acepte
+        // (handleDisclaimerAccept) para no apilar dos pantallas completas.
+        setShowInstallPrompt(true);
+      }
     } else {
       // El Modo Sala de Espera comparte los mismos datos que el modo Casa.
       // Antes se borraban aquí sin avisar cada vez que se entraba en Exprés,
@@ -94,11 +108,16 @@ export default function App() {
 
   const goToNextTab = (from: TabId): TabId => {
     const s = actions.data.screening;
+    // El diario miccional (day-0/1/2) va al final, después de los
+    // cuestionarios: se rellena a lo largo de 3 días, así que dejarlo para
+    // el final evita interrumpir con una espera de varios días el flujo de
+    // cuestionarios, que se completa de un tirón.
     const seq: TabId[] = [
-      'patient', 'screening', 'day-0', 'day-1', 'day-2', 'ipss',
+      'patient', 'screening', 'ipss',
       ...(s.iief ? ['iief' as TabId] : []),
       ...(s.oab ? ['oab' as TabId] : []),
       ...(s.iciq ? ['iciq' as TabId] : []),
+      'day-0', 'day-1', 'day-2',
       'dashboard',
     ];
     const idx = seq.indexOf(from);
@@ -177,9 +196,6 @@ export default function App() {
           onAddNote={actions.addNote}
           onOpenRecommendations={() => setShowRecommendations(true)}
         />
-        {showInstallPrompt && (
-          <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
-        )}
         {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
       </>
     );
@@ -200,7 +216,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">
-      <Disclaimer visible={showDisclaimer} onAccept={() => setShowDisclaimer(false)} />
+      <Disclaimer visible={showDisclaimer} onAccept={handleDisclaimerAccept} />
+      {showInstallPrompt && (
+        <InstallPrompt onContinue={() => setShowInstallPrompt(false)} />
+      )}
       <Toast message={toastMessage} visible={toastVisible} />
 
       {showRecommendations && <RecommendationsScreen onClose={() => setShowRecommendations(false)} />}
@@ -229,7 +248,7 @@ export default function App() {
           <ScreeningTab
             data={d}
             actions={actions}
-            onNext={() => nav('day-0')}
+            onNext={() => nav(goToNextTab('screening'))}
           />
         )}
         {(['day-0', 'day-1', 'day-2'] as TabId[]).map((id) => {
@@ -270,7 +289,7 @@ export default function App() {
           <ICIQTab
             data={d}
             actions={actions}
-            onNext={() => nav('dashboard')}
+            onNext={() => nav(goToNextTab('iciq'))}
           />
         )}
         {activeTab === 'dashboard' && (

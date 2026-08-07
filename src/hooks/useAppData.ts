@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { AppData, DayData, DiaryEntry, PadEntry } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
 import { uid, isDuplicateByClientKey } from '../lib/clinical';
@@ -6,13 +6,49 @@ import { uid, isDuplicateByClientKey } from '../lib/clinical';
 export function useAppData(initialData: AppData) {
   const [data, setData] = useState<AppData>(initialData);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Último estado pendiente de escribir: si el paciente cierra la pestaña
+  // antes de que salten los 300 ms de debounce, el setTimeout de save() se
+  // pierde con la pestaña. Se guarda aquí también para poder forzar la
+  // escritura inmediatamente al ocultarse la página (ver flush más abajo).
+  const pendingRef = useRef<AppData | null>(null);
 
   // idbSave escribe en IndexedDB y en localStorage (cifrado) en un único punto
   const save = useCallback((newData: AppData) => {
+    pendingRef.current = newData;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      idbSave(JSON.stringify(newData));
+      saveTimerRef.current = null;
+      const toSave = pendingRef.current;
+      pendingRef.current = null;
+      if (toSave) idbSave(JSON.stringify(toSave));
     }, 300);
+  }, []);
+
+  // Crítico para el Modo Sala de Espera: el paciente suele rellenar los
+  // cuestionarios y cerrar la pestaña de inmediato para enseñarla en
+  // consulta minutos u horas después. 'visibilitychange'/'pagehide' se
+  // disparan de forma fiable al cerrar, cambiar de pestaña o ir a otra app
+  // (a diferencia de 'beforeunload', poco fiable en móvil) — se usan para
+  // adelantar el guardado pendiente y no depender del temporizador de 300 ms.
+  useEffect(() => {
+    const flush = () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      const toSave = pendingRef.current;
+      pendingRef.current = null;
+      if (toSave) idbSave(JSON.stringify(toSave));
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pagehide', flush);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pagehide', flush);
+    };
   }, []);
 
   const update = useCallback(<K extends keyof AppData>(key: K, val: AppData[K]) => {

@@ -116,7 +116,10 @@ describe('IPSS', () => {
 // ═══════════════════════════════════════════════════════════════════
 
 describe('IIEF-5', () => {
-  it('mínimo → 0', () => expect(iiefScore(iief([0, 0, 0, 0, 0]))).toBe(0));
+  // Acumulador interno: cinco ceros NO son una cumplimentación válida del
+  // instrumento (el ítem 1 se puntúa 1-5). Esta prueba comprueba únicamente
+  // la aritmética de la suma, no una respuesta admisible del paciente.
+  it('acumulador interno: la suma de cinco ceros es 0 (no es una respuesta válida del instrumento)', () => expect(iiefScore(iief([0, 0, 0, 0, 0]))).toBe(0));
   it('máximo → 25', () => expect(iiefScore(iief([5, 5, 5, 5, 5]))).toBe(25));
   it('caso a mano: 4+3+5+2+1 = 15', () => {
     expect(iiefScore(iief([4, 3, 5, 2, 1]))).toBe(15);
@@ -302,7 +305,8 @@ describe('ICIQ-SF', () => {
 
 // ═══════════════════════════════════════════════════════════════════
 // Pad test — Cambio 1: la app deja de clasificar el pad test por
-// gravedad. padSeverity() se elimina; solo se reportan gramos/24h y el
+// gravedad. padSeverity() se elimina; solo se reportan gramos por día
+// registrado (no un periodo de 24 h ICS) y el
 // número de días válidos (ver describe "pad test por día" más abajo).
 // ═══════════════════════════════════════════════════════════════════
 
@@ -780,12 +784,13 @@ describe('días válidos para el promedio (regla interna, sin recuento de miccio
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// Volumen 24h en ml/kg — Cambio 3: se calcula y se muestra el valor,
-// pero la app ya NO lo etiqueta como "poliuria" ni aplica ningún
-// umbral (el booleano `poly` se elimina de DiaryStats).
+// Volumen del día registrado en ml/kg — Cambio 3: se calcula y se muestra
+// el valor, pero la app ya NO lo etiqueta como "poliuria" ni aplica ningún
+// umbral (el booleano `poly` se elimina de DiaryStats). No es un volumen
+// de 24 h ICS: ver PERIOD_DISCLAIMER.
 // ═══════════════════════════════════════════════════════════════════
 
-describe('volumen 24h en ml/kg (sin etiqueta de umbral)', () => {
+describe('volumen del día registrado en ml/kg (sin etiqueta de umbral)', () => {
   const fourVoidsSumming = (total: number) => {
     const each = total / 4;
     return [
@@ -798,7 +803,7 @@ describe('volumen 24h en ml/kg (sin etiqueta de umbral)', () => {
 
   it('50 kg / 2500 ml → 50 ml/kg por día registrado', () => {
     const data = appData({
-      patient: { name: '', age: '', sex: '', med: '', weight: '50' },
+      patient: { name: '', age: '', sex: '', med: '', weight: '50', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
       days: [emptyDay({ date: '2026-01-01', wake: '07:00', sleep: '23:00', dayComplete: true, entries: fourVoidsSumming(2500) })],
     });
     const s = computeStats(data);
@@ -807,7 +812,7 @@ describe('volumen 24h en ml/kg (sin etiqueta de umbral)', () => {
 
   it('100 kg / 3000 ml → 30 ml/kg por día registrado', () => {
     const data = appData({
-      patient: { name: '', age: '', sex: '', med: '', weight: '100' },
+      patient: { name: '', age: '', sex: '', med: '', weight: '100', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
       days: [emptyDay({ date: '2026-01-01', wake: '07:00', sleep: '23:00', dayComplete: true, entries: fourVoidsSumming(3000) })],
     });
     const s = computeStats(data);
@@ -824,7 +829,7 @@ describe('volumen 24h en ml/kg (sin etiqueta de umbral)', () => {
 
   it('un valor de exactamente 40 ml/kg se calcula igual que cualquier otro: no hay salto de categoría', () => {
     const data = appData({
-      patient: { name: '', age: '', sex: '', med: '', weight: '70' },
+      patient: { name: '', age: '', sex: '', med: '', weight: '70', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
       days: [emptyDay({ date: '2026-01-01', wake: '07:00', sleep: '23:00', dayComplete: true, entries: fourVoidsSumming(2800) })],
     });
     const s = computeStats(data);
@@ -833,7 +838,7 @@ describe('volumen 24h en ml/kg (sin etiqueta de umbral)', () => {
 
   it('el peso con coma decimal ("72,5") se interpreta correctamente (A08, tanda 2)', () => {
     const data = appData({
-      patient: { name: '', age: '', sex: '', med: '', weight: '72,5' },
+      patient: { name: '', age: '', sex: '', med: '', weight: '72,5', coffeePerDay: '', colaPerDay: '', smoker: '', cigarettesPerDay: '' },
       days: [emptyDay({ date: '2026-01-01', wake: '07:00', sleep: '23:00', dayComplete: true, entries: fourVoidsSumming(2900) })],
     });
     const s = computeStats(data);

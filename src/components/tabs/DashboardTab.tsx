@@ -6,7 +6,7 @@ import {
   iiefScore, iiefComplete, iiefSeverity,
   oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER, iciqScore, iciqComplete, iciqSeverity,
   computeStats, generateClinicalNote, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
-  CLINICAL_RULES,
+  CLINICAL_RULES, habitsLine,
 } from '../../lib/clinical';
 
 // Cambio 2: "Nocturia" es una ventana horaria, no un dato único. Si hay hora
@@ -106,6 +106,7 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
 
   const handlePrint = () => {
     const fecha = new Date().toLocaleDateString('es-ES');
+    const habits = habitsLine(p);
     const scoreRows = [
       hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : `<tr><td><b>IPSS</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>`,
       s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} de ${s.totalDays} días</td><td>CVF ${s.maxV !== null ? s.maxV + 'ml' : naText} · Vol. nocturno ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>${nocturiaLabel(s)} · IUU ${s.ul} ep.</td></tr>` : '',
@@ -132,7 +133,7 @@ td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
 @media print{body{margin:20px auto}}
 </style></head><body>
 <h1>Resumen Clínico STUI</h1>
-<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + p.med : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
+<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + p.med : ''}${habits ? ' · ' + habits : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${findings.length ? `<div class="algo"><h3>📊 Hallazgos registrados</h3><ul>${findings.map((f) => `<li>${f}</li>`).join('')}</ul></div>` : ''}
@@ -179,7 +180,7 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       {p.name && (
         <div className="bg-gradient-to-br from-teal-700 to-teal-900 rounded-2xl p-5 text-white">
           <div className="text-lg font-black">{p.name}</div>
-          <div className="text-sm text-teal-200 mt-1">{[p.age, p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : null, p.weight ? `${p.weight} kg` : null, p.med ? `Medicación: ${p.med}` : null].filter(Boolean).join(' · ')}</div>
+          <div className="text-sm text-teal-200 mt-1">{[p.age, p.sex ? (p.sex === 'M' ? '♂ Varón' : '♀ Mujer') : null, p.weight ? `${p.weight} kg` : null, p.med ? `Medicación: ${p.med}` : null, habitsLine(p) || null].filter(Boolean).join(' · ')}</div>
         </div>
       )}
 
