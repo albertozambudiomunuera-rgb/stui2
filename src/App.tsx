@@ -254,7 +254,10 @@ export default function App() {
         onTabChange={nav}
         canGoBack={tabHistory.length > 0}
         onBack={goBack}
-        onBackToEntry={() => { setMode('entry'); setTabHistory([]); }}
+        // En Perfil, PatientTab ya tiene su propio control arriba a la
+        // derecha para volver a la entrada — mostrar también el de aquí
+        // duplicaría el mismo botón dos veces en la misma pantalla.
+        onBackToEntry={activeTab === 'patient' ? undefined : () => { setMode('entry'); setTabHistory([]); }}
         onOpenRecommendations={() => setShowRecommendations(true)}
       />
 

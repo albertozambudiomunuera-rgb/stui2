@@ -4,7 +4,7 @@ import type { AppData, DiaryEntry } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
 import { MiccionSheet } from '../modals/MiccionSheet';
 import { BebidaSheet } from '../modals/BebidaSheet';
-import { isNight, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS, nowTime, parseDecimal } from '../../lib/clinical';
+import { isNight, URGENCY_COLORS, URGENCY_TEXT_COLORS, URGENCY_LABELS, nowTime, parseDecimal, DIARY_PURPOSE, DIARY_HOWTO_STEPS, DIARY_HOWTO_NOTE } from '../../lib/clinical';
 
 interface DayTabProps {
   data: AppData;
@@ -74,15 +74,12 @@ export function DayTab({ data, actions, dayIndex: di, onToast, onNext }: DayTabP
 
         {showHelp && (
           <div className="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-4 mb-4 space-y-2 text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-            <p><strong>¿Para qué sirve?</strong> Registrar cada micción y cada bebida durante 3 días permite a tu médico ver con qué frecuencia orinas, cuánto volumen y si te levantas por la noche.</p>
+            <p><strong>¿Para qué sirve?</strong> {DIARY_PURPOSE}</p>
             <p><strong>¿Cómo se rellena?</strong></p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Cada vez que orines, pulsa <strong>🚽 Micción</strong> y anota la hora, la cantidad aproximada y si sentiste urgencia.</li>
-              <li>Cada vez que bebas algo, pulsa <strong>🥤 Bebida</strong> y anota el tipo y la cantidad.</li>
-              <li>Indica la hora a la que te levantas y te acuestas cada día.</li>
-              <li>Al terminar el día, marca "He terminado de registrar este día".</li>
+              {DIARY_HOWTO_STEPS.map((step, i) => <li key={i}>{step}</li>)}
             </ul>
-            <p>No hace falta que sea exacto al mililitro: una estimación a ojo es suficiente.</p>
+            <p>{DIARY_HOWTO_NOTE}</p>
           </div>
         )}
 

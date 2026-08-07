@@ -8,6 +8,8 @@
  * es solo la primera toma de contacto.
  */
 
+import { DIARY_HOWTO_STEPS, DIARY_HOWTO_NOTE } from '../../lib/clinical';
+
 interface DiaryIntroProps {
   onContinue: () => void;
 }
@@ -42,12 +44,9 @@ export function DiaryIntro({ onContinue }: DiaryIntroProps) {
           <div className="bg-slate-50 rounded-xl p-4 mb-5 space-y-2 text-base text-slate-700 leading-relaxed">
             <p className="font-bold text-slate-800">¿Cómo se rellena?</p>
             <ul className="list-disc pl-5 space-y-1.5">
-              <li>Cada vez que orines, pulsa <strong>🚽 Micción</strong> y anota la hora, la cantidad aproximada y si sentiste urgencia.</li>
-              <li>Cada vez que bebas algo, pulsa <strong>🥤 Bebida</strong> y anota el tipo y la cantidad.</li>
-              <li>Indica la hora a la que te levantas y te acuestas cada día.</li>
-              <li>Al terminar el día, marca "He terminado de registrar este día".</li>
+              {DIARY_HOWTO_STEPS.map((step, i) => <li key={i}>{step}</li>)}
             </ul>
-            <p>No hace falta que sea exacto al mililitro: una estimación a ojo es suficiente.</p>
+            <p>{DIARY_HOWTO_NOTE}</p>
           </div>
 
           <p className="text-sm text-slate-500 leading-relaxed mb-6">

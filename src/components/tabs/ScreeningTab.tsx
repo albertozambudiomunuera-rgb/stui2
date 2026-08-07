@@ -10,6 +10,8 @@ interface ScreeningTabProps {
 
 interface ScrCardProps {
   badge: React.ReactNode;
+  title?: string;
+  description?: React.ReactNode;
   question: string;
   value: boolean | null;
   onYes: () => void;
@@ -17,10 +19,16 @@ interface ScrCardProps {
   accentClass: string;
 }
 
-function ScrCard({ badge, question, value, onYes, onNo, accentClass }: ScrCardProps) {
+function ScrCard({ badge, title, description, question, value, onYes, onNo, accentClass }: ScrCardProps) {
   return (
     <div className={`bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border-l-4 border border-slate-100 dark:border-slate-800 ${accentClass}`}>
       <div className="mb-3">{badge}</div>
+      {title && (
+        <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-2 flex items-center gap-2">{title}</h3>
+      )}
+      {description && (
+        <div className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2 space-y-2">{description}</div>
+      )}
       <p className="text-base font-semibold text-slate-700 dark:text-slate-300 leading-relaxed mb-4">{question}</p>
       <div className="flex gap-3">
         <button
@@ -117,49 +125,29 @@ export function ScreeningTab({ data, actions, onNext }: ScreeningTabProps) {
           paciente quiere hacerlo. Una vez responde "Sí", queda desbloqueado
           para las siguientes veces (la respuesta se guarda con el resto de
           datos, igual que las demás preguntas de cribado). */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-500 border border-slate-100 dark:border-slate-800">
-        <div className="mb-3">
-          <Badge active={s.diary === true} label={s.diary === true ? 'Diario miccional activado' : 'Diario miccional bloqueado'} />
-        </div>
-        <h3 className="font-black text-slate-800 dark:text-slate-100 text-base mb-2 flex items-center gap-2">
-          <span>🗓️</span> Diario Miccional de 3 días
-        </h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
-          Es un registro de cada vez que orinas y cada líquido que bebes, durante 3 días
-          seguidos. Con esa información tu médico ve con qué frecuencia orinas, cuánto
-          volumen y si te levantas por la noche — datos que los cuestionarios por sí
-          solos no dan.
-        </p>
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-          Lleva un minuto cada vez que vas al baño. Si tu médico no te lo ha pedido
-          expresamente, puedes responder "No" y seguir solo con los cuestionarios.
-        </p>
-        <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-4">
-          ¿Quieres rellenar el Diario Miccional?
-        </p>
-        <div className="flex gap-3">
-          <button
-            onClick={() => actions.updateScreening('diary', true)}
-            className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
-              s.diary === true
-                ? 'bg-teal-700 border-teal-700 text-white shadow-md shadow-teal-700/20'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-teal-300'
-            }`}
-          >
-            Sí
-          </button>
-          <button
-            onClick={() => actions.updateScreening('diary', false)}
-            className={`flex-1 min-h-[52px] rounded-xl font-black text-base border-2 transition-all ${
-              s.diary === false
-                ? 'bg-slate-200 dark:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'
-            }`}
-          >
-            No
-          </button>
-        </div>
-      </div>
+      <ScrCard
+        badge={<Badge active={s.diary === true} label={s.diary === true ? 'Diario miccional activado' : 'Diario miccional bloqueado'} />}
+        title="🗓️ Diario Miccional de 3 días"
+        description={
+          <>
+            <p>
+              Es un registro de cada vez que orinas y cada líquido que bebes, durante 3 días
+              seguidos. Con esa información tu médico ve con qué frecuencia orinas, cuánto
+              volumen y si te levantas por la noche — datos que los cuestionarios por sí
+              solos no dan.
+            </p>
+            <p>
+              Lleva un minuto cada vez que vas al baño. Si tu médico no te lo ha pedido
+              expresamente, puedes responder "No" y seguir solo con los cuestionarios.
+            </p>
+          </>
+        }
+        question="¿Quieres rellenar el Diario Miccional?"
+        value={s.diary}
+        onYes={() => actions.updateScreening('diary', true)}
+        onNo={() => actions.updateScreening('diary', false)}
+        accentClass="border-l-emerald-500"
+      />
 
       {oabAnswered && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-slate-800">

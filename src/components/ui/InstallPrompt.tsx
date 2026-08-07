@@ -181,7 +181,7 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
           {seleccion && (
             <>
               <h3 className="text-lg font-bold text-slate-900 mb-3">{seleccion.titulo}</h3>
-              <ol className="space-y-3 mb-2">
+              <ol className="space-y-3 mb-6">
                 {seleccion.pasos.map((paso, i) => (
                   <li key={i} className="flex gap-3 text-base text-slate-800 leading-relaxed">
                     <span className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-600 text-white
@@ -194,12 +194,11 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
               </ol>
 
               {chosen === 'android' && (
-                <p className="text-sm text-slate-500 leading-relaxed mb-6">
+                <p className="text-sm text-slate-500 leading-relaxed -mt-4 mb-6">
                   ¿Tu pantalla se ve distinta? Busca "Añadir a pantalla de inicio" o
                   "Instalar aplicación" en el menú de tu navegador.
                 </p>
               )}
-              {chosen === 'ios' && <div className="mb-6" />}
             </>
           )}
 

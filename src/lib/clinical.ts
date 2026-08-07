@@ -341,6 +341,20 @@ export function iciqSeverity(sc: number): { text: string; colorClass: string } {
 // y se deja la interpretación al clínico (ver PAD_TEST_DISCLAIMER).
 export const PAD_TEST_DISCLAIMER = 'Valor no clasificado: las bandas de gravedad del pad test dependen de la población y del protocolo.';
 
+// Texto de "¿Cómo se rellena?" del Diario Miccional — compartido entre
+// DiaryIntro.tsx (pantalla de bienvenida, una sola vez) y DayTab.tsx (panel
+// desplegable, siempre disponible), para que ambos digan siempre lo mismo.
+export const DIARY_PURPOSE = 'Registrar cada micción y cada bebida durante 3 días permite a tu médico ver con qué frecuencia orinas, cuánto volumen y si te levantas por la noche.';
+
+export const DIARY_HOWTO_STEPS = [
+  'Cada vez que orines, pulsa 🚽 Micción y anota la hora, la cantidad aproximada y si sentiste urgencia.',
+  'Cada vez que bebas algo, pulsa 🥤 Bebida y anota el tipo y la cantidad.',
+  'Indica la hora a la que te levantas y te acuestas cada día.',
+  'Al terminar el día, marca "He terminado de registrar este día".',
+];
+
+export const DIARY_HOWTO_NOTE = 'No hace falta que sea exacto al mililitro: una estimación a ojo es suficiente.';
+
 // Calcula el pad test por día (no acumulado). Cambio 3 (ronda 3 · punto 3.4):
 // el criterio anterior (excluir todo día sin absorbentes) confundía "el
 // paciente no registró este día" con "el paciente registró un día seco, sin
