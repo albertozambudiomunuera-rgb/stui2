@@ -80,7 +80,7 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
         >
           <span className="text-lg flex-shrink-0">⚠️</span>
           <span className="flex-1 text-sm text-amber-800 dark:text-amber-400 leading-snug">
-            App no instalada: tus datos podrían perderse. Toca para ver cómo instalarla.
+            ¿Tienes la app instalada? Si no, tus datos podrían perderse — toca para ver cómo instalarla.
           </span>
         </button>
       )}
