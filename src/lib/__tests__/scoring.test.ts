@@ -27,7 +27,7 @@ import {
   iciqScore, iciqSeverity,
   padDayStats,
   toMin, isNight,
-  computeStats, generateClinicalNote,
+  computeStats, generateClinicalNote, splitClinicalNote,
   isValidScaleValue, ipssItemValid, iiefItem1Valid, iiefItemValid,
   oabItemValid, iciqQ1Valid, iciqQ2Valid, urgencyValid,
   parseDecimal, isDuplicateByClientKey,
@@ -227,6 +227,35 @@ describe('AUA OAB Assessment — sin bandas de gravedad', () => {
     const note = generateClinicalNote(data);
     const oabLine = note.split('\n').find((l) => l.startsWith('AUA OAB Assessment'));
     expect(oabLine).not.toMatch(/Leve|Moderado|Grave/);
+  });
+});
+
+describe('splitClinicalNote — informe visible vs. reglas desplegables', () => {
+  // Regresión: generateClinicalNote() usa el mismo separador de guiones para
+  // abrir la cabecera "EVALUACIÓN STUI" Y para introducir la cola de reglas
+  // clínicas. Un indexOf() ingenuo encuentra el primero (la cabecera) y deja
+  // todo el informe — paciente, puntuaciones, hallazgos — escondido dentro
+  // del desplegable, visible solo el título. Debe usarse el último separador.
+  it('el cuerpo principal conserva las puntuaciones y no incluye las reglas', () => {
+    const data = appData({ ipss: ipss([1, 1, 1, 1, 1, 1, 1]) });
+    const note = generateClinicalNote(data);
+    const { main, rules } = splitClinicalNote(note);
+    expect(main).toContain('IPSS: 7/35');
+    expect(main).not.toContain('Reglas clínicas aplicadas');
+    expect(rules.startsWith('Reglas clínicas aplicadas')).toBe(true);
+  });
+
+  it('las reglas incluyen el pie "Informe generado con STUI App"', () => {
+    const data = appData({ ipss: ipss([1, 1, 1, 1, 1, 1, 1]) });
+    const { rules } = splitClinicalNote(generateClinicalNote(data));
+    expect(rules).toContain('Informe generado con STUI App');
+  });
+
+  it('concatenar main + separador + rules reconstruye el informe completo', () => {
+    const data = appData({ ipss: ipss([1, 1, 1, 1, 1, 1, 1]) });
+    const note = generateClinicalNote(data);
+    const { main, rules } = splitClinicalNote(note);
+    expect(main + '\n' + '━'.repeat(44) + '\n' + rules).toBe(note);
   });
 });
 

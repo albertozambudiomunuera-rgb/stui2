@@ -5,7 +5,7 @@ import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
   iiefScore, iiefComplete, iiefSeverity,
   oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER, iciqScore, iciqComplete, iciqSeverity,
-  computeStats, generateClinicalNote, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
+  computeStats, generateClinicalNote, splitClinicalNote, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
   CLINICAL_RULES, habitsLine,
 } from '../../lib/clinical';
 
@@ -96,14 +96,11 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
   const note = generateClinicalNote(data);
-  // El bloque "Reglas clínicas aplicadas" es la cola del texto, tras el
-  // separador de guiones — se muestra aparte, desplegable, para no ocupar
-  // pantalla con referencias bibliográficas que el paciente no necesita
-  // leer. El texto para copiar/imprimir (note completo) no cambia.
-  const RULES_SEP = '\n' + '━'.repeat(44) + '\n';
-  const rulesIdx = note.indexOf(RULES_SEP);
-  const noteMain = rulesIdx >= 0 ? note.slice(0, rulesIdx) : note;
-  const noteRules = rulesIdx >= 0 ? note.slice(rulesIdx + RULES_SEP.length) : '';
+  // El bloque "Reglas clínicas aplicadas" se muestra aparte, desplegable,
+  // para no ocupar pantalla con referencias bibliográficas que el paciente
+  // no necesita leer. El texto para copiar/imprimir (note completo) no
+  // cambia. Ver splitClinicalNote() en clinical.ts.
+  const { main: noteMain, rules: noteRules } = splitClinicalNote(note);
 
   const handleCopy = async () => {
     try {

@@ -10,7 +10,7 @@ import {
   iiefScore, iiefComplete, iiefSeverity,
   oabScore, oabComplete, oabNoUrgency, OAB_DISCLAIMER,
   iciqScore, iciqComplete, iciqSeverity,
-  generateClinicalNote, computeStats, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
+  generateClinicalNote, splitClinicalNote, computeStats, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
   CLINICAL_RULES,
 } from '../../lib/clinical';
 
@@ -506,11 +506,9 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
   // (versión + fuentes bibliográficas) se separa para mostrarla en un
   // desplegable aparte, colapsado por defecto — es la parte más engorrosa
   // de leer en el resumen y no es lo primero que el médico necesita ver.
-  // El texto para copiar/imprimir (note completo) no cambia.
-  const RULES_SEP = '\n' + '━'.repeat(44) + '\n';
-  const rulesIdx = note.indexOf(RULES_SEP);
-  const noteMain = rulesIdx >= 0 ? note.slice(0, rulesIdx) : note;
-  const noteRules = rulesIdx >= 0 ? note.slice(rulesIdx + RULES_SEP.length) : '';
+  // El texto para copiar/imprimir (note completo) no cambia. Ver
+  // splitClinicalNote() en clinical.ts.
+  const { main: noteMain, rules: noteRules } = splitClinicalNote(note);
 
   const scoreCards = [
     hasIPSS && { title: 'IPSS', val: ipssVal, max: '/35', sev: ipssSev, accent: 'teal', extra: `${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' · QoL: ' + IPSS_QOL[data.ipss.qol] : ''}` },

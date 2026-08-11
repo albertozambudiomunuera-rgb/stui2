@@ -661,3 +661,20 @@ export function generateClinicalNote(data: AppData): string {
   t += `Informe generado con STUI App · AEU · ${new Date().toLocaleDateString('es-ES')}`;
   return t;
 }
+
+const RULES_FOOTER_SEP = '\n' + '━'.repeat(44) + '\n';
+
+/**
+ * Separa generateClinicalNote() en el cuerpo principal y la cola de "Reglas
+ * clínicas aplicadas" (versión + fuentes bibliográficas), para que la UI
+ * pueda mostrar esa cola en un desplegable colapsado sin tapar el resto del
+ * informe. Usa el ÚLTIMO separador, no el primero: el mismo separador de
+ * guiones abre también la cabecera "EVALUACIÓN STUI", así que buscar el
+ * primero cortaría el informe justo después del título.
+ * El texto para copiar/imprimir sigue usando generateClinicalNote() completo.
+ */
+export function splitClinicalNote(note: string): { main: string; rules: string } {
+  const idx = note.lastIndexOf(RULES_FOOTER_SEP);
+  if (idx < 0) return { main: note, rules: '' };
+  return { main: note.slice(0, idx), rules: note.slice(idx + RULES_FOOTER_SEP.length) };
+}
