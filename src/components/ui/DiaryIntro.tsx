@@ -9,15 +9,20 @@
  */
 
 import { DIARY_HOWTO_STEPS, DIARY_HOWTO_NOTE } from '../../lib/clinical';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface DiaryIntroProps {
   onContinue: () => void;
 }
 
 export function DiaryIntro({ onContinue }: DiaryIntroProps) {
+  useBodyScrollLock(true);
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
-      <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto">
+    // Scroll en el contenedor exterior (inset-0, no vh) en vez de max-h en
+    // vh en la tarjeta — ver el porqué en InstallPrompt.tsx.
+    <div className="fixed inset-0 z-[200] overflow-y-auto overscroll-contain bg-black/60">
+      <div className="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl">
         <div className="p-6">
 
           <div className="flex items-start gap-3 mb-4">
@@ -63,6 +68,7 @@ export function DiaryIntro({ onContinue }: DiaryIntroProps) {
           </button>
 
         </div>
+      </div>
       </div>
     </div>
   );

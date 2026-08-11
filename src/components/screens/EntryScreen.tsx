@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, Building2, MessageSquareHeart, BookOpen, ChevronRight, Save } from 'lucide-react';
+import { Home, Building2, MessageSquareHeart, BookOpen, ChevronRight, Save, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface EntryScreenProps {
   onChoose: (mode: 'home' | 'express') => void;
@@ -11,6 +11,10 @@ interface EntryScreenProps {
 export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendations }: EntryScreenProps) {
   const [draft, setDraft] = useState('');
   const [saved, setSaved] = useState(false);
+  // Colapsado por defecto: lo primero que debe ver el paciente son las 2
+  // tarjetas de elección, no la Escuela de Salud Vesical ni el cuadro de
+  // notas — con las que se hacían un lío antes de decidir Casa/Exprés.
+  const [showMore, setShowMore] = useState(false);
 
   const handleSave = () => {
     const text = draft.trim();
@@ -111,58 +115,79 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
         </button>
       </div>
 
-      {/* Recomendaciones + Mis Notas */}
-      <div className="w-full max-w-md space-y-3 mb-6">
-        {/* Recomendaciones — abre pantalla completa */}
+      {/* Más opciones — Recomendaciones + Mis Notas, desplegable y colapsado
+          por defecto para no competir con la elección de modo. */}
+      <div className="w-full max-w-md mb-6">
         <button
-          onClick={onOpenRecommendations}
-          className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-left hover:bg-white/15 active:scale-[0.98] transition-all"
+          onClick={() => setShowMore((v) => !v)}
+          className="w-full flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 hover:bg-white/15 active:scale-[0.98] transition-all"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-teal-600/50 flex items-center justify-center flex-shrink-0">
-              <BookOpen size={16} className="text-teal-100" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-black text-white uppercase tracking-wider">Escuela de Salud Vesical</p>
-              <p className="text-sm text-teal-300 mt-0.5">6 bloques educativos · Guías AEU 2026</p>
-            </div>
-            <ChevronRight size={16} className="text-teal-300 flex-shrink-0" />
+          <div className="w-9 h-9 rounded-xl bg-teal-600/50 flex items-center justify-center flex-shrink-0">
+            <BookOpen size={16} className="text-teal-100" />
           </div>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-xs font-black text-white uppercase tracking-wider">Más opciones</p>
+            <p className="text-sm text-teal-300 mt-0.5">
+              Escuela de Salud Vesical{notesCount > 0 ? ` · ${notesCount} nota${notesCount > 1 ? 's' : ''} guardada${notesCount > 1 ? 's' : ''}` : ' y notas para el médico'}
+            </p>
+          </div>
+          {showMore ? <ChevronUp size={16} className="text-teal-300 flex-shrink-0" /> : <ChevronDown size={16} className="text-teal-300 flex-shrink-0" />}
         </button>
 
-        {/* Mis notas para el médico */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <div className="flex items-center gap-2">
-              <MessageSquareHeart size={16} className="text-teal-200 flex-shrink-0" />
-              <span className="text-xs font-black text-white uppercase tracking-wider">Mis notas para el médico</span>
+        {showMore && (
+          <div className="space-y-3 mt-3">
+            {/* Recomendaciones — abre pantalla completa */}
+            <button
+              onClick={onOpenRecommendations}
+              className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 text-left hover:bg-white/15 active:scale-[0.98] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-teal-600/50 flex items-center justify-center flex-shrink-0">
+                  <BookOpen size={16} className="text-teal-100" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-black text-white uppercase tracking-wider">Escuela de Salud Vesical</p>
+                  <p className="text-sm text-teal-300 mt-0.5">6 bloques educativos · Guías AEU 2026</p>
+                </div>
+                <ChevronRight size={16} className="text-teal-300 flex-shrink-0" />
+              </div>
+            </button>
+
+            {/* Mis notas para el médico */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <MessageSquareHeart size={16} className="text-teal-200 flex-shrink-0" />
+                  <span className="text-xs font-black text-white uppercase tracking-wider">Mis notas para el médico</span>
+                </div>
+                {notesCount > 0 && (
+                  <span className="text-sm bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">
+                    {notesCount} guardada{notesCount > 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-teal-200 mb-2 leading-relaxed">
+                Escribe tus dudas, miedos o lo que no quieres olvidar contarle al médico. Puedes guardar varias notas en distintos días.
+              </p>
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Ej: Me preocupa levantarme tantas veces por la noche, ¿es normal?…"
+                rows={3}
+                className="w-full bg-white/10 text-white placeholder-teal-300/60 text-xs rounded-xl p-3 border border-white/20 resize-none focus:outline-none focus:ring-2 focus:ring-white/30 leading-relaxed mb-2"
+              />
+              <button
+                onClick={handleSave}
+                disabled={!draft.trim()}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: saved ? '#059669' : 'rgba(255,255,255,0.2)', color: 'white' }}
+              >
+                <Save size={13} />
+                {saved ? '✅ ¡Nota guardada! Aparecerá en tu Informe' : 'Guardar nota'}
+              </button>
             </div>
-            {notesCount > 0 && (
-              <span className="text-sm bg-white/20 text-white font-bold px-2 py-0.5 rounded-full">
-                {notesCount} guardada{notesCount > 1 ? 's' : ''}
-              </span>
-            )}
           </div>
-          <p className="text-xs text-teal-200 mb-2 leading-relaxed">
-            Escribe tus dudas, miedos o lo que no quieres olvidar contarle al médico. Puedes guardar varias notas en distintos días.
-          </p>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Ej: Me preocupa levantarme tantas veces por la noche, ¿es normal?…"
-            rows={3}
-            className="w-full bg-white/10 text-white placeholder-teal-300/60 text-xs rounded-xl p-3 border border-white/20 resize-none focus:outline-none focus:ring-2 focus:ring-white/30 leading-relaxed mb-2"
-          />
-          <button
-            onClick={handleSave}
-            disabled={!draft.trim()}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ backgroundColor: saved ? '#059669' : 'rgba(255,255,255,0.2)', color: 'white' }}
-          >
-            <Save size={13} />
-            {saved ? '✅ ¡Nota guardada! Aparecerá en tu Informe' : 'Guardar nota'}
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Bottom explanation */}

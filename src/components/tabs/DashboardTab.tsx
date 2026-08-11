@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Printer, Copy, CheckCircle, Trash2, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Printer, Copy, Share2, CheckCircle, Trash2, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
@@ -101,6 +101,18 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   // no necesita leer. El texto para copiar/imprimir (note completo) no
   // cambia. Ver splitClinicalNote() en clinical.ts.
   const { main: noteMain, rules: noteRules } = splitClinicalNote(note);
+
+  // El panel nativo de compartir (WhatsApp, email, SMS…) en un solo toque
+  // es mucho más cómodo en móvil que el flujo actual "imprimir → buscar el
+  // PDF guardado → abrir compartir" — por eso es la opción principal donde
+  // el navegador la soporta (la mayoría de móviles; no en desktop).
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({ title: `Informe STUI — ${p.name || 'Paciente'}`, text: note });
+    } catch { /* el usuario canceló el panel de compartir; no es un error */ }
+  };
 
   const handleCopy = async () => {
     try {
@@ -319,16 +331,26 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 no-print pb-8">
-        <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-black py-4 rounded-2xl text-sm transition-all shadow-lg shadow-teal-700/25 active:scale-[0.98] min-h-[56px]">
+      <div className="flex gap-3 no-print">
+        {canShare && (
+          <button onClick={handleShare} className="flex-1 flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-black py-4 rounded-2xl text-sm transition-all shadow-lg shadow-teal-700/25 active:scale-[0.98] min-h-[56px]">
+            <Share2 size={18} />
+            Compartir con el urólogo
+          </button>
+        )}
+        <button onClick={handlePrint} className={`flex items-center justify-center gap-2 font-bold py-4 rounded-2xl text-sm transition-all min-h-[56px] ${canShare ? 'px-5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border border-teal-100 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/50' : 'flex-1 bg-teal-700 hover:bg-teal-800 text-white shadow-lg shadow-teal-700/25 active:scale-[0.98]'}`}>
           <Printer size={18} />
-          Generar PDF para el urólogo
+          {canShare ? 'PDF' : 'Generar PDF para el urólogo'}
         </button>
         <button onClick={handleCopy} className="flex items-center justify-center gap-2 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 font-bold py-4 px-5 rounded-2xl text-sm transition-all border border-teal-100 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/50 min-h-[56px]">
           {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
           {copied ? '¡Copiado!' : 'Copiar'}
         </button>
       </div>
+      <p className="text-xs text-slate-500 dark:text-slate-500 text-center no-print pb-8 leading-relaxed">
+        💡 Hazlo ahora, aunque sigas rellenando el resto: una vez compartido o descargado, esa copia ya
+        no depende de que el dispositivo siga guardando los datos hasta la consulta.
+      </p>
     </div>
   );
 }

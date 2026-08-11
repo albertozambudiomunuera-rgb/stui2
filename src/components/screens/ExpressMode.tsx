@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Home, Printer, ArrowLeft, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Home, Printer, Share2, ArrowLeft, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
 import { emptyData } from '../../lib/storage';
@@ -525,6 +525,15 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
     slate: 'border-slate-500',
   };
 
+  // Panel nativo de compartir en un solo toque — igual que en DashboardTab.tsx.
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({ title: `Informe STUI — ${p.name || 'Paciente'}`, text: note });
+    } catch { /* el usuario canceló el panel de compartir; no es un error */ }
+  };
+
   const handlePrint = () => {
     const fecha = new Date().toLocaleDateString('es-ES');
     const scoreRows = [
@@ -637,18 +646,30 @@ ${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.n
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 pb-4">
+      <div className="flex gap-3">
+        {canShare && (
+          <button onClick={handleShare}
+            className="flex-1 flex items-center justify-center gap-2 text-white font-black py-4 rounded-2xl text-sm shadow-lg active:scale-[0.98] transition-all min-h-[56px]"
+            style={{ backgroundColor: RED }}>
+            <Share2 size={18} />
+            Compartir con el urólogo
+          </button>
+        )}
         <button onClick={handlePrint}
-          className="flex-1 flex items-center justify-center gap-2 text-white font-black py-4 rounded-2xl text-sm shadow-lg active:scale-[0.98] transition-all min-h-[56px]"
-          style={{ backgroundColor: RED }}>
+          className={`flex items-center justify-center gap-2 font-bold py-4 rounded-2xl text-sm transition-all min-h-[56px] ${canShare ? 'px-5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700' : 'flex-1 text-white font-black shadow-lg active:scale-[0.98]'}`}
+          style={canShare ? undefined : { backgroundColor: RED }}>
           <Printer size={18} />
-          Generar PDF para el urólogo
+          {canShare ? 'PDF' : 'Generar PDF para el urólogo'}
         </button>
         <button onClick={onSwitchHome}
           className="flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-4 px-5 rounded-2xl text-sm border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all min-h-[56px]">
           <Home size={18} />
         </button>
       </div>
+      <p className="text-xs text-slate-500 dark:text-slate-500 text-center pb-4 pt-3 leading-relaxed">
+        💡 Compártelo o descárgalo ahora: una vez fuera de la app, esa copia ya no depende de
+        que el dispositivo siga guardando los datos.
+      </p>
     </div>
   );
 }

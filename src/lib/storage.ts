@@ -11,7 +11,7 @@
 
 import type { AppData } from '../types';
 import { openDB, DATA_STORE, DATA_KEY } from './idb';
-import { getActiveKey } from './keyManager';
+import { getActiveKey, setupPINKey, setStoredMode } from './keyManager';
 import { encrypt, decrypt, isEncryptedPayload } from './crypto';
 import { ensureEntryClientKeys } from './clinical';
 
@@ -19,6 +19,7 @@ const LS_KEY = 'stuiv1';
 const DISCLAIMER_KEY = 'stuiv1_d';
 const INSTALL_PROMPT_KEY = 'stuiv1_ip';
 const DIARY_INTRO_KEY = 'stuiv1_di';
+const PIN_OFFER_KEY = 'stuiv1_po';
 
 // ── Helpers de cifrado para el storage ────────────────────────────────────────
 
@@ -204,6 +205,39 @@ export function isDiaryIntroSeen(): boolean {
 
 export function markDiaryIntroSeen(): void {
   try { localStorage.setItem(DIARY_INTRO_KEY, '1'); } catch { /* ignore */ }
+}
+
+// ── Oferta contextual de PIN ───────────────────────────────────────────────────
+// Ya no se pregunta al arrancar la app (useSecureInit.ts activa 'auto' en
+// silencio). En Modo Casa, antes de rellenar el Perfil por primera vez, se
+// ofrece una única vez proteger los datos con PIN — ver App.tsx.
+
+export function isPinOfferSeen(): boolean {
+  try { return !!localStorage.getItem(PIN_OFFER_KEY); } catch { return false; }
+}
+
+export function markPinOfferSeen(): void {
+  try { localStorage.setItem(PIN_OFFER_KEY, '1'); } catch { /* ignore */ }
+}
+
+/** Para "Olvidé mi PIN": al resetear todo, se puede volver a decidir sobre PIN. */
+export function clearPinOfferSeen(): void {
+  try { localStorage.removeItem(PIN_OFFER_KEY); } catch { /* ignore */ }
+}
+
+/**
+ * Pasa del cifrado automático ('auto') al derivado de PIN ('pin') SIN
+ * perder los datos que ya hubiera: los descifra con la clave activa actual
+ * (auto) antes de que setupPINKey() la sustituya por la derivada del PIN, y
+ * los vuelve a guardar — ya cifrados con la nueva. El orden importa: leer
+ * con la clave vieja, activar la nueva, guardar con la nueva.
+ */
+export async function upgradeToPIN(pin: string): Promise<void> {
+  const db = await openDB();
+  const existing = await idbLoad();
+  await setupPINKey(pin, db);
+  if (existing !== null) await idbSave(existing);
+  setStoredMode('pin');
 }
 
 // ── Backup / Importación ──────────────────────────────────────────────────────

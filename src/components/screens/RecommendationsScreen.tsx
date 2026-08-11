@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface Props {
   onClose: () => void;
@@ -279,6 +280,7 @@ const ALARM = ['hematuria (sangre en orina)', 'dolor agudo al orinar', 'fiebre',
 
 /* ─── Main component ─────────────────────────────────────────── */
 export function RecommendationsScreen({ onClose }: Props) {
+  useBodyScrollLock(true);
   const [active, setActive] = useState(0);
   const tab = TABS[active];
 
@@ -326,7 +328,7 @@ export function RecommendationsScreen({ onClose }: Props) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-6 max-w-2xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto overscroll-contain p-4 pb-6 max-w-2xl mx-auto w-full">
         {tab.content}
 
         {/* Alarm footer */}

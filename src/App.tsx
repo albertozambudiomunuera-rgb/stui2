@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { TabId } from './types';
-import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, isInstallPromptSeen, markInstallPromptSeen, isDiaryIntroSeen, markDiaryIntroSeen, emptyData, idbClear } from './lib/storage';
-import { clearPINSetup, clearStoredMode } from './lib/keyManager';
+import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted, isInstallPromptSeen, markInstallPromptSeen, isDiaryIntroSeen, markDiaryIntroSeen, isPinOfferSeen, markPinOfferSeen, clearPinOfferSeen, upgradeToPIN, emptyData, idbClear } from './lib/storage';
+import { clearPINSetup, clearStoredMode, type StoredMode } from './lib/keyManager';
 import { useAppData } from './hooks/useAppData';
 import { useSecureInit } from './hooks/useSecureInit';
 import { SecurityChoice } from './components/ui/SecurityChoice';
@@ -31,6 +31,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('patient');
   const [tabHistory, setTabHistory] = useState<TabId[]>([]);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showPinOffer, setShowPinOffer] = useState(false);
+  const [pinOfferStep, setPinOfferStep] = useState<'choice' | 'setup-pin'>('choice');
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showDiaryIntro, setShowDiaryIntro] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -72,7 +74,34 @@ export default function App() {
 
   const handleDisclaimerAccept = () => {
     setShowDisclaimer(false);
-    if (!isInstalled() && !isInstallPromptSeen()) setShowInstallPrompt(true);
+    // El aviso de instalación ya no se encadena aquí: se dispara al terminar
+    // Perfil (ver el onNext de PatientTab), no nada más aceptar el
+    // disclaimer — así no es el segundo muro seguido que ve el paciente.
+    // La oferta de PIN sí se encadena aquí: es la única pregunta que queda
+    // antes de Perfil, y solo se hace una vez (isPinOfferSeen).
+    if (!isPinOfferSeen()) setShowPinOffer(true);
+  };
+
+  // "Sin PIN" (por defecto): no hay nada que migrar, ya se arrancó en modo
+  // 'auto'. "Sí, PIN": se pasa a pedir y confirmar el PIN (pinOfferStep).
+  const handlePinOfferChoice = async (choice: StoredMode): Promise<void> => {
+    if (choice === 'auto') {
+      markPinOfferSeen();
+      setShowPinOffer(false);
+    } else {
+      setPinOfferStep('setup-pin');
+    }
+  };
+
+  // Al crear el PIN aquí (no al arrancar), puede que ya exista algún dato
+  // cifrado con la clave automática (p.ej. una nota guardada desde "Más
+  // opciones" en la bienvenida) — upgradeToPIN() lo relee y lo vuelve a
+  // guardar con la clave nueva antes de activarla, para no perderlo.
+  const handlePinOfferSetup = async (pin: string) => {
+    await upgradeToPIN(pin);
+    markPinOfferSeen();
+    setShowPinOffer(false);
+    setPinOfferStep('choice');
   };
 
   // El aviso a pantalla completa se marca como visto la primera vez que se
@@ -87,7 +116,10 @@ export default function App() {
   const handleForgotPIN = async () => {
     await idbClear();
     clearPINSetup();
-    clearStoredMode(); // vuelve a mostrar la pantalla de elección al reiniciar
+    clearStoredMode();
+    // Al resetear todo, se puede volver a decidir sobre PIN desde cero (se
+    // le volverá a ofrecer antes de Perfil, como a un paciente nuevo).
+    clearPinOfferSeen();
     window.location.reload();
   };
 
@@ -97,12 +129,18 @@ export default function App() {
       // Show disclaimer on first-time entry to app
       if (!isDisclaimerAccepted()) {
         setShowDisclaimer(true);
-      } else if (!isInstalled() && !isInstallPromptSeen()) {
-        // Sin disclaimer pendiente, el aviso de instalación puede mostrarse
-        // ya. Si hay disclaimer pendiente, espera a que se acepte
+      } else if (!isPinOfferSeen()) {
+        // Sin disclaimer pendiente, la oferta de PIN puede mostrarse ya. Si
+        // hay disclaimer pendiente, espera a que se acepte
         // (handleDisclaimerAccept) para no apilar dos pantallas completas.
-        setShowInstallPrompt(true);
+        setShowPinOffer(true);
       }
+      // El aviso de instalación ya no se dispara aquí: se movió al terminar
+      // Perfil (ver el onNext de PatientTab más abajo), para no ser el
+      // primer muro que ve el paciente. Sigue cubriendo a todos los
+      // perfiles, no solo a quien activa el Diario, porque el riesgo real
+      // (desalojo de almacenamiento en Safari/iOS tras varios días sin
+      // abrir la pestaña) ya existe con solo los cuestionarios rellenados.
     } else {
       // El Modo Sala de Espera comparte los mismos datos que el modo Casa.
       // Antes se borraban aquí sin avisar cada vez que se entraba en Exprés,
@@ -162,11 +200,10 @@ export default function App() {
   };
 
   if (mode === 'loading') {
-    // Primer arranque: el usuario elige su nivel de seguridad
-    if (secure.status === 'choose-mode') {
-      return <SecurityChoice onChoose={secure.chooseMode} />;
-    }
-    // Modo PIN, primera vez: configurar PIN
+    // El primer arranque ya no pregunta nada aquí (ver useSecureInit.ts):
+    // arranca en modo 'auto' en silencio. Este estado 'setup-pin' solo se
+    // alcanza en el arranque para quien ya hubiera elegido PIN antes (o si
+    // se interrumpió a mitad la configuración), no para un paciente nuevo.
     if (secure.status === 'setup-pin') {
       return (
         <PINSetup
@@ -234,6 +271,23 @@ export default function App() {
     );
   }
 
+  // Oferta de PIN, una sola vez, justo antes de Perfil (no al arrancar la
+  // app): se resuelve con un return anterior, como Disclaimer ya bloqueaba
+  // antes de llegar aquí — así nunca se ve el formulario de datos
+  // personales sin haber pasado por esta decisión la primera vez.
+  if (showPinOffer) {
+    if (pinOfferStep === 'setup-pin') {
+      return (
+        <PINSetup
+          mode="setup"
+          onSetup={handlePinOfferSetup}
+          onUnlock={async () => false}
+        />
+      );
+    }
+    return <SecurityChoice onChoose={handlePinOfferChoice} />;
+  }
+
   const d = actions.data;
 
   return (
@@ -268,7 +322,14 @@ export default function App() {
             actions={actions}
             idbActive={idbActive}
             onToast={showToast}
-            onNext={() => nav('screening')}
+            onNext={() => {
+              nav('screening');
+              // Único disparo del aviso de instalación a pantalla completa:
+              // justo al terminar de rellenar Perfil, antes de entrar en
+              // Cribado. Cubre a todo el mundo (no solo a quien activa el
+              // Diario) y ya no es el primer muro que ve el paciente.
+              if (!isInstalled() && !isInstallPromptSeen()) setShowInstallPrompt(true);
+            }}
             onBackToEntry={() => { setMode('entry'); setTabHistory([]); }}
             installed={isInstalled()}
             onOpenInstallHelp={() => setShowInstallPrompt(true)}

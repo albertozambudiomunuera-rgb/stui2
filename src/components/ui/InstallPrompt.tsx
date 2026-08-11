@@ -13,15 +13,18 @@
  *   · Safari macOS, pestaña             → persist() DENEGADO
  *   · Safari macOS, añadida al Dock     → persist() CONCEDIDO
  *
- * Se muestra SOLO al elegir "Voy a preparar mi consulta" (App.tsx), porque
- * el diario dura 3 días y la consulta suele ser semanas después: rellenarlo
- * en una pestaña expone al paciente a perder todos los datos antes de la
+ * Se muestra SOLO en Modo Casa ("Voy a preparar mi consulta"), una vez,
+ * justo al terminar de rellenar Perfil (antes de Cribado) — no nada más
+ * elegir el modo, para no ser el primer muro que ve el paciente (ver
+ * App.tsx). El diario dura 3 días y la consulta suele ser semanas después:
+ * rellenar datos en una pestaña expone al paciente a perderlos antes de la
  * visita. El Modo Sala de Espera se rellena de un tirón, con la pestaña
  * abierta, así que este aviso no aplica ahí y no se muestra: solo añadiría
  * ruido justo antes de entrar a consulta.
  */
 
 import { useEffect, useState } from 'react';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface InstallPromptProps {
   onContinue: () => void;
@@ -56,6 +59,7 @@ function detectAndroidBrowser(): AndroidBrowser {
 type Choice = 'ios' | 'android';
 
 export function InstallPrompt({ onContinue }: InstallPromptProps) {
+  useBodyScrollLock(true);
   const [androidBrowser, setAndroidBrowser] = useState<AndroidBrowser>('chrome');
   const [persisted, setPersisted] = useState<boolean | null>(null);
   // Nada preseleccionado por defecto: el paciente pulsa su propio sistema.
@@ -68,16 +72,18 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
     const p = detectPlatform();
     setChosen(p === 'ios' || p === 'android' ? p : null);
     setAndroidBrowser(detectAndroidBrowser());
-    // Pedimos almacenamiento persistente: si el navegador lo concede
-    // (habitualmente solo cuando está instalada), el riesgo desaparece.
+    // Solo se COMPRUEBA si ya hay almacenamiento persistente (persisted(),
+    // de solo lectura, no dispara ningún permiso). NO se llama a
+    // navigator.storage.persist(): en algunos navegadores/WebViews Android
+    // esa llamada puede abrir un diálogo de permiso nativo que se renderiza
+    // mal o se queda colgado, dejando la pantalla sin responder a ningún
+    // toque (bug real reportado: "no puedo darle a ok ni atrás ni salir").
+    // Pedir instalar la PWA ya basta — el navegador concede persist()
+    // automáticamente al instalarla, sin que la app tenga que solicitarlo.
     (async () => {
       try {
         if (navigator.storage?.persisted) {
-          const already = await navigator.storage.persisted();
-          if (already) { setPersisted(true); return; }
-        }
-        if (navigator.storage?.persist) {
-          setPersisted(await navigator.storage.persist());
+          setPersisted(await navigator.storage.persisted());
         }
       } catch {
         setPersisted(null);
@@ -125,8 +131,15 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
   const seleccion = chosen === 'android' ? androidInstrucciones[androidBrowser] : chosen === 'ios' ? iosInstrucciones : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4">
-      <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto">
+    // El contenedor con scroll es este de fuera (inset-0, anclado al
+    // viewport real, no a unidades vh) en vez de darle un max-h en vh a la
+    // tarjeta interior: en iOS, con el body fijado (useBodyScrollLock), un
+    // max-h en vh dentro de ese contexto puede calcularse mal y dejar la
+    // tarjeta "incompleta" con la parte de abajo inalcanzable. Así, si el
+    // contenido no cabe, es esta capa la que hace scroll con normalidad.
+    <div className="fixed inset-0 z-[200] overflow-y-auto overscroll-contain bg-black/60">
+      <div className="min-h-full flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl">
         <div className="p-6">
 
           <div className="flex items-start gap-3 mb-4">
@@ -223,6 +236,7 @@ export function InstallPrompt({ onContinue }: InstallPromptProps) {
           </p>
 
         </div>
+      </div>
       </div>
     </div>
   );

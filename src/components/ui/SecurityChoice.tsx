@@ -1,16 +1,19 @@
 /**
- * SecurityChoice — Primera pantalla mostrada al abrir la app, antes de nada
- * más (incluso antes de elegir Modo Casa / Sala de Espera).
+ * SecurityChoice — Pregunta "¿PIN sí o no?", una sola pregunta directa para
+ * reducir la fricción (la versión anterior mostraba dos tarjetas largas con
+ * insignias y un panel técnico expandible, engorroso sobre todo para
+ * pacientes mayores). El texto legal/RGPD se conserva pero relegado a una
+ * nota pequeña al pie, sin competir visualmente con la pregunta principal.
  *
- * Simplificada a una sola pregunta directa (¿PIN sí o no?) para reducir la
- * fricción de entrada: la versión anterior mostraba dos tarjetas largas con
- * insignias y un panel técnico expandible, lo que resultaba engorroso sobre
- * todo para pacientes mayores que solo quieren empezar el cuestionario. El
- * texto legal/RGPD se conserva pero relegado a una nota pequeña al pie, sin
- * competir visualmente con la pregunta principal.
+ * YA NO se muestra al arrancar la app: el primer arranque activa el modo
+ * 'auto' en silencio (useSecureInit.ts). Este componente se reutiliza tal
+ * cual como la oferta contextual de PIN que App.tsx dispara una sola vez,
+ * en Modo Casa, justo antes de rellenar el Perfil — donde tiene sentido
+ * preguntar, en vez de antes de que el paciente haya visto nada de la app.
  *
  * "Sí" → PINSetup pide el PIN y luego lo repite para confirmarlo.
- * "No" → cifrado automático transparente, sin pedir nada más.
+ * "No" → sigue con el cifrado automático transparente ya activo, sin pedir
+ * nada más.
  */
 
 import { useState } from 'react';

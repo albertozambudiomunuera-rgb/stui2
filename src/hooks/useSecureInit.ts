@@ -3,30 +3,32 @@
  *
  * Máquina de estados:
  *
- *   'initializing' ──► sin elección guardada ──► 'choose-mode'
+ *   'initializing' ──► sin elección guardada ──► activa 'auto' en silencio ──► 'ready'
  *                  └──► modo 'auto' guardado ──► init clave ──► 'ready'
  *                  └──► modo 'pin' guardado  ──► PIN existe ──► 'unlock-pin'
  *                                             └► PIN nuevo  ──► 'setup-pin'
  *
- *   'choose-mode'  ──► user elige 'auto' ──► init clave ──► 'ready'
- *                  └──► user elige 'pin' ──────────────────► 'setup-pin'
- *
  *   'setup-pin'    ──► user crea PIN ──► 'ready'
  *   'unlock-pin'   ──► PIN correcto  ──► 'ready'
+ *
+ * El primer arranque YA NO pregunta nada (antes había un estado
+ * 'choose-mode' bloqueante aquí): se activa el modo 'auto' directamente, sin
+ * pantalla. La oferta de proteger los datos con PIN se hace más tarde, en
+ * contexto, justo antes de rellenar el Perfil en Modo Casa — ver App.tsx
+ * (showPinOffer) y storage.ts (upgradeToPIN).
  */
 
 import { useState, useEffect } from 'react';
 import { openDB } from '../lib/idb';
 import {
-  type StoredMode,
   getStoredMode, setStoredMode,
   initAutoKey,
   isPINConfigured, setupPINKey, unlockWithPIN,
 } from '../lib/keyManager';
+import { markPinOfferSeen } from '../lib/storage';
 
 export type SecureStatus =
   | 'initializing'   // abriendo IDB, leyendo preferencias
-  | 'choose-mode'    // primer arranque: el usuario debe elegir su nivel de seguridad
   | 'ready'          // clave activa; la app puede leer/escribir datos cifrados
   | 'setup-pin'      // modo PIN, primera vez: solicitar creación de PIN
   | 'unlock-pin'     // modo PIN, retorno: solicitar PIN para descifrar
@@ -35,8 +37,6 @@ export type SecureStatus =
 export interface UseSecureInitResult {
   status: SecureStatus;
   error: string | null;
-  /** Primera vez: el usuario elige su modo de seguridad. */
-  chooseMode: (mode: StoredMode) => Promise<void>;
   /** (Modo PIN) Configura el PIN por primera vez. */
   submitSetupPIN: (pin: string) => Promise<void>;
   /** (Modo PIN) Verifica el PIN e inicializa la clave. Devuelve false si es incorrecto. */
@@ -56,19 +56,27 @@ export function useSecureInit(): UseSecureInitResult {
 
         const mode = getStoredMode();
 
-        // Primera vez en la app: mostrar pantalla de elección
+        // Primera vez en la app: se activa 'auto' sin preguntar nada. La
+        // oferta de PIN llega más tarde, en contexto (App.tsx).
         if (!mode) {
-          setStatus('choose-mode');
-          return;
-        }
-
-        if (mode === 'auto') {
+          setStoredMode('auto');
           await initAutoKey(database);
           setStatus('ready');
           return;
         }
 
-        // Modo PIN: determinar si es primera vez o retorno
+        if (mode === 'auto') {
+          // Quien ya tenía un modo guardado de antes de este cambio (pasó
+          // por la antigua pantalla de elección) no debe ver la nueva
+          // oferta contextual de PIN — ya decidió.
+          markPinOfferSeen();
+          await initAutoKey(database);
+          setStatus('ready');
+          return;
+        }
+
+        // Modo PIN ya elegido de antes: tampoco vuelve a preguntarse.
+        markPinOfferSeen();
         setStatus(isPINConfigured() ? 'unlock-pin' : 'setup-pin');
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al inicializar el almacenamiento seguro');
@@ -76,17 +84,6 @@ export function useSecureInit(): UseSecureInitResult {
       }
     })();
   }, []);
-
-  const chooseMode = async (mode: StoredMode): Promise<void> => {
-    if (!db) throw new Error('Base de datos no disponible');
-    setStoredMode(mode);
-    if (mode === 'auto') {
-      await initAutoKey(db);
-      setStatus('ready');
-    } else {
-      setStatus('setup-pin');
-    }
-  };
 
   const submitSetupPIN = async (pin: string): Promise<void> => {
     if (!db) throw new Error('Base de datos no disponible');
@@ -101,5 +98,5 @@ export function useSecureInit(): UseSecureInitResult {
     return ok;
   };
 
-  return { status, error, chooseMode, submitSetupPIN, submitUnlockPIN };
+  return { status, error, submitSetupPIN, submitUnlockPIN };
 }

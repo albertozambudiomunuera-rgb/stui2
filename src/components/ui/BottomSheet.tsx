@@ -1,5 +1,6 @@
-import { useEffect, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 interface BottomSheetProps {
   open: boolean;
@@ -9,14 +10,7 @@ interface BottomSheetProps {
 }
 
 export function BottomSheet({ open, title, onClose, children }: BottomSheetProps) {
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [open]);
+  useBodyScrollLock(open);
 
   if (!open) return null;
 
@@ -26,7 +20,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
         onClick={onClose}
       />
-      <div className="fixed bottom-0 left-0 right-0 z-[101] bg-white dark:bg-slate-900 rounded-t-3xl max-h-[92vh] overflow-y-auto animate-slide-up shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 z-[101] bg-white dark:bg-slate-900 rounded-t-3xl max-h-[92vh] overflow-y-auto overscroll-contain animate-slide-up shadow-2xl">
         <div className="w-9 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-3" />
         <div className="sticky top-0 bg-white dark:bg-slate-900 z-10 px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{title}</h3>
