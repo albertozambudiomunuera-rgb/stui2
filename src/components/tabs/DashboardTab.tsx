@@ -8,6 +8,7 @@ import {
   computeStats, generateClinicalNote, splitClinicalNote, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
   CLINICAL_RULES, habitsLine,
 } from '../../lib/clinical';
+import { printReport, noteWithRulesHtml, escapeHtml, TEAL_THEME } from '../../lib/printReport';
 
 // Cambio 2: "Nocturia" es una ventana horaria, no un dato único. Si hay hora
 // de conciliación del sueño (sleepOnset) se usa el recuento ICS; si no,
@@ -134,37 +135,17 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
       hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : data.screening.iciq ? `<tr><td><b>ICIQ-SF</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
     ].filter(Boolean).join('');
 
-    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
-<title>Informe STUI — ${p.name || 'Paciente'}</title>
-<style>
-body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 24px;color:#1a1a1a;font-size:14px}
-h1{color:#0f766e;font-size:22px;margin-bottom:4px}.sub{color:#666;font-size:13px;margin-bottom:24px}
-h2{color:#115e59;font-size:15px;border-bottom:2px solid #99f6e4;padding-bottom:6px;margin:24px 0 12px}
-table{width:100%;border-collapse:collapse;margin-bottom:16px}
-th{background:#f0fdfa;padding:8px 10px;text-align:left;font-size:11px;color:#475569;border-bottom:2px solid #99f6e4;text-transform:uppercase}
-td{padding:8px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top}
-.algo{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:16px}
-.algo h3{color:#92400e;font-size:14px;margin:0 0 10px}
-.algo li{color:#78350f;margin-bottom:6px;line-height:1.5}
-.note{background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;white-space:pre-wrap;line-height:1.8}
-.footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;text-align:center;line-height:1.45}
-@media print{body{margin:20px auto}}
-</style></head><body>
-<h1>Resumen Clínico STUI</h1>
-<div class="sub">Paciente: <b>${p.name || '—'}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + p.med : ''}${habits ? ' · ' + habits : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
+    const bodyHtml = `<h1>Resumen Clínico STUI</h1>
+<div class="sub">Paciente: <b>${escapeHtml(p.name || '—')}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + escapeHtml(p.med) : ''}${habits ? ' · ' + habits : ''} &nbsp;|&nbsp; Fecha: ${fecha}</div>
 <h2>Puntuaciones</h2>
 <table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
 ${findings.length ? `<div class="algo"><h3>📊 Hallazgos registrados</h3><ul>${findings.map((f) => `<li>${f}</li>`).join('')}</ul></div>` : ''}
-${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;margin-bottom:8px;font-size:13px;color:#4c1d95;line-height:1.7"><div style="font-size:11px;color:#9333ea;margin-bottom:4px">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${n.text}</div></div>`).join('')}` : ''}
+${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div class="pnote"><div class="pnote-date">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${escapeHtml(n.text)}</div></div>`).join('')}` : ''}
 <h2>Nota para Historia Clínica</h2>
-<div class="note">${note}</div>
-<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>
-<script>window.onload=function(){window.print();}<\/script>
-</body></html>`;
+${noteWithRulesHtml(noteMain, noteRules)}
+<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>`;
 
-    const w = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
-    if (w) { w.document.write(html); w.document.close(); }
-    else alert('Tu navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio.');
+    printReport({ title: `Informe STUI — ${p.name || 'Paciente'}`, bodyHtml, theme: TEAL_THEME });
   };
 
   // Completion badges
