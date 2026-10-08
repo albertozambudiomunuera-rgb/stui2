@@ -47,7 +47,9 @@ export function PatientTab({ data, actions, idbActive, onToast, onNext, onBackTo
   };
 
   const handleReset = () => {
-    if (confirm('¿Borrar todos los datos? Esta acción no se puede deshacer.')) {
+    const n = data.history.length;
+    const extra = n ? `\n\nTambién se borrará tu historial de seguimiento (${n} ${n === 1 ? 'evaluación anterior' : 'evaluaciones anteriores'}).` : '';
+    if (confirm(`¿Borrar todos los datos? Esta acción no se puede deshacer.${extra}`)) {
       actions.resetData(emptyData);
       onToast('Datos borrados');
     }

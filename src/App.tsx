@@ -160,7 +160,7 @@ export default function App() {
           'Aceptar → borrarlos y empezar con un paciente nuevo.\n' +
           'Cancelar → seguir con esos datos (por ejemplo, si aún no has terminado).'
         );
-        if (empezarDeNuevo) actions.restoreData(emptyData());
+        if (empezarDeNuevo) actions.resetCurrent(); // conserva el historial de seguimiento
       }
       setMode('express');
     }
@@ -384,7 +384,17 @@ export default function App() {
           />
         )}
         {activeTab === 'dashboard' && (
-          <DashboardTab data={d} onAddNote={actions.addNote} onDeleteNote={actions.deleteNote} />
+          <DashboardTab
+            data={d}
+            onAddNote={actions.addNote}
+            onDeleteNote={actions.deleteNote}
+            onCloseVisit={() => {
+              const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+              actions.closeVisit();
+              showToast(`Evaluación del ${fecha} guardada en tu historial`);
+              nav('screening');
+            }}
+          />
         )}
       </main>
 

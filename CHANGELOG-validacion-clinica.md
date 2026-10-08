@@ -580,3 +580,26 @@ cifrado) ni la CSP. No se han añadido dependencias nuevas.
    Duration  183ms (transform 148ms, setup 0ms, import 168ms, tests 18ms, environment 0ms)
 
 ```
+
+## Versión 2 — Seguimiento entre visitas (rama `seguimiento`, posterior a `estudio-v1`)
+
+No forma parte de la versión congelada del estudio (`estudio-v1`). No
+cambia ninguna regla de puntuación: `generateClinicalNote` y los 177 casos
+de verificación quedan intactos.
+
+- **Historial de evaluaciones** (`AppData.history`, `lib/followup.ts`).
+  En el Resumen del Modo Casa, el paciente pulsa "Empezar un nuevo
+  registro" (con confirmación). La evaluación actual se archiva con sus
+  respuestas en bruto y con los valores ya calculados (`visitMetrics`) y
+  la versión de reglas vigente. Se conserva el perfil y se vacían el
+  cribado, los cuestionarios, el diario y las notas.
+- **Evolución.** Tabla en el Resumen, en el PDF y en la nota (bloque
+  EVOLUCIÓN): valores por visita y diferencia frente a la anterior, sin
+  umbrales ni juicio de mejora o empeoramiento. Se avisa si la nocturia
+  mezcla la definición ICS y la ventana declarada, o si las visitas
+  usaron versiones de reglas distintas.
+- **Protección del historial.** "Borrar todo" en Sala de Espera solo vacía
+  la evaluación actual. "Borrar todos los datos" en Perfil avisa de
+  cuántas evaluaciones del historial se perderán.
+- Los datos antiguos sin historial se migran con `history: []` al cargar
+  o importar una copia.

@@ -67,6 +67,7 @@ export function appData(over: Partial<AppData> = {}): AppData {
     oab: oab([null, null, null, null, null]),
     iciq: iciq([null, null]),
     notes: [],
+    history: [],
     ...over,
   };
 }

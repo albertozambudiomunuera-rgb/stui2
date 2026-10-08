@@ -105,6 +105,40 @@ export interface AppData {
   oab: OABData;
   iciq: ICIQData;
   notes: PatientNote[];
+  /** Evaluaciones anteriores archivadas por el paciente al empezar un nuevo
+   * registro (seguimiento entre visitas). Ver lib/followup.ts. */
+  history: Visit[];
+}
+
+/** Valores calculados al archivar una visita. Se guardan ya calculados para
+ * que un cambio posterior de reglas no altere el historial sin que se note
+ * (cada visita guarda su rulesVersion). null = no realizado / sin datos. */
+export interface VisitMetrics {
+  ipss: number | null;
+  ipssQol: number | null;
+  iief: number | null;
+  oab: number | null;
+  iciq: number | null;
+  diaryDays: number | null;
+  dayFreq: number | null;
+  nocturia: number | null;
+  nocturiaKind: 'ics' | 'ventana' | null;
+  cvf: number | null;
+  avgVoid: number | null;
+  nocturnalPct: number | null;
+  dayVolume: number | null;
+  urgencyPerDay: number | null;
+  uui: number | null;
+  sui: number | null;
+  padAvg: number | null;
+}
+
+export interface Visit {
+  id: string;
+  closedAt: string; // ISO
+  rulesVersion: string;
+  snapshot: Omit<AppData, 'history'>;
+  metrics: VisitMetrics;
 }
 
 export interface DiaryStats {

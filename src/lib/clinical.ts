@@ -662,7 +662,7 @@ export function generateClinicalNote(data: AppData): string {
   return t;
 }
 
-const RULES_FOOTER_SEP = '\n' + '━'.repeat(44) + '\n';
+export const RULES_FOOTER_SEP = '\n' + '━'.repeat(44) + '\n';
 
 /**
  * Separa generateClinicalNote() en el cuerpo principal y la cola de "Reglas

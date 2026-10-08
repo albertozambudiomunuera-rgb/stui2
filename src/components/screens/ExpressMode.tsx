@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Home, Printer, Share2, ArrowLeft, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
-import { emptyData } from '../../lib/storage';
 import {
   IPSS_QUESTIONS, IPSS_QOL, IIEF_QUESTIONS, OAB_QUESTIONS,
   ICIQ_Q1_OPTS, ICIQ_Q2_OPTS,
@@ -75,7 +74,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
   const handleDeleteAll = () => {
     const ok = confirm('¿Borrar todos los datos introducidos y empezar con un paciente nuevo?\n\nEsta acción no se puede deshacer.');
     if (!ok) return;
-    actions.resetData(emptyData);
+    actions.resetCurrent(); // no borra el historial de seguimiento (Modo Casa)
     setActiveTab('screening');
   };
 

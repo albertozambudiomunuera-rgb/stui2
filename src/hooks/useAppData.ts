@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import type { AppData, DayData, DiaryEntry, PadEntry } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
 import { uid, isDuplicateByClientKey } from '../lib/clinical';
+import { archiveCurrentVisit, resetCurrentEvaluation } from '../lib/followup';
 
 export function useAppData(initialData: AppData) {
   const [data, setData] = useState<AppData>(initialData);
@@ -272,6 +273,29 @@ export function useAppData(initialData: AppData) {
     save(restored);
   }, [save]);
 
+  // Seguimiento: archiva la evaluación actual en el historial y empieza un
+  // registro nuevo. Se escribe en el momento (sin el debounce de save): es
+  // un cambio que el paciente no debe perder aunque cierre la app enseguida.
+  const closeVisit = useCallback(() => {
+    setData((prev) => {
+      const next = archiveCurrentVisit(prev);
+      if (saveTimerRef.current) { clearTimeout(saveTimerRef.current); saveTimerRef.current = null; }
+      pendingRef.current = null;
+      idbSave(JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // Paciente nuevo en Modo Sala de Espera: vacía la evaluación actual sin
+  // borrar el historial de seguimiento.
+  const resetCurrent = useCallback(() => {
+    setData((prev) => {
+      const next = resetCurrentEvaluation(prev);
+      save(next);
+      return next;
+    });
+  }, [save]);
+
   return {
     data,
     updatePatient,
@@ -296,6 +320,8 @@ export function useAppData(initialData: AppData) {
     deleteNote,
     resetData,
     restoreData,
+    closeVisit,
+    resetCurrent,
     update,
   };
 }

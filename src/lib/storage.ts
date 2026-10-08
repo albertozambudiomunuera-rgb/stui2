@@ -123,6 +123,7 @@ export function emptyData(): AppData {
     // nulo en el slider de afectación se contaría como respuesta real.
     iciq: { q: [null, null], vas: null, when: [] },
     notes: [],
+    history: [],
   };
 }
 

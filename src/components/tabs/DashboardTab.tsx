@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Printer, Copy, Share2, CheckCircle, Trash2, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Printer, Copy, Share2, CheckCircle, Trash2, PlusCircle, ChevronDown, ChevronUp, RotateCcw, Download } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import {
   ipssScore, ipssComplete, ipssSeverity, ipssPredom, IPSS_QOL,
@@ -9,6 +9,11 @@ import {
   CLINICAL_RULES, habitsLine,
 } from '../../lib/clinical';
 import { shareReportPdf } from '../../lib/reportPdf';
+import { noteWithEvolution, evolutionTable, hasCurrentEvaluation } from '../../lib/followup';
+import { exportBackup } from '../../lib/storage';
+import { EvolutionSection } from '../ui/EvolutionSection';
+import { BottomSheet } from '../ui/BottomSheet';
+import { isInstalled } from '../ui/InstallPrompt';
 
 // Cambio 2: "Nocturia" es una ventana horaria, no un dato único. Si hay hora
 // de conciliación del sueño (sleepOnset) se usa el recuento ICS; si no,
@@ -24,15 +29,18 @@ interface DashboardTabProps {
   data: AppData;
   onAddNote?: (text: string) => void;
   onDeleteNote?: (id: string) => void;
+  /** Seguimiento: archiva la evaluación actual y empieza un registro nuevo. */
+  onCloseVisit?: () => void;
 }
 
 const naText = 'sin datos';
 
-export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProps) {
+export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: DashboardTabProps) {
   const [copied, setCopied] = useState(false);
   const [noteDraft, setNoteDraft] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [confirmNewRecord, setConfirmNewRecord] = useState(false);
 
   const handleAddNote = () => {
     const text = noteDraft.trim();
@@ -96,7 +104,10 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
   }
   if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
-  const note = generateClinicalNote(data);
+  // Con historial de seguimiento, la nota incluye el bloque EVOLUCIÓN antes
+  // del pie de reglas clínicas (ver noteWithEvolution en followup.ts).
+  const baseNote = generateClinicalNote(data);
+  const note = noteWithEvolution(baseNote, data);
   // El bloque "Reglas clínicas aplicadas" se muestra aparte, desplegable,
   // para no ocupar pantalla con referencias bibliográficas que el paciente
   // no necesita leer. El texto para copiar/imprimir (note completo) no
@@ -143,9 +154,11 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
       subtitle: `Paciente: ${p.name || '—'}${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}${p.med ? ' · Medicación: ' + p.med : ''}${habits ? ' · ' + habits : ''}  |  Fecha: ${fecha}`,
       accent: [15, 118, 110],
       rows,
+      evolution: data.history.length ? evolutionTable(data, 4) : undefined,
       findings,
       patientNotes: (data.notes ?? []).map((n) => ({ date: new Date(n.date).toLocaleString('es-ES'), text: n.text })),
-      note: noteMain,
+      // El PDF ya muestra la evolución como tabla: la nota va sin ese bloque.
+      note: splitClinicalNote(baseNote).main,
       footer: [
         `Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}; detalle y bibliografía disponibles en la app). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.`,
         `Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}`,
@@ -228,6 +241,8 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
           ))}
         </div>
       </div>
+
+      <EvolutionSection data={data} />
 
       {/* Patient notes */}
       <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-2xl p-5 space-y-3">
@@ -337,6 +352,63 @@ export function DashboardTab({ data, onAddNote, onDeleteNote }: DashboardTabProp
         💡 Hazlo ahora, aunque sigas rellenando el resto: una vez compartido o descargado, esa copia ya
         no depende de que el dispositivo siga guardando los datos hasta la consulta.
       </p>
+
+      {/* Seguimiento: nuevo registro tras la consulta */}
+      {onCloseVisit && (
+        <div className="no-print border-t border-slate-100 dark:border-slate-800 pt-5 pb-8">
+          <button
+            onClick={() => setConfirmNewRecord(true)}
+            disabled={!hasCurrentEvaluation(data)}
+            className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold py-4 rounded-2xl text-sm border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all min-h-[56px] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <RotateCcw size={18} />
+            Empezar un nuevo registro
+          </button>
+          <p className="text-xs text-slate-500 text-center mt-2 leading-relaxed">
+            Tras tu consulta: esta evaluación se guarda en tu historial para compararla en la próxima revisión.
+          </p>
+        </div>
+      )}
+
+      <BottomSheet open={confirmNewRecord} title="¿Empezar un nuevo registro?" onClose={() => setConfirmNewRecord(false)}>
+        <div className="space-y-4">
+          <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+            Los datos de esta evaluación (cuestionarios y diario) <strong>se guardarán en tu historial</strong> y
+            podrás compararlos con el nuevo registro en tu próxima revisión.
+          </p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Hazlo cuando tu médico ya haya revisado estos resultados. Tus datos personales (nombre, edad,
+            medicación…) se mantienen.
+          </p>
+          {!isInstalled() && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+              ⚠️ La app no está instalada en tu pantalla de inicio. Sin instalarla, el móvil puede borrar el
+              historial si pasan días sin abrirla. Instálala o descarga una copia de seguridad.
+            </div>
+          )}
+          <button
+            onClick={() => exportBackup(data)}
+            className="w-full flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-sm min-h-[48px]"
+          >
+            <Download size={16} />
+            Descargar copia de seguridad
+          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setConfirmNewRecord(false)}
+              className="flex-1 min-h-[52px] rounded-xl font-bold text-base border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => { setConfirmNewRecord(false); onCloseVisit?.(); }}
+              className="flex-1 min-h-[52px] rounded-xl font-black text-base bg-teal-700 hover:bg-teal-800 text-white"
+            >
+              Sí, empezar
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 }
