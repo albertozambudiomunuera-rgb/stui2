@@ -9,6 +9,7 @@ import {
   CLINICAL_RULES, habitsLine,
 } from '../../lib/clinical';
 import { shareReportPdf } from '../../lib/reportPdf';
+import { noteWithUsage, usageSummary, formatDuration } from '../../lib/usage';
 import { noteWithEvolution, evolutionTable, hasCurrentEvaluation } from '../../lib/followup';
 import { exportBackup } from '../../lib/storage';
 import { EvolutionSection } from '../ui/EvolutionSection';
@@ -107,7 +108,7 @@ export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: Da
   // Con historial de seguimiento, la nota incluye el bloque EVOLUCIÓN antes
   // del pie de reglas clínicas (ver noteWithEvolution en followup.ts).
   const baseNote = generateClinicalNote(data);
-  const note = noteWithEvolution(baseNote, data);
+  const note = noteWithEvolution(noteWithUsage(baseNote, data.usage), data);
   // El bloque "Reglas clínicas aplicadas" se muestra aparte, desplegable,
   // para no ocupar pantalla con referencias bibliográficas que el paciente
   // no necesita leer. El texto para copiar/imprimir (note completo) no
@@ -155,9 +156,13 @@ export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: Da
       accent: [15, 118, 110],
       rows,
       evolution: data.history.length ? evolutionTable(data, 4) : undefined,
+      usage: (() => {
+        const u = usageSummary(data.usage);
+        return u ? { summary: `${formatDuration(u.totalSec)} en ${u.sessions} ${u.sessions === 1 ? 'sesión' : 'sesiones'} (media ${formatDuration(u.totalSec / u.sessions)}/sesión)`, header: u.header, rows: u.rows } : undefined;
+      })(),
       findings,
       patientNotes: (data.notes ?? []).map((n) => ({ date: new Date(n.date).toLocaleString('es-ES'), text: n.text })),
-      // El PDF ya muestra la evolución como tabla: la nota va sin ese bloque.
+      // El PDF ya muestra la evolución y el tiempo de uso como tablas: la nota va sin esos bloques.
       note: splitClinicalNote(baseNote).main,
       footer: [
         `Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}; detalle y bibliografía disponibles en la app). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.`,

@@ -17,6 +17,8 @@ export interface ReportPdf {
   rows: string[][];
   /** Tabla de evolución entre visitas (seguimiento), si hay historial. */
   evolution?: { header: string[]; rows: string[][]; footnotes: string[] };
+  /** Tiempo de uso de la app por sesión. */
+  usage?: { summary: string; header: string[]; rows: string[][] };
   findings: string[];
   patientNotes: { date: string; text: string }[];
   note: string;
@@ -119,6 +121,15 @@ export function buildPdf(r: ReportPdf): jsPDF {
     y += 1;
     para('Cambio = evaluación actual frente a la anterior. Sin interpretación clínica.', 8, { color: [100, 116, 139] });
     r.evolution.footnotes.forEach((f) => para(f, 8, { color: [100, 116, 139] }));
+  }
+
+  if (r.usage && r.usage.rows.length) {
+    h2('Tiempo de uso de la app');
+    para(r.usage.summary, 9.5);
+    y += 2;
+    table([30, 50, 50, W - 130], r.usage.header, r.usage.rows);
+    y += 1;
+    para('Solo cuenta el tiempo con la app en pantalla; una ausencia de más de 5 min abre una sesión nueva.', 8, { color: [100, 116, 139] });
   }
 
   if (r.findings.length) {

@@ -124,6 +124,7 @@ export function emptyData(): AppData {
     iciq: { q: [null, null], vas: null, when: [] },
     notes: [],
     history: [],
+    usage: [],
   };
 }
 

@@ -34,6 +34,7 @@ export function visitMetrics(data: AppData): VisitMetrics {
     uui: s ? s.ul : null,
     sui: s ? s.el : null,
     padAvg: pad.avgPerDay,
+    usageMin: data.usage.length ? Math.round(data.usage.reduce((s, u) => s + u.seconds, 0) / 6) / 10 : null,
   };
 }
 
@@ -94,6 +95,7 @@ export const EVOLUTION_METRICS: MetricDef[] = [
   { key: 'uui', label: 'Escapes por urgencia' },
   { key: 'sui', label: 'Escapes por esfuerzo' },
   { key: 'padAvg', label: 'Pad test (g/día)' },
+  { key: 'usageMin', label: 'Tiempo de uso de la app (min)' },
 ];
 
 export function formatDelta(prev: number | null, cur: number | null): string {
@@ -126,11 +128,11 @@ export function evolutionTable(data: AppData, maxVisits = Infinity): EvolutionTa
   const prev = data.history.length ? data.history[data.history.length - 1].metrics : null;
 
   const rows = EVOLUTION_METRICS
-    .filter((m) => cols.some((c) => c[m.key] !== null))
+    .filter((m) => cols.some((c) => (c[m.key] ?? null) !== null))
     .map((m) => [
       m.label,
-      ...cols.map((c) => (c[m.key] === null ? '—' : String(c[m.key]))),
-      prev ? formatDelta(prev[m.key], cur[m.key]) : '—',
+      ...cols.map((c) => { const v = c[m.key] ?? null; return v === null ? '—' : String(v); }),
+      prev ? formatDelta(prev[m.key] ?? null, cur[m.key] ?? null) : '—',
     ]);
 
   const footnotes: string[] = [];

@@ -603,3 +603,17 @@ de verificación quedan intactos.
   cuántas evaluaciones del historial se perderán.
 - Los datos antiguos sin historial se migran con `history: []` al cargar
   o importar una copia.
+
+## Tiempo de uso de la app por sesión
+
+- `lib/usage.ts`, `hooks/useUsageTracker.ts`: se mide el tiempo con la app
+  en pantalla dentro del Modo Casa o de Sala de Espera (no la bienvenida).
+  Una salida de hasta 5 min continúa la sesión sin contar el tiempo fuera;
+  una ausencia más larga, o un cambio de modo, abre una sesión nueva.
+- El informe (nota, PDF de ambos modos) incluye "Tiempo de uso de la app":
+  total, número de sesiones, media por sesión y detalle por sesión (o por
+  día, si hay más de 10 sesiones).
+- Las sesiones pertenecen a la evaluación actual: se archivan al empezar un
+  nuevo registro y el tiempo total aparece en la tabla de Evolución.
+- Sustituye al cronómetro de Sala de Espera ("Duración"), que solo medía
+  desde que se abría la pantalla y se reiniciaba al salir.

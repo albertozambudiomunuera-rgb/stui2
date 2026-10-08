@@ -4,6 +4,7 @@ import { loadDataAsync, hasExistingData, checkIDBAvailable, isDisclaimerAccepted
 import { clearPINSetup, clearStoredMode, type StoredMode } from './lib/keyManager';
 import { useAppData } from './hooks/useAppData';
 import { useSecureInit } from './hooks/useSecureInit';
+import { useUsageTracker } from './hooks/useUsageTracker';
 import { SecurityChoice } from './components/ui/SecurityChoice';
 import { PINSetup } from './components/ui/PINSetup';
 import { Toast, useToast } from './components/ui/Toast';
@@ -40,6 +41,8 @@ export default function App() {
   const { toastMessage, toastVisible, showToast } = useToast();
   const actions = useAppData(emptyData());
   const secure = useSecureInit();
+  // Tiempo de uso por sesión para el informe clínico (no cuenta la bienvenida).
+  useUsageTracker(mode === 'app' ? 'casa' : mode === 'express' ? 'sala' : null, actions.recordUsage);
 
   // Cargar datos clínicos solo cuando el sistema de cifrado esté listo
   useEffect(() => {

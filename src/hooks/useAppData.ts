@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { AppData, DayData, DiaryEntry, PadEntry } from '../types';
+import type { AppData, DayData, DiaryEntry, PadEntry, UsageMode } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
 import { uid, isDuplicateByClientKey } from '../lib/clinical';
 import { archiveCurrentVisit, resetCurrentEvaluation } from '../lib/followup';
+import { recordUsage as addUsage } from '../lib/usage';
 
 export function useAppData(initialData: AppData) {
   const [data, setData] = useState<AppData>(initialData);
@@ -286,6 +287,17 @@ export function useAppData(initialData: AppData) {
     });
   }, []);
 
+  // Tiempo de uso por sesión (ver useUsageTracker y lib/usage.ts).
+  const recordUsage = useCallback((mode: UsageMode, seconds: number, now: Date) => {
+    setData((prev) => {
+      const usage = addUsage(prev.usage, mode, seconds, now);
+      if (usage === prev.usage) return prev;
+      const next = { ...prev, usage };
+      save(next);
+      return next;
+    });
+  }, [save]);
+
   // Paciente nuevo en Modo Sala de Espera: vacía la evaluación actual sin
   // borrar el historial de seguimiento.
   const resetCurrent = useCallback(() => {
@@ -322,6 +334,7 @@ export function useAppData(initialData: AppData) {
     restoreData,
     closeVisit,
     resetCurrent,
+    recordUsage,
     update,
   };
 }

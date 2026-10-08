@@ -108,6 +108,17 @@ export interface AppData {
   /** Evaluaciones anteriores archivadas por el paciente al empezar un nuevo
    * registro (seguimiento entre visitas). Ver lib/followup.ts. */
   history: Visit[];
+  /** Tiempo de uso por sesión de la evaluación actual (ver lib/usage.ts). */
+  usage: UsageSession[];
+}
+
+export type UsageMode = 'casa' | 'sala';
+
+export interface UsageSession {
+  start: string;      // ISO
+  lastActive: string; // ISO — para decidir si un nuevo uso continúa la sesión
+  seconds: number;    // tiempo activo con la app en pantalla
+  mode: UsageMode;
 }
 
 /** Valores calculados al archivar una visita. Se guardan ya calculados para
@@ -131,6 +142,9 @@ export interface VisitMetrics {
   uui: number | null;
   sui: number | null;
   padAvg: number | null;
+  /** Minutos totales de uso de la app en esa evaluación. Opcional: las
+   * visitas archivadas antes de medir el uso no lo tienen. */
+  usageMin?: number | null;
 }
 
 export interface Visit {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { X, Home, Printer, Share2, ArrowLeft, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import type { AppData, DiaryStats } from '../../types';
 import { useAppData } from '../../hooks/useAppData';
@@ -13,6 +13,7 @@ import {
   CLINICAL_RULES,
 } from '../../lib/clinical';
 import { shareReportPdf } from '../../lib/reportPdf';
+import { noteWithUsage, usageSummary, formatDuration } from '../../lib/usage';
 
 // Cambio 2: ver misma nota en DashboardTab.tsx.
 function nocturiaLabel(s: DiaryStats): string {
@@ -36,14 +37,6 @@ const naText = 'sin datos';
 export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps) {
   const data = actions.data;
   const [activeTab, setActiveTab] = useState<ExpressTab>('screening');
-  const [elapsed, setElapsed] = useState(0);
-  const startRef = useRef(Date.now());
-
-  useEffect(() => {
-    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const sex = data.patient.sex;
 
   // Solo se pasan los cuestionarios cuyo cribado es "Sí" (igual que
@@ -129,7 +122,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
         {activeTab === 'iief' && <ExpressIIEF data={data} actions={actions} onNext={goNext} />}
         {activeTab === 'oab' && <ExpressOAB data={data} actions={actions} onNext={goNext} />}
         {activeTab === 'iciq' && <ExpressICIQ data={data} actions={actions} onNext={goNext} />}
-        {activeTab === 'result' && <ExpressResult data={data} elapsed={elapsed} onSwitchHome={() => { onExit(); onSwitchHome(); }} />}
+        {activeTab === 'result' && <ExpressResult data={data} onSwitchHome={() => { onExit(); onSwitchHome(); }} />}
       </div>
     </div>
   );
@@ -455,10 +448,8 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
   );
 }
 
-function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed: number; onSwitchHome: () => void }) {
+function ExpressResult({ data, onSwitchHome }: { data: AppData; onSwitchHome: () => void }) {
   const p = data.patient;
-  const min = Math.floor(elapsed / 60);
-  const sec = elapsed % 60;
   const [showRules, setShowRules] = useState(false);
 
   const hasIPSS = ipssComplete(data.ipss);
@@ -506,7 +497,8 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
   }
   if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
-  const note = generateClinicalNote(data);
+  const baseNote = generateClinicalNote(data);
+  const note = noteWithUsage(baseNote, data.usage);
   // Igual que en DashboardTab.tsx: la cola "Reglas clínicas aplicadas"
   // (versión + fuentes bibliográficas) se separa para mostrarla en un
   // desplegable aparte, colapsado por defecto — es la parte más engorrosa
@@ -555,12 +547,17 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
     // admite desplegables); siguen disponibles en la app y en Copiar/Compartir.
     void shareReportPdf({
       title: 'Resumen Clínico STUI — Modo Exprés',
-      subtitle: `Paciente: ${p.name || '—'}${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}  |  Duración: ${min}:${sec < 10 ? '0' : ''}${sec}  |  Fecha: ${fecha}`,
+      subtitle: `Paciente: ${p.name || '—'}${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}  |  Fecha: ${fecha}`,
       accent: [64, 82, 214],
       rows,
       findings,
       patientNotes: (data.notes ?? []).map((n) => ({ date: new Date(n.date).toLocaleString('es-ES'), text: n.text })),
-      note: noteMain,
+      // El PDF muestra el tiempo de uso como tabla: la nota va sin ese bloque.
+      note: splitClinicalNote(baseNote).main,
+      usage: (() => {
+        const u = usageSummary(data.usage);
+        return u ? { summary: `${formatDuration(u.totalSec)} en ${u.sessions} ${u.sessions === 1 ? 'sesión' : 'sesiones'} (media ${formatDuration(u.totalSec / u.sessions)}/sesión)`, header: u.header, rows: u.rows } : undefined;
+      })(),
       footer: [
         `Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}; detalle y bibliografía disponibles en la app). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.`,
         `Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}`,
