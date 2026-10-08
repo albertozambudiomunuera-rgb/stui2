@@ -13,7 +13,7 @@ import {
   generateClinicalNote, splitClinicalNote, computeStats, padDayStats, PAD_TEST_DISCLAIMER, PERIOD_DISCLAIMER,
   CLINICAL_RULES,
 } from '../../lib/clinical';
-import { printReport, noteWithRulesHtml, escapeHtml, INDIGO_THEME } from '../../lib/printReport';
+import { shareReportPdf } from '../../lib/reportPdf';
 
 // Cambio 2: ver misma nota en DashboardTab.tsx.
 function nocturiaLabel(s: DiaryStats): string {
@@ -542,26 +542,31 @@ function ExpressResult({ data, elapsed, onSwitchHome }: { data: AppData; elapsed
 
   const handlePrint = () => {
     const fecha = new Date().toLocaleDateString('es-ES');
-    const scoreRows = [
-      hasIPSS ? `<tr><td><b>IPSS</b></td><td>${ipssVal}/35</td><td>${ipssSev.text}</td><td>Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}</td></tr>` : `<tr><td><b>IPSS</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>`,
-      s ? `<tr><td><b>Diario miccional</b></td><td>${s.n} de ${s.totalDays} días</td><td>CVF ${s.maxV !== null ? s.maxV + 'ml' : naText} · Vol. nocturno ${s.npI !== null ? s.npI + '%' : 'n/d'}</td><td>${nocturiaLabel(s)} · IUU ${s.ul} ep.</td></tr>` : '',
-      hasIIEF ? `<tr><td><b>IIEF-5</b></td><td>${iiefVal}/25</td><td>${iiefSev.text}</td><td></td></tr>` : data.screening.iief ? `<tr><td><b>IIEF-5</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
-      hasOAB ? `<tr><td><b>AUA OAB Assessment</b></td><td>${oabVal}/25</td><td>${oabNoUrgency(data) ? 'Sin urgencia miccional' : '—'}</td><td>${OAB_DISCLAIMER}</td></tr>` : data.screening.oab ? `<tr><td><b>AUA OAB Assessment</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
-      padStats.avgPerDay !== null ? `<tr><td><b>Pad Test</b></td><td>${padStats.avgPerDay}g por día</td><td>—</td><td>media de ${padStats.n} día(s) registrado(s), ${padStats.dryDays} seco(s) · ${PAD_TEST_DISCLAIMER}</td></tr>` : '',
-      hasICIQ ? `<tr><td><b>ICIQ-SF</b></td><td>${iciqVal}/21</td><td>${iciqSev.text}</td><td></td></tr>` : data.screening.iciq ? `<tr><td><b>ICIQ-SF</b></td><td colspan="3">cuestionario incompleto (no interpretable)</td></tr>` : '',
-    ].filter(Boolean).join('');
+    const incomplete = 'cuestionario incompleto (no interpretable)';
+    const rows = [
+      hasIPSS ? ['IPSS', `${ipssVal}/35`, ipssSev.text, `Predominio: ${ipssPredom(data.ipss)}${data.ipss.qol !== null ? ' | QoL: ' + data.ipss.qol + '/6' : ''}`] : ['IPSS', incomplete, '', ''],
+      s ? ['Diario miccional', `${s.n} de ${s.totalDays} días`, `CVF ${s.maxV !== null ? s.maxV + 'ml' : naText} · Vol. nocturno ${s.npI !== null ? s.npI + '%' : 'n/d'}`, `${nocturiaLabel(s)} · IUU ${s.ul} ep.`] : null,
+      hasIIEF ? ['IIEF-5', `${iiefVal}/25`, iiefSev.text, ''] : data.screening.iief ? ['IIEF-5', incomplete, '', ''] : null,
+      hasOAB ? ['AUA OAB Assessment', `${oabVal}/25`, oabNoUrgency(data) ? 'Sin urgencia miccional' : '—', OAB_DISCLAIMER] : data.screening.oab ? ['AUA OAB Assessment', incomplete, '', ''] : null,
+      padStats.avgPerDay !== null ? ['Pad Test', `${padStats.avgPerDay}g por día`, '—', `media de ${padStats.n} día(s) registrado(s), ${padStats.dryDays} seco(s) · ${PAD_TEST_DISCLAIMER}`] : null,
+      hasICIQ ? ['ICIQ-SF', `${iciqVal}/21`, iciqSev.text, ''] : data.screening.iciq ? ['ICIQ-SF', incomplete, '', ''] : null,
+    ].filter((r): r is string[] => r !== null);
 
-    const bodyHtml = `<h1>Resumen Clínico STUI — Modo Exprés</h1>
-<div class="sub">Paciente: <b>${escapeHtml(p.name || '—')}</b>${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''} &nbsp;|&nbsp; Duración: ${min}:${sec < 10 ? '0' : ''}${sec} &nbsp;|&nbsp; Fecha: ${fecha}</div>
-<h2>Puntuaciones</h2>
-<table><thead><tr><th>Cuestionario</th><th>Puntuación</th><th>Severidad</th><th>Notas</th></tr></thead><tbody>${scoreRows || '<tr><td colspan="4" style="color:#94a3b8">Sin datos suficientes</td></tr>'}</tbody></table>
-${findings.length ? `<div class="algo"><h3>📊 Hallazgos registrados</h3><ul>${findings.map((sg) => `<li>${sg}</li>`).join('')}</ul></div>` : ''}
-${data.notes?.length ? `<h2>💬 Notas del Paciente para el Médico</h2>${data.notes.map((n) => `<div class="pnote"><div class="pnote-date">${new Date(n.date).toLocaleString('es-ES')}</div><div style="white-space:pre-wrap">${escapeHtml(n.text)}</div></div>`).join('')}` : ''}
-<h2>Nota para Historia Clínica</h2>
-${noteWithRulesHtml(noteMain, noteRules)}
-<div class="footer"><p style="margin:0 0 6px">Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.</p><p style="margin:0">Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}</p></div>`;
-
-    printReport({ title: `Informe STUI — ${p.name || 'Paciente'}`, bodyHtml, theme: INDIGO_THEME });
+    // Las reglas clínicas y la bibliografía no van en el PDF (un PDF no
+    // admite desplegables); siguen disponibles en la app y en Copiar/Compartir.
+    void shareReportPdf({
+      title: 'Resumen Clínico STUI — Modo Exprés',
+      subtitle: `Paciente: ${p.name || '—'}${p.age ? ' · ' + p.age : ''}${p.sex ? ' · ' + (p.sex === 'M' ? 'Varón' : 'Mujer') : ''}${p.weight ? ' · ' + p.weight + ' kg' : ''}  |  Duración: ${min}:${sec < 10 ? '0' : ''}${sec}  |  Fecha: ${fecha}`,
+      accent: [64, 82, 214],
+      rows,
+      findings,
+      patientNotes: (data.notes ?? []).map((n) => ({ date: new Date(n.date).toLocaleString('es-ES'), text: n.text })),
+      note: noteMain,
+      footer: [
+        `Documento generado automáticamente a partir de las respuestas introducidas por el paciente. Reproduce las reglas de puntuación publicadas de cada instrumento (reglas clínicas v${CLINICAL_RULES.version}; detalle y bibliografía disponibles en la app). No constituye un diagnóstico ni una recomendación terapéutica: requiere interpretación por un profesional sanitario.`,
+        `Generado con STUI App · Oficina de Salud Digital · AEU · ${fecha}`,
+      ],
+    }, p.name);
   };
 
   return (
