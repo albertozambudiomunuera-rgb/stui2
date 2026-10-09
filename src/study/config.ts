@@ -1,4 +1,4 @@
-// ESTUDIO-VALIDACION — encuesta temporal de usabilidad (SUS + uMARS).
+// ESTUDIO-VALIDACION — encuesta temporal de usabilidad (SUS).
 //
 // Todo el código de la encuesta vive en src/study/. Para desactivarla basta
 // con poner esta constante a false. Para quitarla del todo: borrar esta

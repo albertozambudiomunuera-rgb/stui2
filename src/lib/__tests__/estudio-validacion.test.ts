@@ -1,12 +1,10 @@
 /**
- * ESTUDIO-VALIDACION — puntuación SUS/uMARS y bloque del informe.
+ * ESTUDIO-VALIDACION — puntuación SUS y bloque del informe.
  * Casos sintéticos calculados a mano.
  */
 import { describe, it, expect } from 'vitest';
-import type { UmarsAnswer } from '../../types';
-import { susScore, umarsSectionMean, emptyStudy, normalizeStudy, isStudyComplete } from '../../study/scoring';
+import { susScore, emptyStudy, normalizeStudy, isStudyComplete } from '../../study/scoring';
 import { noteWithStudy, studyReport, studyText } from '../../study/report';
-import type { UmarsSection } from '../../study/instruments';
 import { SUS_ITEMS } from '../../study/instruments';
 import { generateClinicalNote, splitClinicalNote } from '../clinical';
 import { archiveCurrentVisit, resetCurrentEvaluation } from '../followup';
@@ -22,24 +20,6 @@ describe('SUS', () => {
     expect(susScore([4, 2, 5, 1, 4, 2, 4, 1, 5, 2])).toBe(85);
   });
   it('incompleto → null', () => expect(susScore([4, 2, 5, 1, 4, 2, 4, 1, 5, null])).toBeNull());
-});
-
-describe('uMARS — media de subescala', () => {
-  const opts: [string, string, string, string, string] = ['1', '2', '3', '4', '5'];
-  const sec = (n: number): UmarsSection => ({ id: 'information', title: 'Información', objective: true, items: Array.from({ length: n }, () => ({ q: 'q', opts, na: true })) });
-  it('media simple', () => {
-    // con UMARS_SECTIONS sin cargar, la sección de prueba empieza en el índice 0
-    expect(umarsSectionMean([4, 5, 3, 4] as UmarsAnswer[], sec(4))).toBe(4);
-  });
-  it('"No aplica" se excluye de la media', () => {
-    expect(umarsSectionMean([4, 'na', 5, 'na'] as UmarsAnswer[], sec(4))).toBe(4.5);
-  });
-  it('falta un ítem → null', () => {
-    expect(umarsSectionMean([4, null, 5, 3] as UmarsAnswer[], sec(4))).toBeNull();
-  });
-  it('todo "No aplica" → null', () => {
-    expect(umarsSectionMean(['na', 'na'] as UmarsAnswer[], sec(2))).toBeNull();
-  });
 });
 
 describe('bloque del informe', () => {
@@ -63,7 +43,7 @@ describe('bloque del informe', () => {
   it('encuesta parcial: lo indica y no puntúa la escala incompleta', () => {
     const partial = { ...emptyStudy(), sus: [4, 2, 5, null, null, null, null, null, null, null] };
     const r = studyReport(partial)!;
-    expect(r.status).toMatch(/^Encuesta incompleta \(3\/\d+ respuestas\)$/);
+    expect(r.status).toBe('Encuesta incompleta (3/10 respuestas)');
     expect(r.scores[0]).toEqual(['SUS (0-100)', 'incompleto']);
     expect(isStudyComplete(normalizeStudy(partial))).toBe(false);
   });

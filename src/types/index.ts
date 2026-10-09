@@ -115,10 +115,8 @@ export interface AppData {
 }
 
 // ESTUDIO-VALIDACION
-export type UmarsAnswer = number | 'na' | null;
 export interface StudySurvey {
   sus: (number | null)[];
-  umars: UmarsAnswer[];
   /** La ventana ya se abrió sola una vez: no vuelve a abrirse automáticamente. */
   prompted: boolean;
   completedAt: string | null;

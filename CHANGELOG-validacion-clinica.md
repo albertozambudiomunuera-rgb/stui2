@@ -618,7 +618,7 @@ de verificación quedan intactos.
 - Sustituye al cronómetro de Sala de Espera ("Duración"), que solo medía
   desde que se abría la pantalla y se reiniciaba al salir.
 
-## ESTUDIO-VALIDACION — encuesta de usabilidad SUS + uMARS (TEMPORAL)
+## ESTUDIO-VALIDACION — encuesta de usabilidad SUS (TEMPORAL)
 
 Encuesta para el estudio de validación con pacientes. **Temporal**: todo vive
 en `src/study/`. Para desactivarla, `STUDY_SURVEY_ENABLED = false` en
@@ -626,15 +626,13 @@ en `src/study/`. Para desactivarla, `STUDY_SURVEY_ENABLED = false` en
 líneas marcadas `ESTUDIO-VALIDACION` (`grep -rn "ESTUDIO-VALIDACION" src`).
 
 - Se abre sola una vez al llegar al informe (Resumen en Modo Casa, Resultado
-  en Sala de Espera) con el IPSS completo. Paso 1: SUS; pasos siguientes: una
-  sección de uMARS por pantalla. Cada respuesta se guarda al momento; "Ahora
-  no" deja un botón en el informe para retomarla.
-- Las respuestas y puntuaciones (SUS 0-100; uMARS por subescala y calidad de
-  la app) salen en la nota y en el PDF, en un bloque separado del contenido
+  en Sala de Espera) con el IPSS completo, con los 10 ítems del SUS. Cada
+  respuesta se guarda al momento; "Ahora no" deja un botón en el informe
+  para retomarla.
+- Las respuestas ítem a ítem y la puntuación SUS (0-100) salen en la nota y en el PDF, en un bloque separado del contenido
   clínico con líneas dobles, rotulado "datos de investigación, no clínicos".
   Sin interpretación ni bandas.
 - SUS: versión española proporcionada por el equipo investigador, transcrita
-  literalmente. uMARS: pendiente del texto de la versión española validada;
-  hasta entonces solo se muestra el SUS.
+  literalmente. Se descartó incluir uMARS en la app.
 - Un nuevo registro (seguimiento) conserva la encuesta; borrar paciente en
   Sala de Espera la vacía.
