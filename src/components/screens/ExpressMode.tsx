@@ -14,6 +14,8 @@ import {
 } from '../../lib/clinical';
 import { shareReportPdf } from '../../lib/reportPdf';
 import { noteWithUsage, usageSummary, formatDuration } from '../../lib/usage';
+import { noteWithStudy, studyReport } from '../../study/report'; // ESTUDIO-VALIDACION
+import { StudySurvey } from '../../study/StudySurvey'; // ESTUDIO-VALIDACION
 
 // Cambio 2: ver misma nota en DashboardTab.tsx.
 function nocturiaLabel(s: DiaryStats): string {
@@ -122,7 +124,7 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
         {activeTab === 'iief' && <ExpressIIEF data={data} actions={actions} onNext={goNext} />}
         {activeTab === 'oab' && <ExpressOAB data={data} actions={actions} onNext={goNext} />}
         {activeTab === 'iciq' && <ExpressICIQ data={data} actions={actions} onNext={goNext} />}
-        {activeTab === 'result' && <ExpressResult data={data} onSwitchHome={() => { onExit(); onSwitchHome(); }} />}
+        {activeTab === 'result' && <ExpressResult data={data} onUpdateStudy={actions.updateStudy} onSwitchHome={() => { onExit(); onSwitchHome(); }} />}
       </div>
     </div>
   );
@@ -448,7 +450,7 @@ function ExpressICIQ({ data, actions, onNext }: { data: AppData; actions: Return
   );
 }
 
-function ExpressResult({ data, onSwitchHome }: { data: AppData; onSwitchHome: () => void }) {
+function ExpressResult({ data, onSwitchHome, onUpdateStudy }: { data: AppData; onSwitchHome: () => void; onUpdateStudy: ReturnType<typeof useAppData>['updateStudy'] }) {
   const p = data.patient;
   const [showRules, setShowRules] = useState(false);
 
@@ -498,7 +500,7 @@ function ExpressResult({ data, onSwitchHome }: { data: AppData; onSwitchHome: ()
   if (!findings.length) findings.push('Completa el IPSS y los cuestionarios para ver los hallazgos registrados.');
 
   const baseNote = generateClinicalNote(data);
-  const note = noteWithUsage(baseNote, data.usage);
+  const note = noteWithStudy(noteWithUsage(baseNote, data.usage), data.study); // ESTUDIO-VALIDACION: noteWithStudy
   // Igual que en DashboardTab.tsx: la cola "Reglas clínicas aplicadas"
   // (versión + fuentes bibliográficas) se separa para mostrarla en un
   // desplegable aparte, colapsado por defecto — es la parte más engorrosa
@@ -552,6 +554,7 @@ function ExpressResult({ data, onSwitchHome }: { data: AppData; onSwitchHome: ()
       rows,
       findings,
       patientNotes: (data.notes ?? []).map((n) => ({ date: new Date(n.date).toLocaleString('es-ES'), text: n.text })),
+      study: studyReport(data.study) ?? undefined, // ESTUDIO-VALIDACION
       // El PDF muestra el tiempo de uso como tabla: la nota va sin ese bloque.
       note: splitClinicalNote(baseNote).main,
       usage: (() => {
@@ -602,6 +605,9 @@ function ExpressResult({ data, onSwitchHome }: { data: AppData; onSwitchHome: ()
           ))}
         </div>
       </div>
+
+      {/* ESTUDIO-VALIDACION */}
+      <StudySurvey study={data.study} onChange={onUpdateStudy} ready={hasIPSS} />
 
       {/* Clinical note */}
       <div>

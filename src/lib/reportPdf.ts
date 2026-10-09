@@ -17,6 +17,8 @@ export interface ReportPdf {
   rows: string[][];
   /** Tabla de evolución entre visitas (seguimiento), si hay historial. */
   evolution?: { header: string[]; rows: string[][]; footnotes: string[] };
+  /** ESTUDIO-VALIDACION: encuesta de usabilidad, separada con líneas gruesas. */
+  study?: { title: string; notice: string; status: string; scores: string[][]; answers: string[][] };
   /** Tiempo de uso de la app por sesión. */
   usage?: { summary: string; header: string[]; rows: string[][] };
   findings: string[];
@@ -151,6 +153,27 @@ export function buildPdf(r: ReportPdf): jsPDF {
 
   h2('Nota para Historia Clínica');
   para(r.note.trim(), 8.5, { font: 'courier' });
+
+  // ESTUDIO-VALIDACION — bloque de investigación, separado del contenido
+  // clínico con una línea gruesa arriba y otra abajo.
+  if (r.study) {
+    const thick = () => { doc.setDrawColor(51, 65, 85); doc.setLineWidth(1); doc.line(M, y, M + W, y); };
+    y += 8;
+    ensure(30);
+    thick();
+    y += 4;
+    para(r.study.title, 12, { style: 'bold', color: [51, 65, 85] });
+    para(r.study.notice, 8.5, { color: [100, 116, 139] });
+    para(r.study.status, 9.5);
+    y += 2;
+    table([95, W - 95], ['ESCALA', 'PUNTUACIÓN'], r.study.scores);
+    y += 2;
+    r.study.answers.forEach(([k, v]) => para(`${k}: ${v}`, 8.5, { font: 'courier' }));
+    y += 3;
+    ensure(2);
+    thick();
+    y += 2;
+  }
 
   y += 6;
   doc.setDrawColor(226, 232, 240);

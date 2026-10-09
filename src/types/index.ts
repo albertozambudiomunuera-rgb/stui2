@@ -110,6 +110,18 @@ export interface AppData {
   history: Visit[];
   /** Tiempo de uso por sesión de la evaluación actual (ver lib/usage.ts). */
   usage: UsageSession[];
+  // ESTUDIO-VALIDACION — encuesta temporal de usabilidad (src/study/).
+  study?: StudySurvey;
+}
+
+// ESTUDIO-VALIDACION
+export type UmarsAnswer = number | 'na' | null;
+export interface StudySurvey {
+  sus: (number | null)[];
+  umars: UmarsAnswer[];
+  /** La ventana ya se abrió sola una vez: no vuelve a abrirse automáticamente. */
+  prompted: boolean;
+  completedAt: string | null;
 }
 
 export type UsageMode = 'casa' | 'sala';

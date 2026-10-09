@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { AppData, DayData, DiaryEntry, PadEntry, UsageMode } from '../types';
+import type { AppData, DayData, DiaryEntry, PadEntry, UsageMode, StudySurvey } from '../types';
 import { idbSave, idbClear } from '../lib/storage';
 import { uid, isDuplicateByClientKey } from '../lib/clinical';
 import { archiveCurrentVisit, resetCurrentEvaluation } from '../lib/followup';
@@ -298,6 +298,16 @@ export function useAppData(initialData: AppData) {
     });
   }, [save]);
 
+  // ESTUDIO-VALIDACION — encuesta temporal de usabilidad. Se guarda en cada
+  // respuesta (con el mismo debounce y flush al cerrar que el resto).
+  const updateStudy = useCallback((fn: (prev: StudySurvey | undefined) => StudySurvey) => {
+    setData((prev) => {
+      const next = { ...prev, study: fn(prev.study) };
+      save(next);
+      return next;
+    });
+  }, [save]);
+
   // Paciente nuevo en Modo Sala de Espera: vacía la evaluación actual sin
   // borrar el historial de seguimiento.
   const resetCurrent = useCallback(() => {
@@ -335,6 +345,7 @@ export function useAppData(initialData: AppData) {
     closeVisit,
     resetCurrent,
     recordUsage,
+    updateStudy, // ESTUDIO-VALIDACION
     update,
   };
 }

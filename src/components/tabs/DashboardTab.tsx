@@ -10,6 +10,8 @@ import {
 } from '../../lib/clinical';
 import { shareReportPdf } from '../../lib/reportPdf';
 import { noteWithUsage, usageSummary, formatDuration } from '../../lib/usage';
+import { noteWithStudy, studyReport } from '../../study/report'; // ESTUDIO-VALIDACION
+import { StudySurvey } from '../../study/StudySurvey'; // ESTUDIO-VALIDACION
 import { noteWithEvolution, evolutionTable, hasCurrentEvaluation } from '../../lib/followup';
 import { exportBackup } from '../../lib/storage';
 import { EvolutionSection } from '../ui/EvolutionSection';
@@ -32,11 +34,13 @@ interface DashboardTabProps {
   onDeleteNote?: (id: string) => void;
   /** Seguimiento: archiva la evaluación actual y empieza un registro nuevo. */
   onCloseVisit?: () => void;
+  /** ESTUDIO-VALIDACION */
+  onUpdateStudy?: (fn: (prev: AppData['study']) => NonNullable<AppData['study']>) => void;
 }
 
 const naText = 'sin datos';
 
-export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: DashboardTabProps) {
+export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit, onUpdateStudy }: DashboardTabProps) {
   const [copied, setCopied] = useState(false);
   const [noteDraft, setNoteDraft] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
@@ -108,7 +112,7 @@ export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: Da
   // Con historial de seguimiento, la nota incluye el bloque EVOLUCIÓN antes
   // del pie de reglas clínicas (ver noteWithEvolution en followup.ts).
   const baseNote = generateClinicalNote(data);
-  const note = noteWithEvolution(noteWithUsage(baseNote, data.usage), data);
+  const note = noteWithStudy(noteWithEvolution(noteWithUsage(baseNote, data.usage), data), data.study); // ESTUDIO-VALIDACION: noteWithStudy
   // El bloque "Reglas clínicas aplicadas" se muestra aparte, desplegable,
   // para no ocupar pantalla con referencias bibliográficas que el paciente
   // no necesita leer. El texto para copiar/imprimir (note completo) no
@@ -156,6 +160,7 @@ export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: Da
       accent: [15, 118, 110],
       rows,
       evolution: data.history.length ? evolutionTable(data, 4) : undefined,
+      study: studyReport(data.study) ?? undefined, // ESTUDIO-VALIDACION
       usage: (() => {
         const u = usageSummary(data.usage);
         return u ? { summary: `${formatDuration(u.totalSec)} en ${u.sessions} ${u.sessions === 1 ? 'sesión' : 'sesiones'} (media ${formatDuration(u.totalSec / u.sessions)}/sesión)`, header: u.header, rows: u.rows } : undefined;
@@ -306,6 +311,9 @@ export function DashboardTab({ data, onAddNote, onDeleteNote, onCloseVisit }: Da
           </div>
         )}
       </div>
+
+      {/* ESTUDIO-VALIDACION */}
+      {onUpdateStudy && <StudySurvey study={data.study} onChange={onUpdateStudy} ready={hasIPSS} />}
 
       {/* Clinical note */}
       <div>

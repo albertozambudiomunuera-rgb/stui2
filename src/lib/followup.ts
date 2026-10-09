@@ -63,7 +63,8 @@ export function archiveCurrentVisit(data: AppData, now: Date = new Date()): AppD
     snapshot: structuredClone(snapshot),
     metrics: visitMetrics(data),
   };
-  return { ...emptyData(), patient: { ...data.patient }, history: [...history, visit] };
+  // ESTUDIO-VALIDACION: la encuesta es sobre la app, no sobre la visita — se conserva.
+  return { ...emptyData(), patient: { ...data.patient }, history: [...history, visit], study: data.study };
 }
 
 /** Vacía la evaluación actual (paciente nuevo) sin tocar el historial. */

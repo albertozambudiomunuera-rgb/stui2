@@ -391,6 +391,7 @@ export default function App() {
             data={d}
             onAddNote={actions.addNote}
             onDeleteNote={actions.deleteNote}
+            onUpdateStudy={actions.updateStudy} // ESTUDIO-VALIDACION
             onCloseVisit={() => {
               const fecha = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
               actions.closeVisit();
