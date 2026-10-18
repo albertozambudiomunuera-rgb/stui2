@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: STUIapp - Evaluador Digital de Síntomas del Tracto Urinario Inferior
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Zambudio Munuera"
+    given-names: "Alberto"
+    orcid: "https://orcid.org/0009-0009-2320-5088
+repository-code: "https://github.com/tu-usuario/tu-repo-stui2"
+url: "https://stuiapp.urosuite.es"
+abstract: "Aplicación web interactiva para la valoración y triaje clínico de los STUI"
