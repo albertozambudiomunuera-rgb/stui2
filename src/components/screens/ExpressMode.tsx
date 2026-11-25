@@ -81,11 +81,6 @@ export function ExpressMode({ actions, onExit, onSwitchHome }: ExpressModeProps)
       <div className="sticky top-0 z-10 shadow-lg" style={{ backgroundColor: RED }}>
         <div className="px-4 safe-top pb-0">
           <div className="flex items-center gap-3 mb-3">
-            <img
-              src="/Logo-AEU-Corporativo.png"
-              alt="AEU"
-              className="h-6 flex-shrink-0 object-contain"
-            />
             <span className="text-white font-black text-base">Modo Sala de Espera</span>
             <span className="bg-white/20 text-white text-xs font-bold px-2 py-0.5 rounded-lg">EXPRÉS</span>
             <div className="ml-auto flex items-center gap-2">

@@ -72,11 +72,6 @@ export function Header({ data, activeTab, onTabChange, canGoBack, onBack, onBack
               <span className="text-xs font-bold text-white">Inicio</span>
             </button>
           )}
-          <img
-            src="/Logo-AEU-Corporativo.png"
-            alt="AEU"
-            className="h-9 flex-shrink-0 object-contain"
-          />
           <div className="flex-1 min-w-0">
             <div className="font-black text-white text-base leading-tight truncate">
               {p.name || 'Evaluación STUI'}

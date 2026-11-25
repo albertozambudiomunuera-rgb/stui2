@@ -28,16 +28,11 @@ export function EntryScreen({ onChoose, notesCount, onAddNote, onOpenRecommendat
     <div className="min-h-screen bg-gradient-to-b from-teal-700 via-teal-800 to-teal-900 flex flex-col items-center p-6 pt-12">
       {/* Logo + Welcome */}
       <div className="text-center mb-12 animate-fade-in">
-        <img
-          src="/Logo-AEU-Corporativo.png"
-          alt="AEU"
-          className="h-20 mx-auto mb-6 object-contain drop-shadow-lg"
-        />
         <h1 className="text-4xl font-black text-white tracking-tight mb-2">
           STUI App
         </h1>
         <p className="text-sm text-teal-100 font-semibold">
-          Asociación Española de Urología
+          Oficina de Salud Digital AEU
         </p>
       </div>
 

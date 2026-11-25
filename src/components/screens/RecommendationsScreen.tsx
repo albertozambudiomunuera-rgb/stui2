@@ -290,7 +290,6 @@ export function RecommendationsScreen({ onClose }: Props) {
       <div className="bg-gradient-to-br from-teal-700 to-teal-900 flex-shrink-0">
         <div className="px-4 safe-top pb-0">
           <div className="flex items-center gap-3 mb-3">
-            <img src="/Logo-AEU-Corporativo.png" alt="AEU" className="h-8 flex-shrink-0 object-contain" />
             <div className="flex-1 min-w-0">
               <div className="font-black text-white text-sm leading-tight">Escuela de Salud Vesical</div>
               <div className="text-teal-300 text-sm mt-0.5">Guías clínicas AEU 2026</div>
